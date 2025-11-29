@@ -1,0 +1,25 @@
+{
+  "name": "NYSee Now",
+  "version": "1.0.0",
+  "description": "A repository our CS-546 final project",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elireinhold/CS-546-Final-Project.git"
+  },
+  "keywords": [],
+  "author": "group 17",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "mongodb": "^6.6.0",
+    "express": "^4.19.0",
+    "express-handlebars": "^7.1.0",
+    "express-session": "^1.17.3",
+    "cookie-parser": "^1.4.6",
+    "bcryptjs": "^2.4.3"
+  }
+}
