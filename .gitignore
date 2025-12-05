@@ -1,0 +1,35 @@
+# Node modules
+node_modules/
+
+# Environment files 
+.env
+.env.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+logs/
+*.log
+
+# OS files (macOS)
+.DS_Store
+
+# Build / output directories
+dist/
+build/
+coverage/
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+
+# IDE / Editor settings 
+.vscode/
+.idea/
+
+# ignore package-lock.json to keep repo clean
+package-lock.json
+
+# Don't store the NYC dataset locally!
