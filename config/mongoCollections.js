@@ -1,19 +1,17 @@
-import { MongoClient } from "mongodb";
-import { mongoConfig } from "./settings.js";
+import { dbConnection } from "./mongoCollections.js";
 
-let _connection = undefined;
-let _db = undefined;
+const getCollectionFn = (collection) => {
+  let _col = undefined;
 
-const dbConnection = async () => {
-  if (!_connection) {
-    _connection = await MongoClient.connect(mongoConfig.serverUrl);
-    _db = _connection.db(mongoConfig.database);
-  }
+  return async () => {
+    if (!_col) {
+      const db = await dbConnection();
+      _col = await db.collection(collection);
+    }
 
-  return _db;
-};
-const closeConnection = async () => {
-  await _connection.close();
+    return _col;
+  };
 };
 
-export { dbConnection, closeConnection };
+export const users = getCollectionFn("users");
+export const events = getCollectionFn("events");
