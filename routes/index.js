@@ -18,7 +18,7 @@ const constructorMethod = (app) => {
   
 
 
-  //fakeid
+  //don't delete this, it's a fakeid for testing save/unsave function
   app.get("/testlogin", (req, res) => {
     req.session.user = {
       _id: "6935b41a74e0dabcb657159b",
