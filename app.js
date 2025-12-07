@@ -1,4 +1,9 @@
 import express from "express";
+import handlebars from "express-handlebars";
+import session from "express-session";
+import cookieParser from "cookie-parser";
+import configRoutes from "./routes/index.js";
+import { settings } from "./config/settings.js";
 import exphbs from "express-handlebars";
 import session from "express-session";
 import cookieParser from "cookie-parser";
@@ -6,37 +11,41 @@ import configRoutes from "./routes/index.js";
 
 const app = express();
 
-// Parse JSON and form data
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Cookies & Sessions
 app.use(cookieParser());
+
+// Session
 app.use(
   session({
-    name: "AuthState",
-    secret: "super secret string",
+    name: settings.session.cookieName,
+    secret: settings.session.secret,
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: false
   })
 );
 
-// Handlebars setup
-app.engine(
-  "handlebars",
-  exphbs.engine({
-    defaultLayout: "main",
-  })
-);
+// ⭐ Handlebars Setup (Correct & Clean Version)
+const hbs = handlebars.create({
+  defaultLayout: "main",
+  helpers: {
+    ifEquals(a, b, options) {
+      return a === b ? options.fn(this) : options.inverse(this);
+    }
+  }
+});
+
+app.engine("handlebars", hbs.engine);
 app.set("view engine", "handlebars");
 
-// Static folder
+// Static files
 app.use("/public", express.static("public"));
 
-// Load routes
+// Routes
 configRoutes(app);
 
-// Start server
-app.listen(3000, () => {
-  console.log("Server running at http://localhost:3000");
+// Server
+app.listen(settings.server.port, () => {
+  console.log(`Server running at http://localhost:${settings.server.port}`);
 });

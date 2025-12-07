@@ -1,13 +1,34 @@
-import { Router } from 'express';
+import { Router } from "express";
+import eventsRoutes from "./events.js";
+import usersRoutes from "./users.js";
+import homeRoutes from "./home.js";
 
 const constructorMethod = (app) => {
-  app.get('/', (req, res) => {
-    res.render('home');
+  
+  // Home routes
+  app.use("/", homeRoutes);
+
+  // Events routes
+  app.use("/events", eventsRoutes);
+
+  // Users routes (you can add later)
+  app.use("/users", usersRoutes);
+
+  // 404 fallback
+  
+
+
+  //fakeid
+  app.get("/testlogin", (req, res) => {
+    req.session.user = {
+      _id: "6935b41a74e0dabcb657159b",
+      username: "ru_test"
+    };
+
+    res.send("Logged in as test user: ru_test");
   });
 
-  // You can add more subroutes later (events, users…)
-
-  app.use('*', (req, res) => {
+  app.use("*", (req, res) => {
     res.status(404).send("Page Not Found");
   });
 };

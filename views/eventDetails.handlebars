@@ -1,0 +1,25 @@
+<h1>{{event.eventName}}</h1>
+
+<p><strong>Borough:</strong> {{event.eventBorough}}</p>
+<p><strong>Location:</strong> {{event.eventLocation}}</p>
+<p><strong>Start:</strong> {{event.startDateTime}}</p>
+<p><strong>End:</strong> {{event.endDateTime}}</p>
+
+<hr>
+
+<!-- Save / Unsave Button -->
+<div id="save-section" data-event-id="{{event._id}}">
+  
+  {{#if saved}}
+    <button id="saveBtn" data-saved="true">Unsave</button>
+  {{else}}
+    <button id="saveBtn" data-saved="false">Save</button>
+  {{/if}}
+
+  <p id="userCountText">
+    Saved by {{userCount}} user{{#ifEquals userCount 1}}{{else}}s{{/ifEquals}}
+  </p>
+
+</div>
+
+<script src="/public/js/eventDetails.js"></script>
