@@ -4,6 +4,10 @@ import session from "express-session";
 import cookieParser from "cookie-parser";
 import configRoutes from "./routes/index.js";
 import { settings } from "./config/settings.js";
+import exphbs from "express-handlebars";
+import session from "express-session";
+import cookieParser from "cookie-parser";
+import configRoutes from "./routes/index.js";
 
 const app = express();
 
