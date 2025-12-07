@@ -1,9 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8" />
     <title>NYSee Now</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="/public/css/main.css">
+
+    <!-- ANY future icons / fonts -->
 </head>
+
 <body>
-    {{{body}}}
+
+    <!-- Navigation bar (optional, you can hide later) -->
+    <header>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/events/search">Search Events</a>
+
+            {{#if user}}
+                <span>Welcome, {{user.username}}</span>
+                <a href="/users/logout">Logout</a>
+            {{else}}
+                <a href="/users/login">Login</a>
+                <a href="/users/register">Register</a>
+            {{/if}}
+        </nav>
+        <hr>
+    </header>
+
+    <!-- Main content -->
+    <main>
+        {{{body}}}
+    </main>
+
+    <!-- JS: Must load after HTML -->
+    <script src="/public/js/client.js"></script>
+
 </body>
 </html>
