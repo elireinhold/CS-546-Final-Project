@@ -42,6 +42,10 @@ const hbs = handlebars.create({
       return String(a) === String(b);
     }
   }
+    json(data) {
+      return JSON.stringify(data);
+    }
+  },
 });
 
 app.engine("handlebars", hbs.engine);

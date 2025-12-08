@@ -179,4 +179,15 @@ export async function deleteComment(eventId, commentId, userId) {
 
   if (result.modifiedCount === 0) throw "Failed to delete comment";
   return { deleted: true };
+// Gets all events user saved
+export async function getAllEventsByUser(userId) {
+  if (!userId) throw "You must provide a user ID";
+  const eventCollection = await events();
+  const eventData = await eventCollection.find({ userId }).toArray();
+
+  return eventData.map(event => ({
+    title: event.title,
+    date: event.date,
+    eventId: event._id.toString()
+  }));
 }
