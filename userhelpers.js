@@ -1,4 +1,5 @@
 import { users } from "./config/mongoCollections.js";
+import { ObjectId } from "mongodb";
 
 async function getUsers() {
   const usersCollection = await users();
@@ -98,7 +99,7 @@ const exportedMethods = {
     if (typeof borough !== "string") {
       throw "Error: Borough must be a string.";
     }
-    borough = borough.trim().toLowerCase;
+    borough = borough.trim().toLowerCase();
     const validBoroughs = [
       "manhattan",
       "brooklyn",
@@ -154,50 +155,73 @@ const exportedMethods = {
     if (!dateString) {
       throw "Error: Must provide date.";
     }
-    if (typeof date !== "string") {
+    if (typeof dateString !== "string") {
       throw "Error: Date must be a string.";
     }
+    dateString = dateString.trim();
 
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!dateRegex.test(dateString)) {
       throw "Error: Date must be in YYYY-MM-DD format.";
     }
 
-    const date = new Date(dateString);
+    const [year, month, day] = dateString.split("-").map(Number); //https://stackoverflow.com/questions/68637321/js-get-part-of-date-from-string
 
-    if (isNaN(date.getTime())) {
-      throw "Error: Invalid date";
+    if (month < 1 || month > 12) {
+      throw "Error: Month must be between 01 and 12.";
     }
 
-    const [year, month, day] = dateString.split("-").map(Number); //https://stackoverflow.com/questions/68637321/js-get-part-of-date-from-string
-    if (
-      date.getFullYear() !== year ||
-      date.getMonth() + 1 !== month ||
-      date.getDate() !== day
-    ) {
+    if (day < 1 || day > 31) {
+      throw "Error: Day must be between 01 and 31.";
+    }
+    const date = new Date(year, month - 1, day);
+
+    if (date.getMonth() + 1 !== month) {
       throw "Error: Invalid date.";
     }
 
     return dateString;
   },
-
   validAge(birthday) {
-    //ensures user is over 13 for data collection
+    //ensures user is over 13 for data collection but they are not over 100
     if (!birthday) {
       throw "Error: Must provide birthday.";
     }
 
-    birthday = validDate(birthday);
-    const birthDate = new Date(birthday);
+    birthday = exportedMethods.validDate(birthday);
+    const dob = new Date(birthday);
     const today = new Date();
 
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    const dayDiff = today.getDate() - birthDate.getDate();
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
 
-    if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+      //Birthday has not happened yet this year
       age--;
     }
+
+    if (age < 13) {
+      throw "Error: You must be 13 or older to use this website.";
+    }
+
+    if (age > 100) {
+      throw "Error: Age cannot be over 100 years old.";
+    }
+    return birthday;
+  },
+  validCommunityBoard(communityBoard) {
+    const trimmed = communityBoard.trim();
+    const num = parseInt(trimmed);
+
+    if (isNaN(num)) {
+      throw "Error: Community board must be a positive integer.";
+    }
+
+    if (num < 1 || !Number.isInteger(num)) {
+      throw "Error: Community board must be a positive integer.";
+    }
+
+    return trimmed;
   },
 };
 
