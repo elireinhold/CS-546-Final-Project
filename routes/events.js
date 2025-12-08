@@ -149,11 +149,11 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// Add comment to event
+// Add comment or reply to event (parentId optional for replies)
 router.post("/:id/comments", requireLogin, async (req, res) => {
   try {
     const eventId = req.params.id;
-    const { commentText } = req.body;
+    const { commentText, parentId } = req.body;
 
     if (!commentText || !commentText.trim()) {
       return res.status(400).json({ error: "Comment text is required" });
@@ -163,7 +163,8 @@ router.post("/:id/comments", requireLogin, async (req, res) => {
       eventId,
       req.session.user._id,
       req.session.user.username,
-      commentText
+      commentText,
+      parentId || null
     );
 
     return res.json({ success: true, comment });

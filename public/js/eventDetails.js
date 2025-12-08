@@ -64,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Comments functionality
+  // Comments functionality - Recursive rendering with parentId model
 
   // Format date for display
   function formatDate(dateString) {
@@ -72,7 +72,203 @@ document.addEventListener("DOMContentLoaded", () => {
     return date.toLocaleString();
   }
 
-  // Add comment
+  // Recursive function to render comment tree
+  function renderComment(comment, depth = 0) {
+    const commentDiv = document.createElement("div");
+    commentDiv.className = "comment";
+    const commentId = comment._id.toString ? comment._id.toString() : String(comment._id);
+    commentDiv.setAttribute("data-comment-id", commentId);
+    commentDiv.style.marginLeft = `${depth * 20}px`;
+    commentDiv.style.marginTop = "10px";
+    commentDiv.style.borderLeft = depth > 0 ? "2px solid #ccc" : "none";
+    commentDiv.style.paddingLeft = depth > 0 ? "10px" : "0";
+
+    const isOwner = currentUserId && comment.userId && String(comment.userId) === String(currentUserId);
+    const showActions = currentUserId !== null;
+
+    commentDiv.innerHTML = `
+      <p><strong>${comment.username}</strong> <span class="comment-date">${formatDate(comment.createdAt)}</span></p>
+      <p>${comment.text}</p>
+      ${showActions ? `
+        ${isOwner ? `<button class="delete-comment-btn" data-comment-id="${commentId}">Delete</button>` : ''}
+        <button class="reply-btn" data-comment-id="${commentId}">Reply</button>
+      ` : ''}
+      <div class="reply-form-container" data-comment-id="${commentId}" style="display: none; margin-top: 10px;">
+        <textarea class="reply-text" rows="3" cols="40" placeholder="Write your reply..."></textarea>
+        <br>
+        <button class="submit-reply-btn" data-comment-id="${commentId}">Submit Reply</button>
+        <button class="cancel-reply-btn" data-comment-id="${commentId}">Cancel</button>
+      </div>
+    `;
+
+    return commentDiv;
+  }
+
+  // Render all comments recursively
+  function renderComments(comments) {
+    const commentsList = document.getElementById("comments-list");
+    if (!commentsList) return;
+
+    commentsList.innerHTML = "";
+
+    if (!comments || comments.length === 0) {
+      commentsList.innerHTML = "<p>No comments yet.</p>";
+      return;
+    }
+
+    // Build comment tree
+    const commentMap = new Map();
+    const rootComments = [];
+
+    // First pass: create map and find root comments
+    comments.forEach(comment => {
+      commentMap.set(comment._id.toString(), comment);
+      if (!comment.parentId) {
+        rootComments.push(comment);
+      }
+    });
+
+    // Recursive function to render comment and its children
+    function renderCommentTree(comment, depth = 0) {
+      const commentDiv = renderComment(comment, depth);
+      commentsList.appendChild(commentDiv);
+
+      // Find and render children
+      const children = comments.filter(c => 
+        c.parentId && c.parentId.toString() === comment._id.toString()
+      );
+      
+      children.forEach(child => {
+        renderCommentTree(child, depth + 1);
+      });
+    }
+
+    // Render all root comments
+    rootComments.forEach(comment => {
+      renderCommentTree(comment, 0);
+    });
+  }
+
+  // Make allComments mutable
+  let allCommentsArray = typeof allComments !== 'undefined' ? [...allComments] : [];
+
+  // Setup event listeners for comments (using event delegation - only once)
+  let eventListenersSetup = false;
+  function setupCommentEventListeners() {
+    const commentsList = document.getElementById("comments-list");
+    if (!commentsList) return;
+
+    // Only setup event listeners once
+    if (eventListenersSetup) return;
+    eventListenersSetup = true;
+
+    // Use event delegation to handle all buttons
+    commentsList.addEventListener("click", async (e) => {
+      // Reply button - show/hide form
+      if (e.target.classList.contains("reply-btn")) {
+        const commentId = e.target.getAttribute("data-comment-id");
+        const replyForm = document.querySelector(`.reply-form-container[data-comment-id="${commentId}"]`);
+        if (replyForm) {
+          replyForm.style.display = replyForm.style.display === "none" ? "block" : "none";
+        }
+      }
+
+      // Cancel reply button
+      if (e.target.classList.contains("cancel-reply-btn")) {
+        const commentId = e.target.getAttribute("data-comment-id");
+        const replyForm = document.querySelector(`.reply-form-container[data-comment-id="${commentId}"]`);
+        const replyText = replyForm.querySelector(".reply-text");
+        if (replyForm) {
+          replyForm.style.display = "none";
+          if (replyText) replyText.value = "";
+        }
+      }
+
+      // Submit reply button
+      if (e.target.classList.contains("submit-reply-btn")) {
+        const parentId = e.target.getAttribute("data-comment-id");
+        const replyForm = document.querySelector(`.reply-form-container[data-comment-id="${parentId}"]`);
+        const replyText = replyForm.querySelector(".reply-text");
+        const text = replyText.value.trim();
+
+        if (!text) {
+          alert("Please enter a reply");
+          return;
+        }
+
+        try {
+          const response = await fetch(`/events/${eventId}/comments`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ commentText: text, parentId: parentId })
+          });
+
+          const data = await response.json();
+
+          if (data.error) {
+            alert(data.error);
+            return;
+          }
+
+          replyText.value = "";
+          replyForm.style.display = "none";
+
+          // Add new reply to array and re-render
+          allCommentsArray.push(data.comment);
+          renderComments(allCommentsArray);
+
+        } catch (err) {
+          console.error(err);
+          alert("Failed to add reply");
+        }
+      }
+
+      // Delete comment button
+      if (e.target.classList.contains("delete-comment-btn")) {
+        const commentId = e.target.getAttribute("data-comment-id");
+
+        if (!confirm("Are you sure you want to delete this comment?")) {
+          return;
+        }
+
+        try {
+          const response = await fetch(`/events/${eventId}/comments/${commentId}`, {
+            method: "DELETE"
+          });
+
+          const data = await response.json();
+
+          if (data.error) {
+            alert(data.error);
+            return;
+          }
+
+          // Remove comment and all its children recursively
+          const removeCommentAndChildren = (id) => {
+            allCommentsArray = allCommentsArray.filter(c => c._id.toString() !== id);
+            const children = allCommentsArray.filter(c => c.parentId && c.parentId.toString() === id);
+            children.forEach(child => removeCommentAndChildren(child._id.toString()));
+          };
+          removeCommentAndChildren(commentId);
+          renderComments(allCommentsArray);
+
+        } catch (err) {
+          console.error(err);
+          alert("Failed to delete comment");
+        }
+      }
+    });
+  }
+
+  // Initial render
+  renderComments(allCommentsArray);
+  
+  // Setup event listeners after initial render (only once)
+  setupCommentEventListeners();
+
+  // Add top-level comment
   const submitCommentBtn = document.getElementById("submit-comment-btn");
   const commentTextArea = document.getElementById("comment-text");
   
@@ -104,32 +300,9 @@ document.addEventListener("DOMContentLoaded", () => {
         // Clear textarea
         commentTextArea.value = "";
 
-        // Add new comment to the list
-        const commentsContainer = document.getElementById("comments-container");
-        const commentDiv = document.createElement("div");
-        commentDiv.className = "comment";
-        commentDiv.setAttribute("data-comment-id", data.comment._id);
-        
-        // Always show delete button for newly added comments (user owns them)
-        commentDiv.innerHTML = `
-          <p><strong>${data.comment.username}</strong> <span class="comment-date">${formatDate(data.comment.createdAt)}</span></p>
-          <p>${data.comment.text}</p>
-          <button class="delete-comment-btn" data-comment-id="${data.comment._id}">Delete</button>
-        `;
-
-        // Remove "No comments yet" message if exists
-        const noCommentsMsg = commentsContainer.querySelector("p");
-        if (noCommentsMsg && noCommentsMsg.textContent.includes("No comments")) {
-          noCommentsMsg.remove();
-        }
-
-        commentsContainer.appendChild(commentDiv);
-
-        // Add delete button event listener
-        const deleteBtnEl = commentDiv.querySelector(".delete-comment-btn");
-        if (deleteBtnEl) {
-          deleteBtnEl.addEventListener("click", handleDeleteComment);
-        }
+        // Add new comment to array and re-render
+        allCommentsArray.push(data.comment);
+        renderComments(allCommentsArray);
 
       } catch (err) {
         console.error(err);
@@ -138,42 +311,4 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Delete comment handler
-  function handleDeleteComment(e) {
-    const commentId = e.target.getAttribute("data-comment-id");
-    const commentDiv = e.target.closest(".comment");
-
-    if (!confirm("Are you sure you want to delete this comment?")) {
-      return;
-    }
-
-    fetch(`/events/${eventId}/comments/${commentId}`, {
-      method: "DELETE"
-    })
-      .then(response => response.json())
-      .then(data => {
-        if (data.error) {
-          alert(data.error);
-          return;
-        }
-
-        // Remove comment from DOM
-        commentDiv.remove();
-
-        // If no comments left, show message
-        const commentsContainer = document.getElementById("comments-container");
-        if (commentsContainer.children.length === 0) {
-          commentsContainer.innerHTML = "<p>No comments yet.</p>";
-        }
-      })
-      .catch(err => {
-        console.error(err);
-        alert("Failed to delete comment");
-      });
-  }
-
-  // Add event listeners to existing delete buttons
-  document.querySelectorAll(".delete-comment-btn").forEach(btn => {
-    btn.addEventListener("click", handleDeleteComment);
-  });
 });
