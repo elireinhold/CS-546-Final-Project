@@ -1,4 +1,5 @@
 import { Router } from "express";
+
 import { 
   searchEvents, 
   getDistinctEventTypes, 
@@ -14,17 +15,20 @@ import {
   countUsersWhoSavedMany
 } from "../data/users.js";
 
+import { requireLogin } from "../middleware.js";
+
 const router = Router();
 
 /* -----------------------------
-   SEARCH EVENTS (with filters)
+   SEARCH EVENTS (multi-filter)
 ------------------------------ */
 router.get("/search", async (req, res) => {
   try {
     const { keyword, borough, eventType } = req.query;
 
-    const eventTypes = (await getDistinctEventTypes()) || [];
-    const boroughs = (await getDistinctBoroughs()) || [];
+    const eventTypes = await getDistinctEventTypes();
+    const boroughs = await getDistinctBoroughs();
+
     eventTypes.sort();
     boroughs.sort();
 
@@ -36,7 +40,6 @@ router.get("/search", async (req, res) => {
         .map(id => id.toString());
     }
 
-    // ---- NEW: one query for all counts ----
     const eventIds = results.map(evt => evt._id.toString());
     const countMap = await countUsersWhoSavedMany(eventIds);
 
@@ -62,14 +65,10 @@ router.get("/search", async (req, res) => {
 
 
 /* -----------------------------
-   AJAX Save Event
+   SAVE EVENT — requires login
 ------------------------------ */
-router.post("/:id/save", async (req, res) => {
+router.post("/:id/save", requireLogin, async (req, res) => {
   try {
-    if (!req.session.user) {
-      return res.status(403).json({ error: "Login required" });
-    }
-
     const eventId = req.params.id;
     await saveEvent(req.session.user._id, eventId);
 
@@ -87,14 +86,10 @@ router.post("/:id/save", async (req, res) => {
 
 
 /* -----------------------------
-   AJAX Unsave Event
+   UNSAVE EVENT — requires login
 ------------------------------ */
-router.post("/:id/unsave", async (req, res) => {
+router.post("/:id/unsave", requireLogin, async (req, res) => {
   try {
-    if (!req.session.user) {
-      return res.status(403).json({ error: "Login required" });
-    }
-
     const eventId = req.params.id;
     await unsaveEvent(req.session.user._id, eventId);
 
@@ -112,12 +107,12 @@ router.post("/:id/unsave", async (req, res) => {
 
 
 /* -----------------------------
-   Event Details Page
+   EVENT DETAILS PAGE
 ------------------------------ */
 router.get("/:id", async (req, res) => {
   try {
     const event = await getEventById(req.params.id);
-    
+
     let saved = false;
     if (req.session.user) {
       const savedList = await getSavedEvents(req.session.user._id);
