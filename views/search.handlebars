@@ -47,6 +47,10 @@
   <button type="submit">Search</button>
 </form>
 
+{{#if error}}
+  <p class="error" style="color:red;">{{error}}</p>
+{{/if}}
+
 <hr>
 
 <!-- Results -->

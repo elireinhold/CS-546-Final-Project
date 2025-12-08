@@ -37,6 +37,22 @@ router.get("/search", async (req, res) => {
     eventTypes.sort();
     boroughs.sort();
 
+    // Validate date range
+    if (startDate && endDate && startDate > endDate) {
+      return res.status(400).render("search", {
+        keyword: keyword || "",
+        borough,
+        eventType,
+        startDate,
+        endDate,
+        results: [],
+        eventTypes,
+        boroughs,
+        currentUrl: req.originalUrl,
+        error: "Start date cannot be after end date"
+      });
+    }
+
     const results = await searchEvents({
       keyword,
       borough,

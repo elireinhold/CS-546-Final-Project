@@ -75,9 +75,10 @@ export async function getEventById(id) {
 
 
 // -----------------------------
-// Search Events (your original function)
+// Search Events
+// Supports: keyword, borough (multi), eventType (multi), date range
 // -----------------------------
-export async function searchEvents({ keyword, borough, eventType }) {
+export async function searchEvents({ keyword, borough, eventType, startDate, endDate }) {
   const eventCollection = await events();
   const query = {};
 
@@ -102,6 +103,40 @@ export async function searchEvents({ keyword, borough, eventType }) {
   // ------------------------------------
   if (Array.isArray(eventType) && eventType.length > 0 && !eventType.includes("all")) {
     query.eventType = { $in: eventType };
+  }
+
+  // ------------------------------------
+  // Date range (inclusive) — tolerate string or Date in DB
+  // startDate/endDate are yyyy-mm-dd strings from the UI
+  // Convert stored startDateTime to Date on the fly to handle string data
+  // ------------------------------------
+  const dateExpr = [];
+  const dateValue = {
+    $convert: {
+      input: "$startDateTime",
+      to: "date",
+      onError: null,
+      onNull: null
+    }
+  };
+
+  if (startDate) {
+    const start = new Date(`${startDate}T00:00:00.000Z`);
+    if (!isNaN(start)) {
+      dateExpr.push({ $gte: [dateValue, start] });
+    }
+  }
+
+  if (endDate) {
+    const end = new Date(`${endDate}T23:59:59.999Z`);
+    if (!isNaN(end)) {
+      dateExpr.push({ $lte: [dateValue, end] });
+    }
+  }
+
+  if (dateExpr.length) {
+    // Ensure the converted date is not null to avoid matching invalid/empty values
+    query.$expr = { $and: [{ $ne: [dateValue, null] }, ...dateExpr] };
   }
 
   return await eventCollection.find(query).limit(200).toArray();

@@ -33,9 +33,20 @@
 
 <hr>
 
-<a href="{{returnTo}}">← Back to Results</a>
+<a id="back-link" href="{{returnTo}}">← Back to Results</a>
 
 <script>
   const returnTo = "{{returnTo}}";
+  // Prefer actual previous page; fall back to returnTo; default to search
+  const backLink = document.getElementById("back-link");
+  const fallback = returnTo || "/events/search";
+  const target = document.referrer && document.referrer !== window.location.href
+    ? document.referrer
+    : fallback;
+  backLink.setAttribute("href", target);
+  backLink.addEventListener("click", (e) => {
+    e.preventDefault();
+    window.location.href = target;
+  });
 </script>
 <script src="/public/js/eventDetails.js"></script>

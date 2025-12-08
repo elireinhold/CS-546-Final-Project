@@ -46,5 +46,4 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error(err);
       alert("Something went wrong");
     }
-  });
-});
+  }); });
