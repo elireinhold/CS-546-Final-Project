@@ -8,8 +8,8 @@ async function getUsers() {
 }
 
 const exportedMethods = {
+  //Validates first and last name format (all letters, 2 < name.length < 20). Returns with trimmed name.
   validFirstOrLastName(name) {
-    //Validates first and last name format (all letters, 2 < name.length < 20). Returns with trimmed name.
     if (typeof name !== "string") {
       throw "Error: Name must be a string.";
     }
@@ -26,8 +26,8 @@ const exportedMethods = {
     }
     return name;
   },
+  // Validates userName format. (5 < userName.length < 10, alphanumeric, ) Checks if userName is already being used. Returns userName.trim().toLowerCase()
   async validUserNameRegister(userName) {
-    // Validates userName format. (5 < userName.length < 10, alphanumeric, ) Checks if userName is already being used. Returns userName.trim().toLowerCase()
     if (!userName) {
       throw "Error: Must provide userName.";
     }
@@ -56,8 +56,8 @@ const exportedMethods = {
     }
     return lowerUserName;
   },
+  // Checks userName is in a valid format.
   async validUserNameLogin(userName) {
-    // Checks userName is in a valid format.
     if (!userName) {
       throw "Error: Must provide userName.";
     }
@@ -77,8 +77,8 @@ const exportedMethods = {
     }
     return userName;
   },
+  // Validates password. ( 8 < password.length, >= 1 uppercase, digit, special character). Returns trimmed password.
   validPassword(password) {
-    // Validates password. ( 8 < password.length, >= 1 uppercase, digit, special character). Returns trimmed password.
     if (!password) {
       throw "Error: Must provide password.";
     }
@@ -99,8 +99,8 @@ const exportedMethods = {
     }
     return password;
   },
+  // Validate borough format. borough. Return borough with capital first letter
   validBorough(borough) {
-    // Validate borough format. borough. Return borough with capital first letter
     if (typeof borough !== "string") {
       throw "Error: Borough must be a string.";
     }
@@ -121,9 +121,10 @@ const exportedMethods = {
     } else {
       borough = borough.charAt(0).toUpperCase() + borough.slice(1);
     }
+    return borough;
   },
+  //Validates that email is proper format.
   validEmail(email) {
-    //Validates that email is proper format.
     if (!email) {
       throw "Error: Must provide email.";
     }
@@ -140,8 +141,8 @@ const exportedMethods = {
     }
     return email;
   },
+  //Validates that event type is one of the categories from the NYC dataset. CASE-SENSITIVE. Returns trimmed event type.
   validEventType(eventType) {
-    //Validates that event type is one of the categories from the NYC dataset. CASE-SENSITIVE. Returns trimmed event type.
     if (typeof eventType !== "string") {
       throw "Error: Event type must be a string.";
     }
@@ -171,8 +172,8 @@ const exportedMethods = {
     }
     return eventType;
   },
+  // Validate mongoDB _id field
   checkId(id) {
-    //COMEBACK: MAYBE NEED
     if (!id) throw "Error: You must provide an id";
     if (typeof id !== "string") throw "Error: id must be a string";
     id = id.trim();
@@ -181,8 +182,8 @@ const exportedMethods = {
     if (!ObjectId.isValid(id)) throw "Error: is musr be valid object ID";
     return id;
   },
+  //Validates date is in YYYY-MM-DD format and is a real date
   validDate(dateString) {
-    //Validates date is in YYYY-MM-DD format and is a real date
     if (!dateString) {
       throw "Error: Must provide date.";
     }
@@ -213,8 +214,8 @@ const exportedMethods = {
 
     return dateString;
   },
+  //Validates that user is over 13 for data collection but they are not over 100
   validAge(birthday) {
-    //ensures user is over 13 for data collection but they are not over 100
     if (!birthday) {
       throw "Error: Must provide birthday.";
     }
@@ -240,8 +241,8 @@ const exportedMethods = {
     }
     return birthday;
   },
+  // Validates that communityBoard can be turned into a positve integer. Retuns communityBoard.trim()
   validCommunityBoard(communityBoard) {
-    // Validates that communityBoard can be turned into a positve integer. Retuns communityBoard.trim()
     const trimmed = communityBoard.trim();
     const num = parseInt(trimmed);
 
