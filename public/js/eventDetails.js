@@ -30,6 +30,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const userCountText = document.getElementById("userCountText");
         userCountText.textContent = `Saved by ${data.userCount} user${data.userCount === 1 ? "" : "s"}`;
   
+        // Jump back to search page so search result UI refreshes
+        setTimeout(() => {
+          window.location.href = "/events/search";
+        }, 400);
+  
       } catch (err) {
         console.error(err);
         alert("Something went wrong");

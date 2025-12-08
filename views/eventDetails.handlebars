@@ -7,19 +7,21 @@
 
 <hr>
 
-<!-- Save / Unsave Button -->
+<!-- Save Count -->
+<p id="userCountText">
+  Saved by {{userCount}} user{{#ifEquals userCount 1}}{{else}}s{{/ifEquals}}
+</p>
+
+<!-- Save / Unsave Button Section -->
 <div id="save-section" data-event-id="{{event._id}}">
-  
   {{#if saved}}
     <button id="saveBtn" data-saved="true">Unsave</button>
   {{else}}
     <button id="saveBtn" data-saved="false">Save</button>
   {{/if}}
-
-  <p id="userCountText">
-    Saved by {{userCount}} user{{#ifEquals userCount 1}}{{else}}s{{/ifEquals}}
-  </p>
-
 </div>
 
+<hr>
+
+<a href="/events/search">← Back to Search</a>
 <script src="/public/js/eventDetails.js"></script>
