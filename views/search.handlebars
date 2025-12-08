@@ -1,39 +1,55 @@
 <h1>Search Events</h1>
 
 <form method="GET" action="/events/search">
-  
+
   <!-- Keyword -->
   <input 
     type="text" 
     name="keyword" 
-    placeholder="Search by event name" 
+    placeholder="Search by event name"
     value="{{keyword}}"
   />
 
-  <!-- Borough Dropdown -->
-  <select name="borough">
-    <option value="all" {{#ifEquals borough "all"}}selected{{/ifEquals}}>All Boroughs</option>
-    
-    {{#each boroughs}}
-      <option value="{{this}}" {{#ifEquals ../borough this}}selected{{/ifEquals}}>
-        {{this}}
-      </option>
-    {{/each}}
-  </select>
+  <!-- Event Types -->
+  <h3>Type</h3>
+  {{#each eventTypes}}
+    <label>
+      <input 
+        type="checkbox"
+        name="eventType"
+        value="{{this}}"
+        {{#if (contains ../eventType this)}}checked{{/if}}
+      >
+      {{this}}
+    </label><br>
+  {{/each}}
 
-  <!-- Event Type Dropdown -->
-  <select name="eventType">
-    <option value="all" {{#ifEquals eventType "all"}}selected{{/ifEquals}}>All Types</option>
+  <!-- Boroughs -->
+  <h3>Boroughs</h3>
+  {{#each boroughs}}
+    <label>
+      <input 
+        type="checkbox"
+        name="borough"
+        value="{{this}}"
+        {{#if (contains ../borough this)}}checked{{/if}}
+      >
+      {{this}}
+    </label><br>
+  {{/each}}
 
-    {{#each eventTypes}}
-      <option value="{{this}}" {{#ifEquals this ../eventType}}selected{{/ifEquals}}>
-        {{this}}
-      </option>
-    {{/each}}
-  </select>
+  <!-- Date Range -->
+  <h3>Date Range</h3>
+  Start: <input type="date" name="startDate" value="{{startDate}}">
+  End: <input type="date" name="endDate" value="{{endDate}}">
 
+  <br><br>
   <button type="submit">Search</button>
 </form>
+
+{{#if error}}
+  <p class="error" style="color:red;">{{error}}</p>
+{{/if}}
 
 <hr>
 
@@ -42,36 +58,35 @@
   <ul>
     {{#each results}}
       <li>
-        <a href="/events/{{this._id}}">{{this.eventName}}</a>
+        <a href="/events/{{this._id}}?returnTo={{../currentUrl}}">
+          {{this.eventName}}
+        </a>
         — {{this.eventBorough}}
 
-        <!-- Save Count -->
         <div id="save-count-{{this._id}}">
           {{this.userCount}} user(s) saved this
         </div>
 
-        <!-- Save / Unsave Button -->
         {{#if this.saved}}
-          <button 
-            id="save-btn-{{this._id}}" 
-            onclick="updateSaveStatus('{{this._id}}', true)"
-          >
+          <button id="save-btn-{{this._id}}"
+                  onclick="updateSaveStatus('{{this._id}}', true)">
             Unsave
           </button>
         {{else}}
-          <button 
-            id="save-btn-{{this._id}}" 
-            onclick="updateSaveStatus('{{this._id}}', false)"
-          >
+          <button id="save-btn-{{this._id}}"
+                  onclick="updateSaveStatus('{{this._id}}', false)">
             Save
           </button>
         {{/if}}
-
       </li>
     {{/each}}
   </ul>
+
 {{else}}
   <p>No events found.</p>
 {{/if}}
 
+<script>
+  const returnTo = "{{currentUrl}}";
+</script>
 <script src="/public/js/search.js"></script>

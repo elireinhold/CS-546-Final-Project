@@ -7,19 +7,46 @@
 
 <hr>
 
+<!-- Save Count -->
+<p id="save-count-{{event._id}}">
+  {{userCount}} user(s) saved this
+</p>
+
 <!-- Save / Unsave Button -->
-<div id="save-section" data-event-id="{{event._id}}">
-  
-  {{#if saved}}
-    <button id="saveBtn" data-saved="true">Unsave</button>
-  {{else}}
-    <button id="saveBtn" data-saved="false">Save</button>
-  {{/if}}
+{{#if saved}}
+  <button 
+    id="save-btn-{{event._id}}"
+    data-event-id="{{event._id}}"
+    data-saved="true"
+  >
+    Unsave
+  </button>
+{{else}}
+  <button 
+    id="save-btn-{{event._id}}"
+    data-event-id="{{event._id}}"
+    data-saved="false"
+  >
+    Save
+  </button>
+{{/if}}
 
-  <p id="userCountText">
-    Saved by {{userCount}} user{{#ifEquals userCount 1}}{{else}}s{{/ifEquals}}
-  </p>
+<hr>
 
-</div>
+<a id="back-link" href="{{returnTo}}">← Back to Results</a>
 
+<script>
+  const returnTo = "{{returnTo}}";
+  // Prefer actual previous page; fall back to returnTo; default to search
+  const backLink = document.getElementById("back-link");
+  const fallback = returnTo || "/events/search";
+  const target = document.referrer && document.referrer !== window.location.href
+    ? document.referrer
+    : fallback;
+  backLink.setAttribute("href", target);
+  backLink.addEventListener("click", (e) => {
+    e.preventDefault();
+    window.location.href = target;
+  });
+</script>
 <script src="/public/js/eventDetails.js"></script>

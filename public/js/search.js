@@ -1,10 +1,12 @@
-async function updateSaveStatus(eventId, currentlySaved) {
-    const url = currentlySaved
-      ? `/events/${eventId}/unsave`
-      : `/events/${eventId}/save`;
+async function updateSaveStatus(eventId, isSaved) {
+    const url = isSaved ? `/events/${eventId}/unsave` : `/events/${eventId}/save`;
   
     try {
-      const res = await fetch(url, { method: "POST" });
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      });
+  
       const data = await res.json();
   
       if (data.error) {
@@ -12,22 +14,25 @@ async function updateSaveStatus(eventId, currentlySaved) {
         return;
       }
   
-      // Update button text + onclick
-      const btn = document.getElementById(`save-btn-${eventId}`);
-      btn.textContent = data.saved ? "Unsave" : "Save";
-      btn.setAttribute(
-        "onclick",
-        `updateSaveStatus('${eventId}', ${data.saved})`
-      );
+      const button = document.getElementById(`save-btn-${eventId}`);
+      const count = document.getElementById(`save-count-${eventId}`);
   
-      // Update the save count
-      const countEl = document.getElementById(`save-count-${eventId}`);
-      if (countEl) {
-        countEl.textContent = `${data.userCount} user(s) saved this`;
+      if (!button || !count) {
+        console.error("Button or count element not found");
+        return;
       }
   
-    } catch (err) {
-      console.error(err);
-      alert("Save action failed.");
+      if (data.saved) {
+        button.textContent = "Unsave";
+        button.setAttribute("onclick", `updateSaveStatus('${eventId}', true)`);
+      } else {
+        button.textContent = "Save";
+        button.setAttribute("onclick", `updateSaveStatus('${eventId}', false)`);
+      }
+  
+      count.textContent = `${data.userCount} user(s) saved this`;
+    } catch (e) {
+      console.error(e);
+      alert("Error updating save status");
     }
   }

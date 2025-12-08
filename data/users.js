@@ -66,18 +66,14 @@ export async function register(
 
 export async function login(userName, password) {}
 
-// -------------------------------
-// Helper: Convert string → ObjectId
-// -------------------------------
+// Helper: convert string to ObjectId
 function toObjectId(id) {
   if (!id || typeof id !== "string") throw new Error("Invalid ID");
   if (!ObjectId.isValid(id)) throw new Error("Invalid ObjectId format");
   return new ObjectId(id);
 }
 
-/* =====================================================
-   SAVE EVENT (adds eventId to savedEvents array)
-===================================================== */
+// Save event to savedEvents array
 export async function saveEvent(userId, eventId) {
   const userCollection = await users();
 
@@ -89,9 +85,7 @@ export async function saveEvent(userId, eventId) {
   return { saved: result.modifiedCount > 0 };
 }
 
-/* =====================================================
-   UNSAVE EVENT (removes eventId from savedEvents)
-===================================================== */
+// Unsave event from savedEvents
 export async function unsaveEvent(userId, eventId) {
   const userCollection = await users();
 
@@ -103,9 +97,7 @@ export async function unsaveEvent(userId, eventId) {
   return { saved: !(result.modifiedCount > 0) };
 }
 
-/* =====================================================
-   GET SAVED EVENTS (returns array of event ObjectIds)
-===================================================== */
+// Get saved events for user
 export async function getSavedEvents(userId) {
   const userCollection = await users();
 
@@ -115,9 +107,7 @@ export async function getSavedEvents(userId) {
   return user.savedEvents || [];
 }
 
-/* =====================================================
-   COUNT USERS WHO SAVED ONE EVENT
-===================================================== */
+// Count users who saved one event
 export async function countUsersWhoSaved(eventId) {
   const userCollection = await users();
 
@@ -126,10 +116,7 @@ export async function countUsersWhoSaved(eventId) {
   });
 }
 
-/* =====================================================
-   ⭐ NEW: COUNT USERS WHO SAVED MANY EVENTS (Batch)
-   solves N+1 query problem
-===================================================== */
+// Count users who saved many events (batch)
 export async function countUsersWhoSavedMany(eventIds) {
   const userCollection = await users();
 
