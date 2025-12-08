@@ -36,45 +36,8 @@
 <!-- Comments Section -->
 <h2>Comments</h2>
 <div id="comments-container">
-  {{#if event.comments}}
-    {{#each event.comments}}
-      <div class="comment" data-comment-id="{{this._id}}">
-        <p><strong>{{this.username}}</strong> <span class="comment-date">{{this.createdAt}}</span></p>
-        <p>{{this.text}}</p>
-        
-        {{#if ../user}}
-          {{#if (eq this.userId ../user._id)}}
-            <button class="delete-comment-btn" data-comment-id="{{this._id}}">Delete</button>
-          {{/if}}
-          <button class="reply-btn" data-comment-id="{{this._id}}">Reply</button>
-        {{/if}}
-        
-        <!-- Replies Section -->
-        <div class="replies-container" data-comment-id="{{this._id}}" style="margin-left: 20px; margin-top: 10px;">
-          {{#if this.replies}}
-            {{#each this.replies}}
-              <div class="reply" data-reply-id="{{this._id}}">
-                <p><strong>{{this.username}}</strong> <span class="reply-date">{{this.createdAt}}</span></p>
-                <p>{{this.text}}</p>
-              </div>
-            {{/each}}
-          {{/if}}
-        </div>
-        
-        <!-- Reply Form (hidden by default) -->
-        {{#if ../user}}
-          <div class="reply-form-container" data-comment-id="{{this._id}}" style="display: none; margin-left: 20px; margin-top: 10px;">
-            <textarea class="reply-text" rows="3" cols="40" placeholder="Write your reply..."></textarea>
-            <br>
-            <button class="submit-reply-btn" data-comment-id="{{this._id}}">Submit Reply</button>
-            <button class="cancel-reply-btn" data-comment-id="{{this._id}}">Cancel</button>
-          </div>
-        {{/if}}
-      </div>
-    {{/each}}
-  {{else}}
-    <p>No comments yet.</p>
-  {{/if}}
+  <!-- Comments will be rendered by JavaScript recursively -->
+  <div id="comments-list"></div>
 </div>
 
 {{#if user}}
@@ -95,6 +58,9 @@
 <script>
   const returnTo = "{{returnTo}}";
   const eventId = "{{event._id}}";
+  const currentUserId = {{#if user}}"{{user._id}}"{{else}}null{{/if}};
+  const currentUsername = {{#if user}}"{{user.username}}"{{else}}null{{/if}};
+  const allComments = {{#if event.comments}}{{{json event.comments}}}{{else}}[]{{/if}};
   // Prefer actual previous page; fall back to returnTo; default to search
   const backLink = document.getElementById("back-link");
   const fallback = returnTo || "/events/search";

@@ -5,8 +5,7 @@ import {
   getDistinctBoroughs,
   getEventById,
   addComment,
-  deleteComment,
-  addReply
+  deleteComment
 } from "../data/events.js";
 
 import { 
@@ -150,11 +149,11 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// Add comment to event
+// Add comment or reply to event (parentId optional for replies)
 router.post("/:id/comments", requireLogin, async (req, res) => {
   try {
     const eventId = req.params.id;
-    const { commentText } = req.body;
+    const { commentText, parentId } = req.body;
 
     if (!commentText || !commentText.trim()) {
       return res.status(400).json({ error: "Comment text is required" });
@@ -164,7 +163,8 @@ router.post("/:id/comments", requireLogin, async (req, res) => {
       eventId,
       req.session.user._id,
       req.session.user.username,
-      commentText
+      commentText,
+      parentId || null
     );
 
     return res.json({ success: true, comment });
@@ -183,32 +183,6 @@ router.delete("/:id/comments/:commentId", requireLogin, async (req, res) => {
     await deleteComment(eventId, commentId, req.session.user._id);
 
     return res.json({ success: true, deleted: true });
-
-  } catch (e) {
-    res.status(400).json({ error: e.message || e });
-  }
-});
-
-// Add reply to a comment
-router.post("/:id/comments/:commentId/replies", requireLogin, async (req, res) => {
-  try {
-    const eventId = req.params.id;
-    const commentId = req.params.commentId;
-    const { replyText } = req.body;
-
-    if (!replyText || !replyText.trim()) {
-      return res.status(400).json({ error: "Reply text is required" });
-    }
-
-    const reply = await addReply(
-      eventId,
-      commentId,
-      req.session.user._id,
-      req.session.user.username,
-      replyText
-    );
-
-    return res.json({ success: true, reply });
 
   } catch (e) {
     res.status(400).json({ error: e.message || e });
