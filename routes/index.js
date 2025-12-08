@@ -2,6 +2,7 @@ import { Router } from "express";
 import eventsRoutes from "./events.js";
 import usersRoutes from "./users.js";
 import homeRoutes from "./home.js";
+import calendarRoutes from "./calendar.js";
 
 const constructorMethod = (app) => {
   
@@ -13,6 +14,8 @@ const constructorMethod = (app) => {
 
   // Users routes (you can add later)
   app.use("/users", usersRoutes);
+
+  app.use("/calendar", calendarRoutes);
 
   // 404 fallback
   

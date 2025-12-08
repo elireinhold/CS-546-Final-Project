@@ -133,3 +133,16 @@ export async function getDistinctBoroughs() {
 
   return boroughs.filter(b => b && b.trim());
 }
+
+// Gets all events user saved
+export async function getAllEventsByUser(userId) {
+  if (!userId) throw "You must provide a user ID";
+  const eventCollection = await events();
+  const eventData = await eventCollection.find({ userId }).toArray();
+
+  return eventData.map(event => ({
+    title: event.title,
+    date: event.date,
+    eventId: event._id.toString()
+  }));
+}

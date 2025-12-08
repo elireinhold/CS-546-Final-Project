@@ -34,6 +34,9 @@ const hbs = handlebars.create({
       if (!Array.isArray(arr)) return arr === value;
       return arr.includes(value);
     },
+    json(data) {
+      return JSON.stringify(data);
+    }
   },
 });
 
