@@ -13,7 +13,7 @@ async function seedNYC() {
   console.log("Fetching NYC event dataset...");
   const response = await fetch(NYC_API_URL);
   const rawEvents = await response.json();
-
+  
   console.log(`Fetched ${rawEvents.length} events.`);
 
   console.log("Normalizing event data...");

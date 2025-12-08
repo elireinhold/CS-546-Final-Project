@@ -81,19 +81,27 @@ export async function searchEvents({ keyword, borough, eventType }) {
   const eventCollection = await events();
   const query = {};
 
+  // ------------------------------------
   // Keyword search (case-insensitive)
+  // ------------------------------------
   if (keyword && keyword.trim()) {
     query.eventName = { $regex: keyword.trim(), $options: "i" };
   }
 
-  // Borough filter
-  if (borough && borough !== "all") {
-    query.eventBorough = borough;
+  // ------------------------------------
+  // Borough multi-select array support
+  // borough = ["Manhattan", "Brooklyn"]
+  // ------------------------------------
+  if (Array.isArray(borough) && borough.length > 0 && !borough.includes("all")) {
+    query.eventBorough = { $in: borough };
   }
 
-  // Event type filter
-  if (eventType && eventType !== "all") {
-    query.eventType = eventType;
+  // ------------------------------------
+  // EventType multi-select array support
+  // eventType = ["Special Event", "Sport - Youth"]
+  // ------------------------------------
+  if (Array.isArray(eventType) && eventType.length > 0 && !eventType.includes("all")) {
+    query.eventType = { $in: eventType };
   }
 
   return await eventCollection.find(query).limit(200).toArray();

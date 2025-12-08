@@ -1,5 +1,4 @@
 import { Router } from "express";
-
 import { 
   searchEvents, 
   getDistinctEventTypes, 
@@ -24,15 +23,27 @@ const router = Router();
 ------------------------------ */
 router.get("/search", async (req, res) => {
   try {
-    const { keyword, borough, eventType } = req.query;
+    let { keyword, borough, eventType, startDate, endDate } = req.query;
+
+    // Always convert to arrays
+    if (!borough) borough = [];
+    else if (!Array.isArray(borough)) borough = [borough];
+
+    if (!eventType) eventType = [];
+    else if (!Array.isArray(eventType)) eventType = [eventType];
 
     const eventTypes = await getDistinctEventTypes();
     const boroughs = await getDistinctBoroughs();
-
     eventTypes.sort();
     boroughs.sort();
 
-    const results = await searchEvents({ keyword, borough, eventType });
+    const results = await searchEvents({
+      keyword,
+      borough,
+      eventType,
+      startDate,
+      endDate
+    });
 
     let savedList = [];
     if (req.session.user) {
@@ -51,11 +62,14 @@ router.get("/search", async (req, res) => {
 
     res.render("search", {
       keyword: keyword || "",
-      borough: borough || "all",
-      eventType: eventType || "all",
+      borough,
+      eventType,
+      startDate,
+      endDate,
       results,
       eventTypes,
-      boroughs
+      boroughs,
+      currentUrl: req.originalUrl // ⭐ returnTo
     });
 
   } catch (e) {
@@ -63,52 +77,37 @@ router.get("/search", async (req, res) => {
   }
 });
 
-
-/* -----------------------------
-   SAVE EVENT — requires login
------------------------------- */
+/* SAVE */
 router.post("/:id/save", requireLogin, async (req, res) => {
   try {
     const eventId = req.params.id;
     await saveEvent(req.session.user._id, eventId);
 
-    const userCount = await countUsersWhoSaved(eventId.toString());
+    const userCount = await countUsersWhoSaved(eventId);
 
-    return res.json({ 
-      saved: true,
-      userCount
-    });
+    return res.json({ saved: true, userCount });
 
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
 
-
-/* -----------------------------
-   UNSAVE EVENT — requires login
------------------------------- */
+/* UNSAVE */
 router.post("/:id/unsave", requireLogin, async (req, res) => {
   try {
     const eventId = req.params.id;
     await unsaveEvent(req.session.user._id, eventId);
 
-    const userCount = await countUsersWhoSaved(eventId.toString());
+    const userCount = await countUsersWhoSaved(eventId);
 
-    return res.json({
-      saved: false,
-      userCount
-    });
+    return res.json({ saved: false, userCount });
 
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
 
-
-/* -----------------------------
-   EVENT DETAILS PAGE
------------------------------- */
+/* EVENT DETAILS */
 router.get("/:id", async (req, res) => {
   try {
     const event = await getEventById(req.params.id);
@@ -119,12 +118,13 @@ router.get("/:id", async (req, res) => {
       saved = savedList.map(x => x.toString()).includes(req.params.id);
     }
 
-    const userCount = await countUsersWhoSaved(req.params.id.toString());
+    const userCount = await countUsersWhoSaved(req.params.id);
 
     res.render("eventDetails", {
       event,
       saved,
-      userCount
+      userCount,
+      returnTo: req.query.returnTo || "/events/search"
     });
 
   } catch (e) {

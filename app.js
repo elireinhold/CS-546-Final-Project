@@ -1,10 +1,9 @@
 import express from "express";
 import handlebars from "express-handlebars";
 import session from "express-session";
+import cookieParser from "cookie-parser";
 import configRoutes from "./routes/index.js";
 import { settings } from "./config/settings.js";
-import exphbs from "express-handlebars";
-import cookieParser from "cookie-parser";
 
 const app = express();
 
@@ -23,12 +22,17 @@ app.use(
   })
 );
 
-// ⭐ Handlebars Setup (Correct & Clean Version)
+// Handlebars setup (+ contains helper)
 const hbs = handlebars.create({
   defaultLayout: "main",
   helpers: {
     ifEquals(a, b, options) {
       return a === b ? options.fn(this) : options.inverse(this);
+    },
+    contains(arr, value) {
+      if (!arr) return false;
+      if (!Array.isArray(arr)) return arr === value;
+      return arr.includes(value);
     }
   }
 });
@@ -36,10 +40,10 @@ const hbs = handlebars.create({
 app.engine("handlebars", hbs.engine);
 app.set("view engine", "handlebars");
 
-// Static files
+// Static folder
 app.use("/public", express.static("public"));
 
-// Routes
+// Load routes
 configRoutes(app);
 
 // Server
