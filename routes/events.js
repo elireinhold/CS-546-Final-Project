@@ -3,7 +3,9 @@ import {
   searchEvents, 
   getDistinctEventTypes, 
   getDistinctBoroughs,
-  getEventById
+  getEventById,
+  addComment,
+  deleteComment
 } from "../data/events.js";
 
 import { 
@@ -138,11 +140,51 @@ router.get("/:id", async (req, res) => {
       event,
       saved,
       userCount,
-      returnTo: req.query.returnTo || "/events/search"
+      returnTo: req.query.returnTo || "/events/search",
+      user: req.session.user || null
     });
 
   } catch (e) {
     res.status(404).send("Event not found");
+  }
+});
+
+// Add comment to event
+router.post("/:id/comments", requireLogin, async (req, res) => {
+  try {
+    const eventId = req.params.id;
+    const { commentText } = req.body;
+
+    if (!commentText || !commentText.trim()) {
+      return res.status(400).json({ error: "Comment text is required" });
+    }
+
+    const comment = await addComment(
+      eventId,
+      req.session.user._id,
+      req.session.user.username,
+      commentText
+    );
+
+    return res.json({ success: true, comment });
+
+  } catch (e) {
+    res.status(400).json({ error: e.message || e });
+  }
+});
+
+// Delete comment from event
+router.delete("/:id/comments/:commentId", requireLogin, async (req, res) => {
+  try {
+    const eventId = req.params.id;
+    const commentId = req.params.commentId;
+
+    await deleteComment(eventId, commentId, req.session.user._id);
+
+    return res.json({ success: true, deleted: true });
+
+  } catch (e) {
+    res.status(400).json({ error: e.message || e });
   }
 });
 
