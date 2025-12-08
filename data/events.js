@@ -1,11 +1,7 @@
 import { events } from "../config/mongoCollections.js";
 import { ObjectId } from "mongodb";
 
-
-// -----------------------------
-// Normalize NYC Dataset Entry
-// -----------------------------
-// NYC borough abbreviations → full names
+// Normalize NYC data; borough abbreviations map
 const boroughMap = {
   M: "Manhattan",
   BX: "Bronx",
@@ -36,9 +32,7 @@ export function normalizeNYCEvent(rawEvent) {
 }
 
 
-// -----------------------------
-// Insert Many Normalized NYC Events
-// -----------------------------
+// Insert NYC events
 export async function insertManyNYCEvents(eventArray) {
   if (!Array.isArray(eventArray)) {
     throw "insertManyNYCEvents: argument must be an array";
@@ -50,18 +44,14 @@ export async function insertManyNYCEvents(eventArray) {
 }
 
 
-// -----------------------------
-// Clear Old NYC Events
-// -----------------------------
+// Clear NYC events
 export async function clearNYCEvents() {
   const eventCollection = await events();
   return await eventCollection.deleteMany({ eventSource: "NYC" });
 }
 
 
-// -----------------------------
-// Get One Event
-// -----------------------------
+// Get one event
 export async function getEventById(id) {
   const eventCollection = await events();
 
@@ -74,42 +64,27 @@ export async function getEventById(id) {
 }
 
 
-// -----------------------------
-// Search Events
-// Supports: keyword, borough (multi), eventType (multi), date range
-// -----------------------------
+// Search events with keyword/borough/type/date range
 export async function searchEvents({ keyword, borough, eventType, startDate, endDate }) {
   const eventCollection = await events();
   const query = {};
 
-  // ------------------------------------
   // Keyword search (case-insensitive)
-  // ------------------------------------
   if (keyword && keyword.trim()) {
     query.eventName = { $regex: keyword.trim(), $options: "i" };
   }
 
-  // ------------------------------------
-  // Borough multi-select array support
-  // borough = ["Manhattan", "Brooklyn"]
-  // ------------------------------------
+  // Borough multi-select array
   if (Array.isArray(borough) && borough.length > 0 && !borough.includes("all")) {
     query.eventBorough = { $in: borough };
   }
 
-  // ------------------------------------
-  // EventType multi-select array support
-  // eventType = ["Special Event", "Sport - Youth"]
-  // ------------------------------------
+  // EventType multi-select array
   if (Array.isArray(eventType) && eventType.length > 0 && !eventType.includes("all")) {
     query.eventType = { $in: eventType };
   }
 
-  // ------------------------------------
-  // Date range (inclusive) — tolerate string or Date in DB
-  // startDate/endDate are yyyy-mm-dd strings from the UI
-  // Convert stored startDateTime to Date on the fly to handle string data
-  // ------------------------------------
+  // Date range inclusive; convert stored startDateTime to Date
   const dateExpr = [];
   const dateValue = {
     $convert: {
@@ -135,16 +110,14 @@ export async function searchEvents({ keyword, borough, eventType, startDate, end
   }
 
   if (dateExpr.length) {
-    // Ensure the converted date is not null to avoid matching invalid/empty values
+    // Ensure converted date is not null
     query.$expr = { $and: [{ $ne: [dateValue, null] }, ...dateExpr] };
   }
 
   return await eventCollection.find(query).limit(200).toArray();
 }
 
-// -----------------------------
 // Get distinct event types
-// -----------------------------
 export async function getDistinctEventTypes() {
   const eventCollection = await events();
   const types = await eventCollection.distinct("eventType");
@@ -153,9 +126,7 @@ export async function getDistinctEventTypes() {
   return types.filter(t => t && t.trim());
 }
 
-// -----------------------------
 // Get distinct boroughs
-// -----------------------------
 export async function getDistinctBoroughs() {
   const eventCollection = await events();
   const boroughs = await eventCollection.distinct("eventBorough");

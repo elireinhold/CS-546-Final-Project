@@ -18,9 +18,7 @@ import { requireLogin } from "../middleware.js";
 
 const router = Router();
 
-/* -----------------------------
-   SEARCH EVENTS (multi-filter)
------------------------------- */
+// Search events (multi-filter)
 router.get("/search", async (req, res) => {
   try {
     let { keyword, borough, eventType, startDate, endDate } = req.query;
@@ -93,7 +91,7 @@ router.get("/search", async (req, res) => {
   }
 });
 
-/* SAVE */
+// Save event
 router.post("/:id/save", requireLogin, async (req, res) => {
   try {
     const eventId = req.params.id;
@@ -108,7 +106,7 @@ router.post("/:id/save", requireLogin, async (req, res) => {
   }
 });
 
-/* UNSAVE */
+// Unsave event
 router.post("/:id/unsave", requireLogin, async (req, res) => {
   try {
     const eventId = req.params.id;
@@ -123,7 +121,7 @@ router.post("/:id/unsave", requireLogin, async (req, res) => {
   }
 });
 
-/* EVENT DETAILS */
+// Event details
 router.get("/:id", async (req, res) => {
   try {
     const event = await getEventById(req.params.id);
