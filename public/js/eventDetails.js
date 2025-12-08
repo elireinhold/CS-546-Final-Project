@@ -110,11 +110,19 @@ document.addEventListener("DOMContentLoaded", () => {
         commentDiv.className = "comment";
         commentDiv.setAttribute("data-comment-id", data.comment._id);
         
-        // Always show delete button for newly added comments (user owns them)
+        // Always show delete button and reply button for newly added comments
         commentDiv.innerHTML = `
           <p><strong>${data.comment.username}</strong> <span class="comment-date">${formatDate(data.comment.createdAt)}</span></p>
           <p>${data.comment.text}</p>
           <button class="delete-comment-btn" data-comment-id="${data.comment._id}">Delete</button>
+          <button class="reply-btn" data-comment-id="${data.comment._id}">Reply</button>
+          <div class="replies-container" data-comment-id="${data.comment._id}" style="margin-left: 20px; margin-top: 10px;"></div>
+          <div class="reply-form-container" data-comment-id="${data.comment._id}" style="display: none; margin-left: 20px; margin-top: 10px;">
+            <textarea class="reply-text" rows="3" cols="40" placeholder="Write your reply..."></textarea>
+            <br>
+            <button class="submit-reply-btn" data-comment-id="${data.comment._id}">Submit Reply</button>
+            <button class="cancel-reply-btn" data-comment-id="${data.comment._id}">Cancel</button>
+          </div>
         `;
 
         // Remove "No comments yet" message if exists
@@ -125,10 +133,85 @@ document.addEventListener("DOMContentLoaded", () => {
 
         commentsContainer.appendChild(commentDiv);
 
-        // Add delete button event listener
+        // Add event listeners for new comment
         const deleteBtnEl = commentDiv.querySelector(".delete-comment-btn");
         if (deleteBtnEl) {
           deleteBtnEl.addEventListener("click", handleDeleteComment);
+        }
+        
+        const replyBtnEl = commentDiv.querySelector(".reply-btn");
+        if (replyBtnEl) {
+          replyBtnEl.addEventListener("click", (e) => {
+            const commentId = e.target.getAttribute("data-comment-id");
+            const replyForm = document.querySelector(`.reply-form-container[data-comment-id="${commentId}"]`);
+            if (replyForm) {
+              replyForm.style.display = replyForm.style.display === "none" ? "block" : "none";
+            }
+          });
+        }
+        
+        const cancelReplyBtnEl = commentDiv.querySelector(".cancel-reply-btn");
+        if (cancelReplyBtnEl) {
+          cancelReplyBtnEl.addEventListener("click", (e) => {
+            const commentId = e.target.getAttribute("data-comment-id");
+            const replyForm = document.querySelector(`.reply-form-container[data-comment-id="${commentId}"]`);
+            const replyText = replyForm.querySelector(".reply-text");
+            if (replyForm) {
+              replyForm.style.display = "none";
+              if (replyText) replyText.value = "";
+            }
+          });
+        }
+        
+        const submitReplyBtnEl = commentDiv.querySelector(".submit-reply-btn");
+        if (submitReplyBtnEl) {
+          submitReplyBtnEl.addEventListener("click", async (e) => {
+            const commentId = e.target.getAttribute("data-comment-id");
+            const replyForm = document.querySelector(`.reply-form-container[data-comment-id="${commentId}"]`);
+            const replyText = replyForm.querySelector(".reply-text");
+            const text = replyText.value.trim();
+
+            if (!text) {
+              alert("Please enter a reply");
+              return;
+            }
+
+            try {
+              const response = await fetch(`/events/${eventId}/comments/${commentId}/replies`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ replyText: text })
+              });
+
+              const data = await response.json();
+
+              if (data.error) {
+                alert(data.error);
+                return;
+              }
+
+              replyText.value = "";
+              replyForm.style.display = "none";
+
+              const repliesContainer = document.querySelector(`.replies-container[data-comment-id="${commentId}"]`);
+              if (repliesContainer) {
+                const replyDiv = document.createElement("div");
+                replyDiv.className = "reply";
+                replyDiv.setAttribute("data-reply-id", data.reply._id);
+                replyDiv.innerHTML = `
+                  <p><strong>${data.reply.username}</strong> <span class="reply-date">${formatDate(data.reply.createdAt)}</span></p>
+                  <p>${data.reply.text}</p>
+                `;
+                repliesContainer.appendChild(replyDiv);
+              }
+
+            } catch (err) {
+              console.error(err);
+              alert("Failed to add reply");
+            }
+          });
         }
 
       } catch (err) {
@@ -175,5 +258,83 @@ document.addEventListener("DOMContentLoaded", () => {
   // Add event listeners to existing delete buttons
   document.querySelectorAll(".delete-comment-btn").forEach(btn => {
     btn.addEventListener("click", handleDeleteComment);
+  });
+
+  // Reply functionality
+  // Show/hide reply form
+  document.querySelectorAll(".reply-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      const commentId = e.target.getAttribute("data-comment-id");
+      const replyForm = document.querySelector(`.reply-form-container[data-comment-id="${commentId}"]`);
+      if (replyForm) {
+        replyForm.style.display = replyForm.style.display === "none" ? "block" : "none";
+      }
+    });
+  });
+
+  // Cancel reply
+  document.querySelectorAll(".cancel-reply-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      const commentId = e.target.getAttribute("data-comment-id");
+      const replyForm = document.querySelector(`.reply-form-container[data-comment-id="${commentId}"]`);
+      const replyText = replyForm.querySelector(".reply-text");
+      if (replyForm) {
+        replyForm.style.display = "none";
+        if (replyText) replyText.value = "";
+      }
+    });
+  });
+
+  // Submit reply
+  document.querySelectorAll(".submit-reply-btn").forEach(btn => {
+    btn.addEventListener("click", async (e) => {
+      const commentId = e.target.getAttribute("data-comment-id");
+      const replyForm = document.querySelector(`.reply-form-container[data-comment-id="${commentId}"]`);
+      const replyText = replyForm.querySelector(".reply-text");
+      const text = replyText.value.trim();
+
+      if (!text) {
+        alert("Please enter a reply");
+        return;
+      }
+
+      try {
+        const response = await fetch(`/events/${eventId}/comments/${commentId}/replies`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ replyText: text })
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+          alert(data.error);
+          return;
+        }
+
+        // Clear textarea and hide form
+        replyText.value = "";
+        replyForm.style.display = "none";
+
+        // Add reply to the replies container
+        const repliesContainer = document.querySelector(`.replies-container[data-comment-id="${commentId}"]`);
+        if (repliesContainer) {
+          const replyDiv = document.createElement("div");
+          replyDiv.className = "reply";
+          replyDiv.setAttribute("data-reply-id", data.reply._id);
+          replyDiv.innerHTML = `
+            <p><strong>${data.reply.username}</strong> <span class="reply-date">${formatDate(data.reply.createdAt)}</span></p>
+            <p>${data.reply.text}</p>
+          `;
+          repliesContainer.appendChild(replyDiv);
+        }
+
+      } catch (err) {
+        console.error(err);
+        alert("Failed to add reply");
+      }
+    });
   });
 });

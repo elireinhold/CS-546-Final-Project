@@ -146,7 +146,8 @@ export async function addComment(eventId, userId, username, commentText) {
     userId: new ObjectId(userId),
     username: username,
     text: commentText.trim(),
-    createdAt: new Date()
+    createdAt: new Date(),
+    replies: []
   };
 
   const result = await eventCollection.updateOne(
@@ -156,6 +157,40 @@ export async function addComment(eventId, userId, username, commentText) {
 
   if (result.matchedCount === 0) throw "Event not found";
   return comment;
+}
+
+// Add reply to a comment
+export async function addReply(eventId, commentId, userId, username, replyText) {
+  if (!ObjectId.isValid(eventId)) throw "Invalid event ID";
+  if (!ObjectId.isValid(commentId)) throw "Invalid comment ID";
+  if (!ObjectId.isValid(userId)) throw "Invalid user ID";
+  if (!replyText || !replyText.trim()) throw "Reply text is required";
+
+  const eventCollection = await events();
+  const event = await eventCollection.findOne({ _id: new ObjectId(eventId) });
+  if (!event) throw "Event not found";
+
+  const comment = event.comments.find(c => c._id.toString() === commentId);
+  if (!comment) throw "Comment not found";
+
+  const reply = {
+    _id: new ObjectId(),
+    userId: new ObjectId(userId),
+    username: username,
+    text: replyText.trim(),
+    createdAt: new Date()
+  };
+
+  const result = await eventCollection.updateOne(
+    { 
+      _id: new ObjectId(eventId),
+      "comments._id": new ObjectId(commentId)
+    },
+    { $push: { "comments.$.replies": reply } }
+  );
+
+  if (result.matchedCount === 0) throw "Event or comment not found";
+  return reply;
 }
 
 // Delete comment from event

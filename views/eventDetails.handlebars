@@ -41,10 +41,34 @@
       <div class="comment" data-comment-id="{{this._id}}">
         <p><strong>{{this.username}}</strong> <span class="comment-date">{{this.createdAt}}</span></p>
         <p>{{this.text}}</p>
+        
         {{#if ../user}}
           {{#if (eq this.userId ../user._id)}}
             <button class="delete-comment-btn" data-comment-id="{{this._id}}">Delete</button>
           {{/if}}
+          <button class="reply-btn" data-comment-id="{{this._id}}">Reply</button>
+        {{/if}}
+        
+        <!-- Replies Section -->
+        <div class="replies-container" data-comment-id="{{this._id}}" style="margin-left: 20px; margin-top: 10px;">
+          {{#if this.replies}}
+            {{#each this.replies}}
+              <div class="reply" data-reply-id="{{this._id}}">
+                <p><strong>{{this.username}}</strong> <span class="reply-date">{{this.createdAt}}</span></p>
+                <p>{{this.text}}</p>
+              </div>
+            {{/each}}
+          {{/if}}
+        </div>
+        
+        <!-- Reply Form (hidden by default) -->
+        {{#if ../user}}
+          <div class="reply-form-container" data-comment-id="{{this._id}}" style="display: none; margin-left: 20px; margin-top: 10px;">
+            <textarea class="reply-text" rows="3" cols="40" placeholder="Write your reply..."></textarea>
+            <br>
+            <button class="submit-reply-btn" data-comment-id="{{this._id}}">Submit Reply</button>
+            <button class="cancel-reply-btn" data-comment-id="{{this._id}}">Cancel</button>
+          </div>
         {{/if}}
       </div>
     {{/each}}
