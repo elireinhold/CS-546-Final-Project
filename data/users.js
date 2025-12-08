@@ -13,6 +13,8 @@ export async function register(
   email,
   birthday
 ) {
+  // User input validation. Creates new user and adds them to database. Returns { registrationCompleted: true }
+
   /* Input Validation */
   //Required Inputs
   if (!firstName) {
@@ -64,7 +66,25 @@ export async function register(
   return { registrationCompleted: true };
 }
 
-export async function login(userName, password) {}
+export async function login(userName, password) {
+  userName = await helpers.validUserNameLogin(userName);
+  password = helpers.validPassword(password);
+
+  const usersCollection = await users();
+  const lowerUserName = userName.toLowerCase();
+  const user = await usersCollection.findOne({ username: lowerUserName });
+  if (user === null) {
+    throw "Error: Either the userId or password is invalid.";
+  }
+
+  const storedHashedPassword = user.password;
+  const compareToMatch = await bcrypt.compare(password, storedHashedPassword);
+  if (!compareToMatch) {
+    throw "Error: Either the userId or password is invalid.";
+  }
+
+  return user;
+}
 
 // Helper: convert string to ObjectId
 function toObjectId(id) {

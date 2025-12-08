@@ -57,6 +57,7 @@ const exportedMethods = {
     return lowerUserName;
   },
   async validUserNameLogin(userName) {
+    // Checks userName is in a valid format.
     if (!userName) {
       throw "Error: Must provide userName.";
     }
@@ -181,6 +182,7 @@ const exportedMethods = {
     return id;
   },
   validDate(dateString) {
+    //Validates date is in YYYY-MM-DD format and is a real date
     if (!dateString) {
       throw "Error: Must provide date.";
     }
