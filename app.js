@@ -18,7 +18,7 @@ app.use(
     name: settings.session.cookieName,
     secret: settings.session.secret,
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
   })
 );
 
@@ -33,8 +33,8 @@ const hbs = handlebars.create({
       if (!arr) return false;
       if (!Array.isArray(arr)) return arr === value;
       return arr.includes(value);
-    }
-  }
+    },
+  },
 });
 
 app.engine("handlebars", hbs.engine);
@@ -47,6 +47,6 @@ app.use("/public", express.static("public"));
 configRoutes(app);
 
 // Server
-app.listen(settings.server.port, () => {
-  console.log(`Server running at http://localhost:${settings.server.port}`);
+app.listen(3000, () => {
+  console.log("Server running at http://localhost:3000");
 });
