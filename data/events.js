@@ -133,3 +133,50 @@ export async function getDistinctBoroughs() {
 
   return boroughs.filter(b => b && b.trim());
 }
+
+// Add comment to event
+export async function addComment(eventId, userId, username, commentText) {
+  if (!ObjectId.isValid(eventId)) throw "Invalid event ID";
+  if (!ObjectId.isValid(userId)) throw "Invalid user ID";
+  if (!commentText || !commentText.trim()) throw "Comment text is required";
+
+  const eventCollection = await events();
+  const comment = {
+    _id: new ObjectId(),
+    userId: new ObjectId(userId),
+    username: username,
+    text: commentText.trim(),
+    createdAt: new Date()
+  };
+
+  const result = await eventCollection.updateOne(
+    { _id: new ObjectId(eventId) },
+    { $push: { comments: comment } }
+  );
+
+  if (result.matchedCount === 0) throw "Event not found";
+  return comment;
+}
+
+// Delete comment from event
+export async function deleteComment(eventId, commentId, userId) {
+  if (!ObjectId.isValid(eventId)) throw "Invalid event ID";
+  if (!ObjectId.isValid(commentId)) throw "Invalid comment ID";
+  if (!ObjectId.isValid(userId)) throw "Invalid user ID";
+
+  const eventCollection = await events();
+  const event = await eventCollection.findOne({ _id: new ObjectId(eventId) });
+  if (!event) throw "Event not found";
+
+  const comment = event.comments.find(c => c._id.toString() === commentId);
+  if (!comment) throw "Comment not found";
+  if (comment.userId.toString() !== userId) throw "You can only delete your own comments";
+
+  const result = await eventCollection.updateOne(
+    { _id: new ObjectId(eventId) },
+    { $pull: { comments: { _id: new ObjectId(commentId) } } }
+  );
+
+  if (result.modifiedCount === 0) throw "Failed to delete comment";
+  return { deleted: true };
+}

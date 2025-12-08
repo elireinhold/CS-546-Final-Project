@@ -34,7 +34,14 @@ const hbs = handlebars.create({
       if (!Array.isArray(arr)) return arr === value;
       return arr.includes(value);
     },
-  },
+    toString(value) {
+      if (!value) return "";
+      return value.toString();
+    },
+    eq(a, b) {
+      return String(a) === String(b);
+    }
+  }
 });
 
 app.engine("handlebars", hbs.engine);
