@@ -9,6 +9,7 @@ async function getUsers() {
 
 const exportedMethods = {
   validFirstOrLastName(name) {
+    //Validates first and last name format (all letters, 2 < name.length < 20). Returns with trimmed name.
     if (typeof name !== "string") {
       throw "Error: Name must be a string.";
     }
@@ -26,6 +27,7 @@ const exportedMethods = {
     return name;
   },
   async validUserNameRegister(userName) {
+    // Validates userName format. (5 < userName.length < 10, alphanumeric, ) Checks if userName is already being used. Returns userName.trim().toLowerCase()
     if (!userName) {
       throw "Error: Must provide userName.";
     }
@@ -52,7 +54,7 @@ const exportedMethods = {
         throw "Error: Username already exists. Please choose a different Username.";
       }
     }
-    return userName;
+    return lowerUserName;
   },
   async validUserNameLogin(userName) {
     if (!userName) {
@@ -75,6 +77,7 @@ const exportedMethods = {
     return userName;
   },
   validPassword(password) {
+    // Validates password. ( 8 < password.length, >= 1 uppercase, digit, special character). Returns trimmed password.
     if (!password) {
       throw "Error: Must provide password.";
     }
@@ -96,6 +99,7 @@ const exportedMethods = {
     return password;
   },
   validBorough(borough) {
+    // Validate borough format. borough. Return borough with capital first letter
     if (typeof borough !== "string") {
       throw "Error: Borough must be a string.";
     }
@@ -118,6 +122,7 @@ const exportedMethods = {
     }
   },
   validEmail(email) {
+    //Validates that email is proper format.
     if (!email) {
       throw "Error: Must provide email.";
     }
@@ -135,10 +140,34 @@ const exportedMethods = {
     return email;
   },
   validEventType(eventType) {
+    //Validates that event type is one of the categories from the NYC dataset. CASE-SENSITIVE. Returns trimmed event type.
     if (typeof eventType !== "string") {
       throw "Error: Event type must be a string.";
     }
     eventType = eventType.trim();
+
+    const eventTypes = [
+      "Special Event",
+      "Sport - Adult",
+      "Sport - Youth",
+      "Production Event",
+      "Open Street Partner Event",
+      "Plaza Partner Event",
+      "Street Event",
+      "Religious Event",
+      "Farmers Market",
+      "Sidewalk Sale",
+      "Theater Load in and Load Outs",
+      "Parade",
+      "Miscellaneous",
+      "Plaza Event",
+      "Block Party",
+      "Clean-Up",
+    ];
+
+    if (!eventTypes.includes(eventType)) {
+      throw "Error: Event type must be valid. The valid event types are: 'Special Event', 'Sport - Adult', 'Sport - Youth', 'Production Event','Open Street Partner Event', 'Plaza Partner Event','Street Event','Religious Event','Farmers Market','Sidewalk Sale','Theater Load in and Load Outs','Parade','Miscellaneous','Plaza Event','Block Party','Clean-Up'";
+    }
     return eventType;
   },
   checkId(id) {
@@ -210,6 +239,7 @@ const exportedMethods = {
     return birthday;
   },
   validCommunityBoard(communityBoard) {
+    // Validates that communityBoard can be turned into a positve integer. Retuns communityBoard.trim()
     const trimmed = communityBoard.trim();
     const num = parseInt(trimmed);
 
@@ -220,7 +250,6 @@ const exportedMethods = {
     if (num < 1 || !Number.isInteger(num)) {
       throw "Error: Community board must be a positive integer.";
     }
-
     return trimmed;
   },
 };

@@ -1,5 +1,70 @@
 import { ObjectId } from "mongodb";
 import { users } from "../config/mongoCollections.js";
+import helpers from "../helpers/userHelpers.js";
+import bcrypt from "bcrypt";
+
+export async function register(
+  userName,
+  firstName,
+  lastName,
+  password,
+  borough,
+  preferedEvent,
+  email,
+  birthday
+) {
+  /* Input Validation */
+  //Required Inputs
+  if (!firstName) {
+    throw "Error: Must provide first name.";
+  }
+  if (!lastName) {
+    throw "Error: must provide last name.";
+  }
+  userName = await helpers.validUserNameRegister(userName);
+  firstName = helpers.validFirstOrLastName(firstName);
+  lastName = helpers.validFirstOrLastName(lastName);
+  password = helpers.validPassword(password);
+  email = helpers.validEmail(email);
+  birthday = helpers.validAge(birthday);
+
+  //Optional Inputs
+  if (!borough) {
+    borough = null;
+  } else {
+    borough = helpers.validBorough(borough);
+  }
+  if (!preferedEvent) {
+    preferedEvent = null;
+  } else {
+    preferedEvent = helpers.validEventType(preferedEvent);
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const newUser = {
+    username: userName,
+    email: email,
+    password: hashedPassword,
+    firstName: firstName,
+    lastName: lastName,
+    homeBorough: borough,
+    favoriteEventTypes: [preferedEvent],
+    birthday: birthday,
+    savedEvents: [],
+    publicEvents: [],
+    personalEvents: [],
+  };
+
+  const usersCollection = await users();
+  const insertInfo = await usersCollection.insertOne(newUser);
+  if (!insertInfo.acknowledged || !insertInfo.insertedId) {
+    throw "Error: Could not add user.";
+  }
+  return { registrationCompleted: true };
+}
+
+export async function login(userName, password) {}
 
 // -------------------------------
 // Helper: Convert string → ObjectId
@@ -57,7 +122,7 @@ export async function countUsersWhoSaved(eventId) {
   const userCollection = await users();
 
   return await userCollection.countDocuments({
-    savedEvents: toObjectId(eventId)
+    savedEvents: toObjectId(eventId),
   });
 }
 
@@ -69,7 +134,7 @@ export async function countUsersWhoSavedMany(eventIds) {
   const userCollection = await users();
 
   // Convert to ObjectId list
-  const objIds = eventIds.map(id => toObjectId(id));
+  const objIds = eventIds.map((id) => toObjectId(id));
 
   // One MongoDB aggregation (fast)
   const pipeline = [
@@ -79,9 +144,9 @@ export async function countUsersWhoSavedMany(eventIds) {
     {
       $group: {
         _id: "$savedEvents",
-        count: { $sum: 1 }
-      }
-    }
+        count: { $sum: 1 },
+      },
+    },
   ];
 
   const results = await userCollection.aggregate(pipeline).toArray();
@@ -99,3 +164,12 @@ export async function countUsersWhoSavedMany(eventIds) {
 
   return countMap;
 }
+
+const exportedMethods = {
+  register,
+  login,
+  saveEvent,
+  unsaveEvent,
+  countUsersWhoSaved,
+  countUsersWhoSavedMany,
+};
