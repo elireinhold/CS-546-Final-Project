@@ -22,6 +22,12 @@ app.use(
   })
 );
 
+// Session Middleware
+app.use((req,res,next) => {
+  res.locals.session = req.session;
+  next();
+}); // inserts session into every view
+
 // Handlebars setup (+ contains helper)
 const hbs = handlebars.create({
   defaultLayout: "main",

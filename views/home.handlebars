@@ -1,5 +1,19 @@
 <h1>NYSee Now</h1>
 <div id="map"></div>
 
+{{#if session.user}}
+<h2>Hello {{session.user.username}}!</h2>
+
+<h3>Events you may like:</h3>
+
+<div>
+    <a href="/calendar">View Calendar</a>
+    <a href="/">Create New Event</a>
+    <a href="/">Find Your Next Event</a>
+    
+</div>
+
+{{/if}}
+
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="/public/js/homeMap.js"></script>
