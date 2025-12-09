@@ -91,6 +91,7 @@ CS-546-Final-Project/
 │   └── settings.js            # Session and app settings
 ├── data/                      # Data access layer
 │   ├── events.js              # Events (search, comments, save counts)
+│   ├── map.js
 │   ├── users.js               # Users (auth, save/unsave helpers)
 │   └── savedEvents.js         # Saved events store
 ├── helpers/                   # Validation & utility helpers
@@ -108,14 +109,15 @@ CS-546-Final-Project/
 ├── views/                     # Handlebars templates
 │   ├── layouts/
 │       └── main.handlebars
+│   ├── users/
+│       ├── login.handlebars
+│       └── register.handlebars
 │   ├── calendar.handlebars
 │   ├── createEvent.handlebars
 │   ├── createEventSuccess.handlebars
 │   ├── eventDetails.handlebars
 │   ├── home.handlebars
-│   ├── login.handlebars
 │   ├── logout.handlebars
-│   ├── register.handlebars
 │   └── search.handlebars
 └── public/                    # Static assets
     ├── css/main.css
@@ -123,7 +125,7 @@ CS-546-Final-Project/
         ├── client.js
         ├── eventDetails.js    # Save/unsave, comments/replies
         ├── calendar.js
-        ├── homeMap.js
+        ├── map.js
         └── search.js
 ```
 
