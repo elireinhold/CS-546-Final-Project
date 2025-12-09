@@ -84,11 +84,36 @@ const exportedMethods = {
   },
   // Validate Event Location: Eli To Do
   validLocation(eventLocation) {
+    if (!eventLocation || !(eventLocation.trim())) {
+      throw "Error: Must provide an event location.";
+    }
+    if (typeof eventLocation !== "string") {
+      throw "Error: eventLocation must be a string.";
+    }
+    eventLocation = eventLocation.trim()
     return eventLocation;
   },
   // Validate event coordinayes: Eli To Do
+  // input coordinate array
   validCoordinates(coordinates) {
-    return coordinates;
+    if (!Array.isArray(arr) || arr.length !== 2) {
+      throw "Error: Input must be an array of two numbers: [longitude, latitude]";
+    }
+    const [lng, lat] = arr;
+    if (typeof lng !== "number" || typeof lat !== "number") {
+      throw "Error: Both values in the array must be numbers";
+    }
+    if (lng < -180 || lng > 180) {
+      throw "Error: Longitude must be between -180 and 180";
+    }
+    if (lat < -90 || lat > 90) {
+      throw "Error: Latitude must be between -90 and 90";
+    }
+    // Format for Geospace search
+    return {
+      type: "Point",
+      coordinates: [lng, lat]
+    };
   },
   // Validate mongoDB _id field
   checkId(id) {
