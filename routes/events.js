@@ -5,7 +5,8 @@ import {
   getDistinctBoroughs,
   getEventById,
   addComment,
-  deleteComment
+  deleteComment,
+  getAllEvents
 } from "../data/events.js";
 
 import { 
@@ -19,6 +20,15 @@ import {
 import { requireLogin } from "../middleware.js";
 
 const router = Router();
+
+router.get("/", async (req, res) => {
+  try {
+    const eventsArray = await getAllEvents();
+    res.json(eventsArray);
+  } catch (e) {
+    res.status(500).json({ error: e.toString() });
+  }
+});
 
 // Search events (multi-filter)
 router.get("/search", async (req, res) => {

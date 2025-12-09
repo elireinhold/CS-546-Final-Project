@@ -323,3 +323,9 @@ export async function getAllEventsByUser(userId) {
     eventId: event._id.toString(),
   }));
 }
+
+// Gets all events in database
+export async function getAllEvents() {
+  const eventCollection = await events();
+  return await eventCollection.find({}).toArray();
+}
