@@ -108,10 +108,15 @@ CS-546-Final-Project/
 ├── views/                     # Handlebars templates
 │   ├── layouts/
 │       └── main.handlebars
-│   ├── home.handlebars
-│   ├── search.handlebars
+│   ├── calendar.handlebars
+│   ├── createEvent.handlebars
+│   ├── createEventSuccess.handlebars
 │   ├── eventDetails.handlebars
-│   └── calendar.handlebars
+│   ├── home.handlebars
+│   ├── login.handlebars
+│   ├── logout.handlebars
+│   ├── register.handlebars
+│   └── search.handlebars
 └── public/                    # Static assets
     ├── css/main.css
     └── js/
