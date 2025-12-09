@@ -4,7 +4,7 @@ import session from "express-session";
 import cookieParser from "cookie-parser";
 import configRoutes from "./routes/index.js";
 import { settings } from "./config/settings.js";
-// import configMiddleware from './middleware.js';
+import { requireLogin, attachUser, redirectIfLoggedIn, requestLogger } from './middleware.js';
 
 const app = express();
 
@@ -25,9 +25,12 @@ app.use(
 app.use((req,res,next) => {
   res.locals.session = req.session;
   next();
-}); // inserts session into every view
+}); 
 
-// Handlebars setup (+ contains helper)
+app.use(attachUser);
+
+app.use(requestLogger);
+
 const hbs = exphbs.create({
   defaultLayout: "main",
   helpers: {
@@ -52,13 +55,13 @@ const hbs = exphbs.create({
   }
 });
 
-// ⭐ REGISTER YOUR ENGINE HERE
 app.engine("handlebars", hbs.engine);
 app.set("view engine", "handlebars");
 
 app.use("/public", express.static("public"));
 
-// configMiddleware(app);
+app.use("/users/login", redirectIfLoggedIn);
+app.use("/users/register", redirectIfLoggedIn);
 
 configRoutes(app);
 
