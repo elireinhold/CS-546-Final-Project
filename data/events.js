@@ -212,18 +212,6 @@ export async function userCreateEvent(
   return { registrationCompleted: true };
 }
 
-const exportedMethods = {
-  normalizeNYCEvent,
-  insertManyNYCEvents,
-  getEventById,
-  searchEvents,
-  getDistinctEventTypes,
-  getDistinctBoroughs,
-  userCreateEvent,
-};
-
-export default exportedMethods;
-
 // Add comment or reply to event (parentId is null for top-level comments)
 export async function addComment(
   eventId,
@@ -329,3 +317,19 @@ export async function getAllEvents() {
   const eventCollection = await events();
   return await eventCollection.find({}).toArray();
 }
+
+const exportedMethods = {
+  normalizeNYCEvent,
+  insertManyNYCEvents,
+  getEventById,
+  searchEvents,
+  getDistinctEventTypes,
+  getDistinctBoroughs,
+  userCreateEvent,
+  addComment,
+  deleteComment,
+  getAllEventsByUser,
+  getAllEvents,
+};
+
+export default exportedMethods;
