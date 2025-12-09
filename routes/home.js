@@ -8,6 +8,7 @@ router.get("/", async (req, res) => {
   try {
     let recommended = [];
     let savedEventCount = 0;
+    let events = [];
 
      
     if (req.session.user) {
