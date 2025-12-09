@@ -21,28 +21,33 @@ app.use(
   })
 );
 
-app.engine(
-  "handlebars",
-  exphbs.engine({
-    defaultLayout: "main",
-    helpers: {
-      ifEquals(a, b, options) {
-        return a === b ? options.fn(this) : options.inverse(this);
-      },
-      contains(arr, value) {
-        if (!arr) return false;
-        if (!Array.isArray(arr)) return arr === value;
-        return arr.includes(value);
-      },
-      toString(value) {
-        return value ? value.toString() : "";
-      },
-      eq(a, b) {
-        return String(a) === String(b);
-      },
-      json(data) {
-        return JSON.stringify(data);
-      }
+// Session Middleware
+app.use((req,res,next) => {
+  res.locals.session = req.session;
+  next();
+}); // inserts session into every view
+
+// Handlebars setup (+ contains helper)
+const hbs = handlebars.create({
+  defaultLayout: "main",
+  helpers: {
+    ifEquals(a, b, options) {
+      return a === b ? options.fn(this) : options.inverse(this);
+    },
+    contains(arr, value) {
+      if (!arr) return false;
+      if (!Array.isArray(arr)) return arr === value;
+      return arr.includes(value);
+    },
+    toString(value) {
+      if (!value) return "";
+      return value.toString();
+    },
+    eq(a, b) {
+      return String(a) === String(b);
+    },
+    json(data) {
+      return JSON.stringify(data);
     }
   })
 );
