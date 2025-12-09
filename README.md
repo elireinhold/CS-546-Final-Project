@@ -83,15 +83,18 @@ All event data is stored in MongoDB, and NYC data is synchronized through script
 CS-546-Final-Project/
 ├── app.js                     # Main entry
 ├── package.json
+├── middleware.js
+├── README.md
 ├── config/
 │   ├── mongoConnection.js     # MongoDB connection
+│   ├── mongoCollections.js
 │   └── settings.js            # Session and app settings
 ├── data/                      # Data access layer
 │   ├── events.js              # Events (search, comments, save counts)
 │   ├── users.js               # Users (auth, save/unsave helpers)
 │   └── savedEvents.js         # Saved events store
 ├── helpers/                   # Validation & utility helpers
-│   └── userHelpers.js
+│   ├── userHelpers.js
 │   └── eventHelpers.js
 ├── routes/                    # Route handlers
 │   ├── index.js               # Route configuration
@@ -103,7 +106,8 @@ CS-546-Final-Project/
 │   ├── seedNYCEvents.js       # Seed NYC data
 │   └── updateNYCEvents.js     # Update NYC data
 ├── views/                     # Handlebars templates
-│   ├── layouts/main.handlebars
+│   ├── layouts/
+│       └── main.handlebars
 │   ├── home.handlebars
 │   ├── search.handlebars
 │   ├── eventDetails.handlebars
@@ -113,6 +117,8 @@ CS-546-Final-Project/
     └── js/
         ├── client.js
         ├── eventDetails.js    # Save/unsave, comments/replies
+        ├── calendar.js
+        ├── homeMap.js
         └── search.js
 ```
 
