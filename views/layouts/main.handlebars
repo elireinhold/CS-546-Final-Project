@@ -3,22 +3,15 @@
 <head>
     <meta charset="UTF-8" />
     <title>NYSee Now</title>
-
-    <!-- CSS -->
     <link rel="stylesheet" href="/public/css/main.css">
-
     <!-- FOR MAP -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 </head>
-
 <body>
-
-    <!-- Navigation bar (optional, you can hide later) -->
     <header>
         <nav>
             <a href="/">Home</a>
             <a href="/events/search">Search Events</a>
-
             {{#if user}}
                 <span>Welcome, {{user.username}}</span>
                 <a href="/users/logout">Logout</a>
@@ -29,14 +22,9 @@
         </nav>
         <hr>
     </header>
-
-    <!-- Main content -->
     <main>
         {{{body}}}
     </main>
-
-    <!-- JS: Must load after HTML -->
     <script src="/public/js/client.js"></script>
-
 </body>
 </html>
