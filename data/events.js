@@ -21,9 +21,8 @@ export function normalizeNYCEvent(rawEvent) {
     eventSource: "NYC",
     eventType: rawEvent.event_type || null,
     eventBorough: rawEvent.event_borough || null,
-    eventLocation: rawEvent.location || rawEvent.site_location || null,
-    eventStreetSide:
-      rawEvent.street_side || rawEvent.street_side_description || null,
+    eventLocation: rawEvent.event_location || rawEvent.site_location || null,
+    eventStreetSide: rawEvent.street_side || rawEvent.street_side_description || null,
     streetClosureType: rawEvent.street_closure_type || null,
     communityBoard: rawEvent.community_board || null,
     coordinates: rawEvent.coordinates || null,
