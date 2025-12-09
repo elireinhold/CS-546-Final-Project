@@ -4,7 +4,7 @@ import session from "express-session";
 import cookieParser from "cookie-parser";
 import configRoutes from "./routes/index.js";
 import { settings } from "./config/settings.js";
-import configMiddleware from './middleware.js';
+// import configMiddleware from './middleware.js';
 
 const app = express();
 
@@ -51,7 +51,7 @@ app.set("view engine", "handlebars");
 
 app.use("/public", express.static("public"));
 
-configMiddleware(app);
+// configMiddleware(app);
 
 configRoutes(app);
 

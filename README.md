@@ -92,6 +92,7 @@ CS-546-Final-Project/
 │   └── savedEvents.js         # Saved events store
 ├── helpers/                   # Validation & utility helpers
 │   └── userHelpers.js
+│   └── eventHelpers.js
 ├── routes/                    # Route handlers
 │   ├── index.js               # Route configuration
 │   ├── events.js              # Event search/details/save/comments
