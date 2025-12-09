@@ -174,7 +174,7 @@ npm run updateNYC
 
 ## Main Routes
 
-- `GET /` - Home page
+- GET `/` - Home page
 - GET `/search` - Event search page
 - GET `/calendar` - Personal calendar page
 - GET `/event/:id` - Event details page
