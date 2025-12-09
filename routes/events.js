@@ -85,7 +85,7 @@ router.get("/search", async (req, res) => {
       results,
       eventTypes,
       boroughs,
-      currentUrl: req.originalUrl // ⭐ returnTo
+      currentUrl: req.originalUrl 
     });
 
   } catch (e) {

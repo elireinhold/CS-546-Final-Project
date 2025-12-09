@@ -21,7 +21,7 @@ const constructorMethod = (app) => {
   
 
 
-  //don't delete this, it's a fakeid for testing save/unsave function
+  //don't delete this, it's a fakeid for temporary testing purposes
   app.get("/testlogin", (req, res) => {
     req.session.user = {
       _id: "6935b41a74e0dabcb657159b",
@@ -31,20 +31,6 @@ const constructorMethod = (app) => {
     res.send("Logged in as test user: ru_test");
   });
 
-
-  // Fake login for user 2 (second tester)
-  app.get("/testlogin2", (req, res) => {
-    req.session.user = {
-      _id: "6935b41a74e0dabcb657159c",
-      username: "another_user"
-    };
-    res.send("Logged in as another_user");
-  });
-
-  
-  app.use("*", (req, res) => {
-    res.status(404).send("Page Not Found");
-  });
 };
 
 export default constructorMethod;

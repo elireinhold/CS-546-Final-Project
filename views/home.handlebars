@@ -1,4 +1,5 @@
 <h1>NYSee Now</h1>
+
 <div id="map"></div>
 
 {{#if session.user}}
@@ -17,3 +18,22 @@
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="/public/js/homeMap.js"></script>
+{{#if user}}
+  <h2>Events you may like:</h2>
+
+  {{#if recommendedEvents.length}}
+    <ul>
+      {{#each recommendedEvents}}
+        <li>
+          <a href="/events/{{this._id}}">{{this.eventName}}</a>
+          — {{this.eventBorough}} — {{this.eventType}}
+        </li>
+      {{/each}}
+    </ul>
+  {{else}}
+    <p>No recommendations yet. Save more events!</p>
+  {{/if}}
+{{else}}
+  <p>Login to get personalized recommendations!</p>
+{{/if}}
+

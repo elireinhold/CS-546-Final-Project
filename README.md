@@ -13,7 +13,7 @@ NYSee Now is a New York City event browsing and personal calendar application. U
 **Open Dataset:**  
 https://data.cityofnewyork.us/City-Government/NYC-Permitted-Event-Information/tvpp-9vvx/about_data
 
-This project uses daily-updated NYC Open Data. All event data is stored in MongoDB, and NYC data is synchronized through scripts in the `/scripts` directory.
+All event data is stored in MongoDB, and NYC data is synchronized through scripts in the `/scripts` directory.
 
 ---
 
@@ -24,9 +24,9 @@ This project uses daily-updated NYC Open Data. All event data is stored in Mongo
 - Click on a day in the calendar to view all events happening on that day
 
 ### 2. Event Search and Filtering
-- Search events by name, type, and borough
-- Filter functionality: filter by event type and borough
-- Display event type, location, borough, and name for each event
+- Search events by name
+- Filter functionality: filter by event type, borough and time
+- Display event name, type, borough and time.
 - Show whether you have saved the event
 - Display how many other users have saved the event
 
@@ -77,49 +77,54 @@ This project uses daily-updated NYC Open Data. All event data is stored in Mongo
 
 ---
 
-## Tech Stack
-
-- **Backend Framework:** Express.js
-- **Template Engine:** Handlebars
-- **Database:** MongoDB
-- **Session Management:** express-session
-- **Password Encryption:** bcryptjs
-- **Runtime:** Node.js (ES Modules)
-
----
-
 ## Project Structure
 
 ```
 CS-546-Final-Project/
-├── app.js                 # Main application entry point
-├── package.json           # Project dependencies configuration
+├── app.js                     # Main entry
+├── package.json
+├── middleware.js
+├── README.md
 ├── config/
-│   └── mongoConnection.js # MongoDB connection configuration
-├── data/                  # Data access layer
-│   ├── events.js         # Event data operations
-│   ├── savedEvents.js    # Saved event data operations
-│   └── users.js          # User data operations
-├── routes/                # Route handlers
-│   ├── index.js          # Route configuration
-│   ├── events.js         # Event-related routes
-│   ├── home.js           # Home page routes
-│   └── users.js          # User-related routes
-├── scripts/               # Data synchronization scripts
-│   ├── seedNYCEvents.js  # Initialize NYC event data
-│   └── updateNYCEvents.js # Update NYC event data
-├── views/                 # Handlebars templates
+│   ├── mongoConnection.js     # MongoDB connection
+│   ├── mongoCollections.js
+│   └── settings.js            # Session and app settings
+├── data/                      # Data access layer
+│   ├── events.js              # Events (search, comments, save counts)
+│   ├── users.js               # Users (auth, save/unsave helpers)
+│   └── savedEvents.js         # Saved events store
+├── helpers/                   # Validation & utility helpers
+│   ├── userHelpers.js
+│   └── eventHelpers.js
+├── routes/                    # Route handlers
+│   ├── index.js               # Route configuration
+│   ├── events.js              # Event search/details/save/comments
+│   ├── home.js                # Home
+│   ├── calendar.js            # Calendar view
+│   └── users.js               # Auth routes
+├── scripts/                   # Data sync
+│   ├── seedNYCEvents.js       # Seed NYC data
+│   └── updateNYCEvents.js     # Update NYC data
+├── views/                     # Handlebars templates
 │   ├── layouts/
-│   │   └── main.handlebars # Main layout template
-│   ├── calendar.handlebars # Calendar page
-│   ├── eventDetails.handlebars # Event details page
-│   ├── home.handlebars   # Home page
-│   └── search.handlebars # Search page
-└── public/                # Static assets
-    ├── css/
-    │   └── main.css      # Main stylesheet
+│       └── main.handlebars
+│   ├── calendar.handlebars
+│   ├── createEvent.handlebars
+│   ├── createEventSuccess.handlebars
+│   ├── eventDetails.handlebars
+│   ├── home.handlebars
+│   ├── login.handlebars
+│   ├── logout.handlebars
+│   ├── register.handlebars
+│   └── search.handlebars
+└── public/                    # Static assets
+    ├── css/main.css
     └── js/
-        └── client.js     # Client-side JavaScript
+        ├── client.js
+        ├── eventDetails.js    # Save/unsave, comments/replies
+        ├── calendar.js
+        ├── homeMap.js
+        └── search.js
 ```
 
 ---
@@ -144,21 +149,17 @@ CS-546-Final-Project/
    npm install
    ```
 
-3. **Configure MongoDB connection**
-   - Edit the `config/mongoConnection.js` file
-   - Set your MongoDB connection string
-
-4. **Initialize data (optional)**
+3. **Initialize data (optional)**
    ```bash
-   node scripts/seedNYCEvents.js
+   npm run seed
    ```
 
-5. **Start the server**
+4. **Start the server**
    ```bash
    npm start
    ```
 
-6. **Access the application**
+5. **Access the application**
    - Open your browser and navigate to: http://localhost:3000
 
 ### Updating NYC Event Data
@@ -166,7 +167,7 @@ CS-546-Final-Project/
 Run the update script periodically to sync the latest NYC event data:
 
 ```bash
-node scripts/updateNYCEvents.js
+npm run updateNYC
 ```
 
 ---
@@ -174,25 +175,13 @@ node scripts/updateNYCEvents.js
 ## Main Routes
 
 - `GET /` - Home page
-- `GET /search` - Event search page
-- `GET /calendar` - Personal calendar page
-- `GET /event/:id` - Event details page
-- `GET /map` - Map view page
-- `GET /profile` - User profile page
+- GET `/search` - Event search page
+- GET `/calendar` - Personal calendar page
+- GET `/event/:id` - Event details page
+- GET `/map` - Map view page
+- GET `/profile` - User profile page
 
 (For specific route implementations, refer to files in the `routes/` directory)
-
----
-
-## Development Notes
-
-This project uses ES Modules (ESM) syntax. All imports use `import/export` instead of `require/module.exports`.
-
----
-
-## License
-
-ISC
 
 ---
 

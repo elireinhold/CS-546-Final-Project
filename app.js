@@ -1,18 +1,17 @@
 import express from "express";
-import handlebars from "express-handlebars";
+import exphbs from "express-handlebars";
 import session from "express-session";
 import cookieParser from "cookie-parser";
 import configRoutes from "./routes/index.js";
 import { settings } from "./config/settings.js";
+// import configMiddleware from './middleware.js';
 
 const app = express();
 
-// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Session
 app.use(
   session({
     name: settings.session.cookieName,
@@ -50,19 +49,17 @@ const hbs = handlebars.create({
     json(data) {
       return JSON.stringify(data);
     }
-  }
-});
+  })
+);
 
-app.engine("handlebars", hbs.engine);
 app.set("view engine", "handlebars");
 
-// Static folder
 app.use("/public", express.static("public"));
 
-// Load routes
+// configMiddleware(app);
+
 configRoutes(app);
 
-// Server
 app.listen(3000, () => {
   console.log("Server running at http://localhost:3000");
 });
