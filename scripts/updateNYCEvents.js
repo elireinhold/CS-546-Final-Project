@@ -6,14 +6,11 @@ import { settings } from "../config/settings.js";
 const NYC_API_URL = `${settings.nycApi.baseUrl}?$limit=${settings.nycApi.limit}`;
 
 async function updateNYCEvents() {
-  console.log("Connecting to database...");
   const db = await dbConnection();
   const eventCollection = db.collection("events");
 
-  console.log("Fetching latest NYC events...");
   const response = await fetch(NYC_API_URL);
   const rawEvents = await response.json();
-  console.log(`Fetched ${rawEvents.length} NYC events.`);
 
   let updatedCount = 0;
   let insertedCount = 0;
@@ -32,9 +29,6 @@ async function updateNYCEvents() {
     if (result.upsertedCount > 0) insertedCount++;
   }
 
-  console.log(`NYC Events updated: ${updatedCount}`);
-  console.log(`NYC Events inserted: ${insertedCount}`);
-  console.log("Update completed!");
   
   process.exit(0);
 }
