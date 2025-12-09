@@ -1,5 +1,6 @@
 import { events } from "../config/mongoCollections.js";
 import { ObjectId } from "mongodb";
+import helpers from "../helpers/eventHelpers.js";
 
 // Normalize NYC data; borough abbreviations map
 const boroughMap = {
@@ -7,7 +8,7 @@ const boroughMap = {
   BX: "Bronx",
   BK: "Brooklyn",
   Q: "Queens",
-  SI: "Staten Island"
+  SI: "Staten Island",
 };
 
 export function normalizeNYCEvent(rawEvent) {
@@ -20,7 +21,8 @@ export function normalizeNYCEvent(rawEvent) {
     eventType: rawEvent.event_type || null,
     eventBorough: rawEvent.event_borough || null,
     eventLocation: rawEvent.location || rawEvent.site_location || null,
-    eventStreetSide: rawEvent.street_side || rawEvent.street_side_description || null,
+    eventStreetSide:
+      rawEvent.street_side || rawEvent.street_side_description || null,
     streetClosureType: rawEvent.street_closure_type || null,
     communityBoard: rawEvent.community_board || null,
     coordinates: rawEvent.coordinates || null,
@@ -30,7 +32,6 @@ export function normalizeNYCEvent(rawEvent) {
     comments: [],
   };
 }
-
 
 // Insert NYC events
 export async function insertManyNYCEvents(eventArray) {
@@ -43,13 +44,11 @@ export async function insertManyNYCEvents(eventArray) {
   return result.insertedCount;
 }
 
-
 // Clear NYC events
 export async function clearNYCEvents() {
   const eventCollection = await events();
   return await eventCollection.deleteMany({ eventSource: "NYC" });
 }
-
 
 // Get one event
 export async function getEventById(id) {
@@ -63,9 +62,14 @@ export async function getEventById(id) {
   return event;
 }
 
-
 // Search events with keyword/borough/type/date range
-export async function searchEvents({ keyword, borough, eventType, startDate, endDate }) {
+export async function searchEvents({
+  keyword,
+  borough,
+  eventType,
+  startDate,
+  endDate,
+}) {
   const eventCollection = await events();
   const query = {};
 
@@ -75,12 +79,20 @@ export async function searchEvents({ keyword, borough, eventType, startDate, end
   }
 
   // Borough multi-select array
-  if (Array.isArray(borough) && borough.length > 0 && !borough.includes("all")) {
+  if (
+    Array.isArray(borough) &&
+    borough.length > 0 &&
+    !borough.includes("all")
+  ) {
     query.eventBorough = { $in: borough };
   }
 
   // EventType multi-select array
-  if (Array.isArray(eventType) && eventType.length > 0 && !eventType.includes("all")) {
+  if (
+    Array.isArray(eventType) &&
+    eventType.length > 0 &&
+    !eventType.includes("all")
+  ) {
     query.eventType = { $in: eventType };
   }
 
@@ -91,8 +103,8 @@ export async function searchEvents({ keyword, borough, eventType, startDate, end
       input: "$startDateTime",
       to: "date",
       onError: null,
-      onNull: null
-    }
+      onNull: null,
+    },
   };
 
   if (startDate) {
@@ -123,7 +135,7 @@ export async function getDistinctEventTypes() {
   const types = await eventCollection.distinct("eventType");
 
   // Remove null / empty / undefined values
-  return types.filter(t => t && t.trim());
+  return types.filter((t) => t && t.trim());
 }
 
 // Get distinct boroughs
@@ -131,5 +143,83 @@ export async function getDistinctBoroughs() {
   const eventCollection = await events();
   const boroughs = await eventCollection.distinct("eventBorough");
 
-  return boroughs.filter(b => b && b.trim());
+  return boroughs.filter((b) => b && b.trim());
 }
+
+// Called when user submits a create event form. Validates input, creates event, and adds it to the database.
+export async function userCreateEvent(
+  id, //mongoDB _id of user who created the event
+  eventName,
+  eventType,
+  eventLocation,
+  eventBorough,
+  startDateTime,
+  endDateTime,
+  streetClosureType,
+  communityBoard,
+  isPublic
+) {
+  // Optional Fields
+  if (!streetClosureType) {
+    streetClosureType = null;
+  } else {
+    streetClosureType = helpers.validStreetClosure(streetClosureType);
+  }
+
+  if (!communityBoard) {
+    communityBoard = null;
+  } else {
+    communityBoard = helpers.validCommunityBoard(communityBoard);
+  }
+
+  //Required input validation
+  eventName = helpers.validEventName(eventName);
+  eventType = helpers.validEventType(eventType);
+  eventLocation = helpers.validLocation(eventLocation);
+  eventBorough = helpers.validBorough(eventBorough);
+  isPublic = helpers.validPublicity(isPublic);
+  id = await helpers.validUserId(id);
+
+  startDateTime = helpers.validDateTime(startDateTime);
+  endDateTime = helpers.validDateTime(endDateTime);
+  helpers.validStartEndTimeDate(startDateTime, endDateTime);
+
+  const newEvent = {
+    eventId: null,
+    eventName: eventName,
+    startDateTime: startDateTime,
+    endDateTime: endDateTime,
+    eventSource: `User Created: ${id}`,
+    eventType: eventType,
+    eventBorough: eventBorough,
+    eventLocation: eventLocation,
+    eventStreetSide: null,
+    streetClosureType: streetClosureType,
+    communityBoard: communityBoard,
+    coordinates: null,
+    userIdWhoCreatedEvent: id,
+    isPublic: isPublic,
+    createdAt: new Date(),
+    updatedAt: null,
+    comments: [],
+  };
+
+  const eventCollection = await events();
+  const insertInfo = await eventCollection.insertOne(newEvent);
+  if (!insertInfo.acknowledged || !insertInfo.insertedId) {
+    throw "Error: Could not add event.";
+  }
+  return { registrationCompleted: true };
+}
+
+const exportedMethods = {
+  normalizeNYCEvent,
+  insertManyNYCEvents,
+  getEventById,
+  searchEvents,
+  getDistinctEventTypes,
+  getDistinctBoroughs,
+  userCreateEvent,
+};
+
+export default exportedMethods;

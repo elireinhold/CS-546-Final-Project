@@ -180,3 +180,5 @@ const exportedMethods = {
   countUsersWhoSaved,
   countUsersWhoSavedMany,
 };
+
+export default exportedMethods;
