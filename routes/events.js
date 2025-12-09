@@ -1,45 +1,21 @@
 import { Router } from "express";
-import { 
-  searchEvents, 
-  getDistinctEventTypes, 
-  getDistinctBoroughs,
-  getEventById,
-  addComment,
-  deleteComment
-} from "../data/events.js";
-
-import { 
-  saveEvent, 
-  unsaveEvent, 
-  getSavedEvents,
-  countUsersWhoSaved,
-  countUsersWhoSavedMany
-} from "../data/users.js";
-
+import events from "../data/events.js";     
+import users from "../data/users.js";        
 import { requireLogin } from "../middleware.js";
-
-import { getEventWithCoordinates } from "../data/map.js"
+import { getEventWithCoordinates } from "../data/map.js";
 
 const router = Router();
 
-// Search events (multi-filter)
 router.get("/search", async (req, res) => {
   try {
     let { keyword, borough, eventType, startDate, endDate } = req.query;
 
-    // Always convert to arrays
-    if (!borough) borough = [];
-    else if (!Array.isArray(borough)) borough = [borough];
+    borough = Array.isArray(borough) ? borough : borough ? [borough] : [];
+    eventType = Array.isArray(eventType) ? eventType : eventType ? [eventType] : [];
 
-    if (!eventType) eventType = [];
-    else if (!Array.isArray(eventType)) eventType = [eventType];
+    const eventTypes = (await events.getDistinctEventTypes()).sort();
+    const boroughs = (await events.getDistinctBoroughs()).sort();
 
-    const eventTypes = await getDistinctEventTypes();
-    const boroughs = await getDistinctBoroughs();
-    eventTypes.sort();
-    boroughs.sort();
-
-    // Validate date range
     if (startDate && endDate && startDate > endDate) {
       return res.status(400).render("search", {
         keyword: keyword || "",
@@ -50,27 +26,26 @@ router.get("/search", async (req, res) => {
         results: [],
         eventTypes,
         boroughs,
+        error: "Start date cannot be after end date",
         currentUrl: req.originalUrl,
-        error: "Start date cannot be after end date"
       });
     }
 
-    const results = await searchEvents({
-      keyword,
+    const results = await events.searchEvents({
+      keyword: keyword || "",
       borough,
       eventType,
       startDate,
-      endDate
+      endDate,
     });
 
     let savedList = [];
     if (req.session.user) {
-      savedList = (await getSavedEvents(req.session.user._id))
-        .map(id => id.toString());
+      savedList = (await users.getSavedEvents(req.session.user._id)).map(id => id.toString());
     }
 
-    const eventIds = results.map(evt => evt._id.toString());
-    const countMap = await countUsersWhoSavedMany(eventIds);
+    const eventIds = results.map(e => e._id.toString());
+    const countMap = await users.countUsersWhoSavedMany(eventIds);
 
     results.forEach(evt => {
       const id = evt._id.toString();
@@ -87,7 +62,7 @@ router.get("/search", async (req, res) => {
       results,
       eventTypes,
       boroughs,
-      currentUrl: req.originalUrl 
+      currentUrl: req.originalUrl,
     });
 
   } catch (e) {
@@ -95,57 +70,51 @@ router.get("/search", async (req, res) => {
   }
 });
 
-// Save event
 router.post("/:id/save", requireLogin, async (req, res) => {
   try {
     const eventId = req.params.id;
-    await saveEvent(req.session.user._id, eventId);
+    await users.saveEvent(req.session.user._id, eventId);
 
-    const userCount = await countUsersWhoSaved(eventId);
-
-    return res.json({ saved: true, userCount });
+    const userCount = await users.countUsersWhoSaved(eventId);
+    res.json({ saved: true, userCount });
 
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
 
-// Unsave event
 router.post("/:id/unsave", requireLogin, async (req, res) => {
   try {
     const eventId = req.params.id;
-    await unsaveEvent(req.session.user._id, eventId);
+    await users.unsaveEvent(req.session.user._id, eventId);
 
-    const userCount = await countUsersWhoSaved(eventId);
-
-    return res.json({ saved: false, userCount });
+    const userCount = await users.countUsersWhoSaved(eventId);
+    res.json({ saved: false, userCount });
 
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
 
-// Event details
 router.get("/:id", async (req, res) => {
   try {
-    const event = await getEventById(req.params.id);
-    const events = await getEventWithCoordinates(req.params.id)
-    
+    const event = await events.getEventById(req.params.id);
+    const eventLocation = await getEventWithCoordinates(req.params.id);
+
     let saved = false;
     if (req.session.user) {
-      const savedList = await getSavedEvents(req.session.user._id);
+      const savedList = await users.getSavedEvents(req.session.user._id);
       saved = savedList.map(x => x.toString()).includes(req.params.id);
     }
 
-    const userCount = await countUsersWhoSaved(req.params.id);
+    const userCount = await users.countUsersWhoSaved(req.params.id);
 
     res.render("eventDetails", {
       event,
+      eventLocation,
       saved,
       userCount,
       returnTo: req.query.returnTo || "/events/search",
-      user: req.session.user || null,
-      events
     });
 
   } catch (e) {
@@ -153,43 +122,36 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// Add comment or reply to event (parentId optional for replies)
 router.post("/:id/comments", requireLogin, async (req, res) => {
   try {
-    const eventId = req.params.id;
     const { commentText, parentId } = req.body;
 
     if (!commentText || !commentText.trim()) {
       return res.status(400).json({ error: "Comment text is required" });
     }
 
-    const comment = await addComment(
-      eventId,
+    const comment = await events.addComment(
+      req.params.id,
       req.session.user._id,
       req.session.user.username,
       commentText,
       parentId || null
     );
 
-    return res.json({ success: true, comment });
+    res.json({ success: true, comment });
 
   } catch (e) {
-    res.status(400).json({ error: e.message || e });
+    res.status(400).json({ error: e.message });
   }
 });
 
-// Delete comment from event
 router.delete("/:id/comments/:commentId", requireLogin, async (req, res) => {
   try {
-    const eventId = req.params.id;
-    const commentId = req.params.commentId;
-
-    await deleteComment(eventId, commentId, req.session.user._id);
-
-    return res.json({ success: true, deleted: true });
+    await events.deleteComment(req.params.id, req.params.commentId, req.session.user._id);
+    res.json({ success: true });
 
   } catch (e) {
-    res.status(400).json({ error: e.message || e });
+    res.status(400).json({ error: e.message });
   }
 });
 
