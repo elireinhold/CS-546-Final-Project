@@ -1,14 +1,15 @@
 import { Router } from "express";
 import { getRecommendedEventsForUser } from "../data/events.js";
 import { getSavedEvents } from "../data/users.js";
-import { getAllSavedEventsWithCoordinates } from "../data/homeMap.js";
+import { getAllSavedEventsWithCoordinates } from "../data/map.js";
 const router = Router();
 
 router.get("/", async (req, res) => {
   try {
     let recommended = [];
     let savedEventCount = 0;
-     
+    let events = []
+
     if (req.session.user) {
       const userId = req.session.user._id;
       const savedEvents = await getSavedEvents(userId);
