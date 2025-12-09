@@ -1,5 +1,6 @@
 import { events } from "../config/mongoCollections.js";
 import { ObjectId } from "mongodb";
+import { users } from "../config/mongoCollections.js";
 
 async function getEvents() {
   const eventCollection = await events();
@@ -8,7 +9,7 @@ async function getEvents() {
 }
 
 const exportedMethods = {
-  //Validates that event type is one of the categories from the NYC dataset. CASE-SENSITIVE. Returns trimmed event type. Requires eventType
+  // Validates that event type is one of the categories from the NYC dataset. CASE-SENSITIVE. Returns trimmed event type. Requires eventType
   validEventType(eventType) {
     if (!eventType) {
       throw "Error: Event type is required.";
@@ -96,10 +97,10 @@ const exportedMethods = {
     id = id.trim();
     if (id.length === 0)
       throw "Error: id cannot be an empty string or just spaces";
-    if (!ObjectId.isValid(id)) throw "Error: is musr be valid object ID";
+    if (!ObjectId.isValid(id)) throw "Error: is must be valid object ID";
     return id;
   },
-  // Validates that publicity is either private or public. Case Insensetive. Returns publicity.trim().toLowerCase
+  // Validates that publicity is either private or public. Case Insensetive. Returns true if public, false if private
   validPublicity(publicity) {
     if (!publicity) {
       throw "Error: Must specify if event is public or private.";
@@ -108,8 +109,10 @@ const exportedMethods = {
       throw "Error: Publicity must be a string.";
     }
     publicity = publicity.trim().toLowerCase();
-    if (publicity === "private" || publicity === "public") {
-      return publicity;
+    if (publicity === "private") {
+      return false;
+    } else if (publicity === "public") {
+      return true;
     } else {
       throw "Error: Publicity must be private or public.";
     }
@@ -146,6 +149,17 @@ const exportedMethods = {
   // Validates that startDateTime occurs before endDateTime. Returns True if no error. RJ To Do
   validStartEndTimeDate(startDateTime, endDateTime) {
     return true;
+  },
+  async validUserId(id) {
+    id = exportedMethods.checkId(id);
+
+    const usersCollection = await users();
+    const user = await usersCollection.findOne({ _id: new ObjectId(id) });
+
+    if (!user) {
+      throw "Error: No user with that id";
+    }
+    return id;
   },
 };
 
