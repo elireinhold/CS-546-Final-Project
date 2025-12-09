@@ -8,6 +8,7 @@ router.get("/", async (req, res) => {
   try {
     let recommended = [];
     let savedEventCount = 0;
+
      
     if (req.session.user) {
       const userId = req.session.user._id;
