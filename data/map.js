@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import { getAllEventsByUser } from "./events.js";
+import { getAllEventsByUser, getEventById } from "./events.js";
 
 
 // Geocodes location and returns cooridinates
@@ -42,3 +42,25 @@ export async function getAllSavedEventsWithCoordinates(userId) {
 
   return result;
 }
+
+// Uses geocoding to get event with coordinate for event page
+export async function getEventWithCoordinates(eventId) {
+  const eventData = await getEventById(eventId)
+
+  const result = [];
+  if (eventData.eventLocation) {
+        // Need to convert location to an address
+        const parkName = eventData.eventLocation.split(":")[0].trim() + ", New York, NY";
+        const coordinates = await geocodeLocation(parkName);
+        if (coordinates) {
+            result.push({
+                title: eventData.eventName,
+                location: eventData.eventLocation,
+                lat: coordinates.lat,
+                lon: coordinates.lon
+            });
+        }
+    }
+    return result;
+  }
+  

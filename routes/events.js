@@ -18,6 +18,8 @@ import {
 
 import { requireLogin } from "../middleware.js";
 
+import { getEventWithCoordinates } from "../data/map.js"
+
 const router = Router();
 
 // Search events (multi-filter)
@@ -127,7 +129,8 @@ router.post("/:id/unsave", requireLogin, async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const event = await getEventById(req.params.id);
-
+    const events = await getEventWithCoordinates(req.params.id)
+    
     let saved = false;
     if (req.session.user) {
       const savedList = await getSavedEvents(req.session.user._id);
@@ -141,7 +144,8 @@ router.get("/:id", async (req, res) => {
       saved,
       userCount,
       returnTo: req.query.returnTo || "/events/search",
-      user: req.session.user || null
+      user: req.session.user || null,
+      events
     });
 
   } catch (e) {
