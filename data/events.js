@@ -3,26 +3,33 @@ import { ObjectId } from "mongodb";
 import helpers from "../helpers/eventHelpers.js";
 import { users } from "../config/mongoCollections.js";
 
-// Normalize NYC data; borough abbreviations map
-const boroughMap = {
-  M: "Manhattan",
-  BX: "Bronx",
-  BK: "Brooklyn",
-  Q: "Queens",
-  SI: "Staten Island",
-};
+// // Normalize NYC data; borough abbreviations map
+// const boroughMap = {
+//   M: "Manhattan",
+//   BX: "Bronx",
+//   BK: "Brooklyn",
+//   Q: "Queens",
+//   SI: "Staten Island",
+// };
+function formatDateTime(dt) {
+  if (!dt) return null;
+  const d = new Date(dt);
+  if (isNaN(d)) return null;
+  return d.toISOString().replace("T", " ").split(".")[0];
+}
 
 export function normalizeNYCEvent(rawEvent) {
   return {
     eventId: rawEvent.event_id || null,
     eventName: rawEvent.event_name || "Unnamed Event",
-    startDateTime: rawEvent.start_date_time || null,
-    endDateTime: rawEvent.end_date_time || null,
+    startDateTime: formatDateTime(rawEvent.start_date_time) || null,
+    endDateTime: formatDateTime(rawEvent.end_date_time) || null,
     eventSource: "NYC",
     eventType: rawEvent.event_type || null,
     eventBorough: rawEvent.event_borough || null,
-    eventLocation: rawEvent.event_location || rawEvent.site_location || null,
-    eventStreetSide: rawEvent.street_side || rawEvent.street_side_description || null,
+    eventLocation: rawEvent.event_location || null,
+    eventStreetSide:
+      rawEvent.street_side || rawEvent.street_side_description || null,
     streetClosureType: rawEvent.street_closure_type || null,
     communityBoard: rawEvent.community_board || null,
     coordinates: rawEvent.coordinates || null,
@@ -38,7 +45,6 @@ export async function insertManyNYCEvents(eventArray) {
   if (!Array.isArray(eventArray)) {
     throw "insertManyNYCEvents: argument must be an array";
   }
-
   const eventCollection = await events();
   const result = await eventCollection.insertMany(eventArray);
   return result.insertedCount;
@@ -143,12 +149,9 @@ export async function getDistinctBoroughs() {
 export async function getRecommendedEventsForUser(userId, limit = 5) {
   const userCollection = await users();
   const eventCollection = await events();
-
   const user = await userCollection.findOne({ _id: new ObjectId(userId) });
   if (!user) throw "User not found";
-
   const savedEvents = user.savedEvents || [];
-
   if (savedEvents.length === 0) {
     return await eventCollection
       .aggregate([
@@ -157,58 +160,44 @@ export async function getRecommendedEventsForUser(userId, limit = 5) {
       ])
       .toArray();
   }
-
   const lastFiveIds = savedEvents.slice(-5).map(id => new ObjectId(id));
-
   const lastFiveEvents = await eventCollection
     .find({ _id: { $in: lastFiveIds } })
     .toArray();
-
   const boroughCounts = {};
   const typeCounts = {};
-
   lastFiveEvents.forEach(evt => {
     if (evt.eventBorough)
       boroughCounts[evt.eventBorough] =
         (boroughCounts[evt.eventBorough] || 0) + 1;
-
     if (evt.eventType)
       typeCounts[evt.eventType] =
         (typeCounts[evt.eventType] || 0) + 1;
   });
-
   const most = obj =>
     Object.keys(obj).sort((a, b) => obj[b] - obj[a])[0];
-
   const favoriteBorough = most(boroughCounts);
   const favoriteType = most(typeCounts);
-
   const now = new Date().toISOString();
-
   const candidates = await eventCollection
     .find({
       _id: { $nin: savedEvents.map(id => new ObjectId(id)) },
       startDateTime: { $gte: now }
     })
     .toArray();
-
   const scored = candidates.map(evt => {
     let score = 0;
     if (evt.eventBorough === favoriteBorough) score++;
     if (evt.eventType === favoriteType) score++;
     return { evt, score };
   });
-
   scored.sort((a, b) => b.score - a.score);
-
   let recommendations = scored
     .filter(s => s.score > 0)
     .slice(0, limit)
     .map(s => s.evt);
-
   if (recommendations.length < limit) {
     const missingCount = limit - recommendations.length;
-
     const randomFiller = await eventCollection
       .aggregate([
         { $match: { 
