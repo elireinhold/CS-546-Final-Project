@@ -12,14 +12,11 @@ const constructorMethod = (app) => {
   // Events routes
   app.use("/events", eventsRoutes);
 
-  // Users routes (you can add later)
+  // Users routes
   app.use("/users", usersRoutes);
 
+  // Calendar routes
   app.use("/calendar", calendarRoutes);
-
-  // 404 fallback
-  
-
 
   //don't delete this, it's a fakeid for temporary testing purposes
   app.get("/testlogin", (req, res) => {
@@ -31,6 +28,16 @@ const constructorMethod = (app) => {
     res.send("Logged in as test user: ru_test");
   });
 
+  // 404 fallback
+  app.use("*", (req, res) => {
+    res.status(404).render("error", { 
+      title: "404 Not Found",
+      error: "Page Not Found"
+    });
+  });
+
 };
 
 export default constructorMethod;
+
+

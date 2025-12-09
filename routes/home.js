@@ -1,27 +1,21 @@
 import { Router } from "express";
 import { getRecommendedEventsForUser } from "../data/events.js";
-import { getSavedEvents } from "../data/users.js";
 import { getAllSavedEventsWithCoordinates } from "../data/map.js";
 const router = Router();
 
 router.get("/", async (req, res) => {
   try {
-    let recommended = [];
-    let savedEventCount = 0;
-    let events = []
+    let recommendedEvents = [];
+    let events = [];
 
     if (req.session.user) {
       const userId = req.session.user._id;
-      const savedEvents = await getSavedEvents(userId);
-      savedEventCount = savedEvents.length;
-      recommended = await getRecommendedEventsForUser(userId, 5);
+      recommendedEvents = await getRecommendedEventsForUser(userId, 5);
       events = await getAllSavedEventsWithCoordinates(userId);
     } 
 
     res.render("home", {
-      user: req.session.user || null,
-      recommendedEvents: recommended,
-      savedEventCount,
+      recommendedEvents,
       events
     });
 
