@@ -28,7 +28,7 @@ app.use((req,res,next) => {
 }); // inserts session into every view
 
 // Handlebars setup (+ contains helper)
-const hbs = handlebars.create({
+const hbs = exphbs.create({
   defaultLayout: "main",
   helpers: {
     ifEquals(a, b, options) {
@@ -49,9 +49,11 @@ const hbs = handlebars.create({
     json(data) {
       return JSON.stringify(data);
     }
-  })
-);
+  }
+});
 
+// ⭐ REGISTER YOUR ENGINE HERE
+app.engine("handlebars", hbs.engine);
 app.set("view engine", "handlebars");
 
 app.use("/public", express.static("public"));
