@@ -16,8 +16,13 @@
 
 {{/if}}
 
+
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+  const events = {{{json events}}}
+</script>
 <script src="/public/js/homeMap.js"></script>
+
 {{#if user}}
   <h2>Events you may like:</h2>
 
