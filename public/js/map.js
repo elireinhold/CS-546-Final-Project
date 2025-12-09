@@ -9,8 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Add event markers
   const bounds = [];
-  if (Array.isArray(events)) {
-    events.forEach(ev => {
+  if (Array.isArray(eventLocation)) {
+    eventLocation.forEach(ev => {
       if (ev.lat && ev.lon) {
         L.marker([ev.lat, ev.lon])
           .addTo(map)

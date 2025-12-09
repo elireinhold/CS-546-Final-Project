@@ -179,6 +179,7 @@ const exportedMethods = {
   unsaveEvent,
   countUsersWhoSaved,
   countUsersWhoSavedMany,
+  getSavedEvents
 };
 
 export default exportedMethods;
