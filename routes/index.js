@@ -2,6 +2,7 @@ import { Router } from "express";
 import eventsRoutes from "./events.js";
 import usersRoutes from "./users.js";
 import homeRoutes from "./home.js";
+import calendarRoutes from "./calendar.js";
 
 const constructorMethod = (app) => {
   
@@ -13,6 +14,8 @@ const constructorMethod = (app) => {
 
   // Users routes (you can add later)
   app.use("/users", usersRoutes);
+
+  app.use("/calendar", calendarRoutes);
 
   // 404 fallback
   
@@ -28,6 +31,17 @@ const constructorMethod = (app) => {
     res.send("Logged in as test user: ru_test");
   });
 
+
+  // Fake login for user 2 (second tester)
+  app.get("/testlogin2", (req, res) => {
+    req.session.user = {
+      _id: "6935b41a74e0dabcb657159c",
+      username: "another_user"
+    };
+    res.send("Logged in as another_user");
+  });
+
+  
   app.use("*", (req, res) => {
     res.status(404).send("Page Not Found");
   });

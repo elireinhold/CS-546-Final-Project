@@ -1,0 +1,20 @@
+#calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-top: 16px;
+}
+
+#calendar div {
+  border: 1px solid #ccc;
+  padding: 8px;
+  min-height: 80px;
+  box-sizing: border-box;
+  display: grid; 
+}
+
+#prev, #next {
+  padding: 6px 12px;
+  margin: 4px;
+  border: 1px solid #ccc;
+}

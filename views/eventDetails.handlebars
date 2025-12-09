@@ -33,10 +33,34 @@
 
 <hr>
 
+<!-- Comments Section -->
+<h2>Comments</h2>
+<div id="comments-container">
+  <!-- Comments will be rendered by JavaScript recursively -->
+  <div id="comments-list"></div>
+</div>
+
+{{#if user}}
+  <div id="add-comment-section">
+    <h3>Add a Comment</h3>
+    <textarea id="comment-text" rows="4" cols="50" placeholder="Write your comment here..."></textarea>
+    <br>
+    <button id="submit-comment-btn">Submit Comment</button>
+  </div>
+{{else}}
+  <p><a href="/users/login">Login</a> to add a comment.</p>
+{{/if}}
+
+<hr>
+
 <a id="back-link" href="{{returnTo}}">← Back to Results</a>
 
 <script>
   const returnTo = "{{returnTo}}";
+  const eventId = "{{event._id}}";
+  const currentUserId = {{#if user}}"{{user._id}}"{{else}}null{{/if}};
+  const currentUsername = {{#if user}}"{{user.username}}"{{else}}null{{/if}};
+  const allComments = {{#if event.comments}}{{{json event.comments}}}{{else}}[]{{/if}};
   // Prefer actual previous page; fall back to returnTo; default to search
   const backLink = document.getElementById("back-link");
   const fallback = returnTo || "/events/search";
