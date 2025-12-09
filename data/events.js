@@ -410,6 +410,7 @@ const exportedMethods = {
   deleteComment,
   getAllEventsByUser,
   getAllEvents,
+  getRecommendedEventsForUser
 };
 
 export default exportedMethods;
