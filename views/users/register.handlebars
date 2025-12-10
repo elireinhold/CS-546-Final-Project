@@ -1,5 +1,10 @@
 <div class="content-wrapper-center">
     <div class="auth-form">
+        {{#if error}}
+            <p class="error-message">{{error}}</p>
+        {{/if}}
+
+
         <form action="/users/register" method="post" id="register-form">
             <div class="form-group">
                 <label for="username">
@@ -39,24 +44,40 @@
                 <input type="password" name="confirmPassword" id="confirmPassword" class="form-input">
             </div>
             <div class="form-group">
-                <label for="borough">
+                <label for="preferredBorough">
                     Preferred Borough
                 </label>
-                <select name="borough" id="borough" class="form-input">
+                <select name="preferredBorough" id="preferredBorough" class="form-input">
                     <option value="">...</option>
-                    <option value="bronx">The Bronx</option>
+                    <option value="bronx">Bronx</option>
                     <option value="brooklyn">Brooklyn</option>
-                    <option value="manhatten">Manhattan</option>
+                    <option value="manhattan">Manhattan</option>
                     <option value="queens">Queens</option>
                     <option value="staten island">Staten Island</option>
                 </select>
             </div>
             <div class="form-group">
-                <label for="preferedEvent">
+                <label for="preferredEventType">
                     Preferred Event Type
                 </label>
-                <select name="preferedEvent" id="preferedEvent" class="form-input">
-                    <option value="">???</option>
+                <select name="preferredEventType" id="preferredEventType" class="form-input">
+                    <option value="">...</option>
+                    <option value="Special Event">Special Event</option>
+                    <option value="Sport - Adult">Sport - Adult</option>
+                    <option value="Sport - Youth">Sport - Youth</option>
+                    <option value="Production Event">Production Event</option>
+                    <option value="Open Street Partner Event">Open Street Partner Event</option>
+                    <option value="Plaza Partner Event">Plaza Partner Event</option>
+                    <option value="Street Event">Street Event</option>
+                    <option value="Religious Event">Religious Event</option>
+                    <option value="Farmers Market">Farmers Market</option>
+                    <option value="Sidewalk Sale">Sidewalk Sale</option>
+                    <option value="Theater Load in and Load Outs">Theater Load in and Load Outs</option>
+                    <option value="Parade">Parade</option>
+                    <option value="Miscellaneous">Miscellaneous</option>
+                    <option value="Plaza Event">Plaza Event</option>
+                    <option value="Block Party">Block Party</option>
+                    <option value="Clean-Up">Clean-Up</option>
                 </select>
             </div>
             <div class="form-group">

@@ -18,16 +18,16 @@ router.get("/register", (req, res) => {
 });
 
 router.post("/register", async (req, res) => {
-  const {
+  let {
     username,
     firstName,
     lastName,
     password,
     confirmPassword,
     email,
-    birthday,
     preferredBorough,
     preferredEventType,
+    birthday,
   } = req.body;
 
   if (
@@ -36,6 +36,7 @@ router.post("/register", async (req, res) => {
     !lastName ||
     !password ||
     !confirmPassword ||
+    !preferredEventType ||
     !email ||
     !birthday
   ) {
@@ -61,8 +62,11 @@ router.post("/register", async (req, res) => {
     if (!birthday) {
       missingFields.push("birthday");
     }
+    if (!preferredEventType) {
+      missingFields.push("preferredEventType");
+    }
 
-    return res.status(400).render("register", {
+    return res.status(400).render("users/register", {
       error:
         "Error: The following fields are missing: " + missingFields.join(", "),
       title: "Registration Error",
@@ -80,12 +84,13 @@ router.post("/register", async (req, res) => {
   try {
     firstName = userHelpers.validFirstOrLastName(firstName);
     lastName = userHelpers.validFirstOrLastName(lastName);
-    username = userHelpers.validUserNameRegister(username);
+
+    username = await userHelpers.validUserNameRegister(username);
 
     password = userHelpers.validPassword(password);
     confirmPassword = confirmPassword.trim();
     if (password !== confirmPassword) {
-      return res.status(400).render("register", {
+      return res.status(400).render("users/register", {
         error: "Error: Passwords do not match",
         title: "Registration Error",
         username: username,
@@ -98,19 +103,17 @@ router.post("/register", async (req, res) => {
       });
     }
     email = userHelpers.validEmail(email);
+
     birthday = userHelpers.validAge(birthday);
+
     if (preferredBorough) {
       preferredBorough = userHelpers.validBorough(preferredBorough);
     } else {
       preferredBorough = null;
     }
-    if (preferredEventType) {
-      preferredEventType = userHelpers.validEventType(preferredEventType);
-    } else {
-      preferredEventType = null;
-    }
+    preferredEventType = userHelpers.validEventType(preferredEventType);
   } catch (e) {
-    return res.status(400).render("register", {
+    return res.status(400).render("users/register", {
       error: e,
       title: "Registration Error",
       username: username,
@@ -119,7 +122,7 @@ router.post("/register", async (req, res) => {
       email: email,
       birthday: birthday,
       preferredBorough: preferredBorough || "",
-      preferredEventType: preferredEventType || "",
+      preferredEventType: preferredEventType,
     });
   }
 
@@ -146,14 +149,7 @@ router.post("/register", async (req, res) => {
         lastName: user.lastName,
         email: user.email,
         preferredBorough: user.homeBorough || null,
-        preferredEventType: (function () {
-          // Deals with passing null to an array
-          if (user.favoriteEventTypes && user.favoriteEventTypes.length > 0) {
-            return user.favoriteEventTypes[0];
-          } else {
-            return null;
-          }
-        })(),
+        preferredEventType: [preferredEventType],
         birthday: user.birthday,
       };
       return res.redirect("/");
@@ -164,7 +160,7 @@ router.post("/register", async (req, res) => {
       });
     }
   } catch (e) {
-    return res.status(400).render("register", {
+    return res.status(400).render("users/register", {
       error: e,
       title: "Registration Error",
       username: username,
@@ -173,9 +169,25 @@ router.post("/register", async (req, res) => {
       email: email,
       birthday: birthday,
       preferredBorough: preferredBorough || "",
-      preferredEventType: preferredEventType || "",
+      preferredEventType: preferredEventType,
     });
   }
 });
 
+router.route("/logout").get(async (req, res) => {
+  //code here for GET
+  try {
+    if (req.session.user) {
+      req.session.destroy();
+      res.render("logout", { title: "Sign Out" });
+    } else {
+      res.redirect("/login");
+    }
+  } catch (e) {
+    res.status(500).render("error", {
+      error: e,
+      title: "Error",
+    });
+  }
+});
 export default router;

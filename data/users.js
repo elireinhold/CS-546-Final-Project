@@ -28,6 +28,7 @@ export async function register(
   password = helpers.validPassword(password);
   email = helpers.validEmail(email);
   birthday = helpers.validAge(birthday);
+  preferredEventType = helpers.validEventType(preferredEventType);
 
   //Optional Inputs
   if (
@@ -38,15 +39,6 @@ export async function register(
     preferredBorough = null;
   } else {
     preferredBorough = helpers.validBorough(preferredBorough);
-  }
-  if (
-    preferredEventType === null ||
-    !preferredEventType ||
-    preferredEventType.trim() === ""
-  ) {
-    preferredEventType = null;
-  } else {
-    preferredEventType = helpers.validEventType(preferredEventType);
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);

@@ -50,7 +50,7 @@ const exportedMethods = {
 
     const usersList = await getUsers();
     for (let i = 0; i < usersList.length; i++) {
-      if (usersList[i].lowerUserName.toLowerCase() === lowerUserName) {
+      if (usersList[i].username.toLowerCase() === lowerUserName) {
         throw "Error: Username already exists. Please choose a different Username.";
       }
     }
@@ -143,6 +143,9 @@ const exportedMethods = {
   },
   //Validates that event type is one of the categories from the NYC dataset. CASE-SENSITIVE. Returns trimmed event type.
   validEventType(eventType) {
+    if (!eventType) {
+      throw "Error: Event type is required.";
+    }
     if (typeof eventType !== "string") {
       throw "Error: Event type must be a string.";
     }
