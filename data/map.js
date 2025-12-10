@@ -1,34 +1,40 @@
 import fetch from "node-fetch";
 import { getEventById } from "./events.js";
 import { getSavedEvents } from "./users.js"
+import helpers from "../helpers/eventHelpers.js";
 
 
 // Geocodes location and returns cooridinates
 export async function geocodeLocation(eventLocation) {
-  const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(eventLocation)}`;
-const res = await fetch(url, {
-  headers: {
-    "User-Agent": "NYSeeNowApp/1.0 (ereinhol@stevens.edu)"
+  if(!eventLocation || typeof eventLocation !== "string"){
+    throw "Error: Invalid eventLocation"
   }
-});  const data = await res.json();
-  if (!data[0]) return null;
-  
-  return {
-    lat: parseFloat(data[0].lat),
-    lon: parseFloat(data[0].lon)
-  };
-}
+  const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(eventLocation)}`;
+  const res = await fetch(url, {
+    headers: {
+      "User-Agent": "NYSeeNowApp/1.0 (ereinhol@stevens.edu)"
+    }
+  });  const data = await res.json();
+    if (!data[0]) return null;
+    
+    return {
+      lat: parseFloat(data[0].lat),
+      lon: parseFloat(data[0].lon)
+    };
+  }
 
 // Uses geocoding to get all events with coordinates that user saved
 export async function getAllSavedEventsWithCoordinates(userId) {
+  userId = await helpers.validUserId(userId);
   const eventIds = await getSavedEvents(userId);
-      
-      // Fetch each event by ID
-      const eventsList = [];
-      for (const id of eventIds) {
-        const ev = await getEventById(id);
-        eventsList.push(ev);
-      }
+  // Fetch each event by ID
+  const eventsList = [];
+  for (const id of eventIds) {
+    const ev = await getEventById(id);
+    if(ev) {
+      eventsList.push(ev);
+    }
+  }
 
   const result = [];
   // For each event get coordinates and push all obj containing info into result array
@@ -53,6 +59,7 @@ export async function getAllSavedEventsWithCoordinates(userId) {
 
 // Uses geocoding to get event with coordinate for event page
 export async function getEventWithCoordinates(eventId) {
+  eventId = helpers.checkId(eventId);
   const eventData = await getEventById(eventId)
 
   const result = [];
@@ -64,6 +71,7 @@ export async function getEventWithCoordinates(eventId) {
             result.push({
                 title: eventData.eventName,
                 location: eventData.eventLocation,
+                id: eventData._id,
                 lat: coordinates.lat,
                 lon: coordinates.lon
             });

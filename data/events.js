@@ -369,7 +369,7 @@ export async function deleteComment(eventId, commentId, userId) {
 
 // Gets all events user saved
 export async function getAllEventsByUser(userId) {
-  if (!userId) throw "You must provide a user ID";
+  userId = await helpers.validUserId(userId)
   const eventCollection = await events();
   const eventData = await eventCollection.find({ userId }).toArray();
 
