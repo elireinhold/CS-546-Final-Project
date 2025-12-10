@@ -1,17 +1,76 @@
 import { Router } from "express";
-import events from "../data/events.js";     
-import users from "../data/users.js";        
+import events from "../data/events.js";
+import users from "../data/users.js";
 import { requireLogin } from "../middleware.js";
 import { getEventWithCoordinates } from "../data/map.js";
 
 const router = Router();
+
+router.get("/create", requireLogin, async (req, res) => {
+  try {
+    res.render("createEvent", {
+      title: "Create New Event",
+      user: req.session.user,
+    });
+  } catch (e) {
+    res.status(500).render("error", { error: e.message });
+  }
+});
+
+router.post("/", requireLogin, async (req, res) => {
+  try {
+    let {
+      eventName,
+      eventType,
+      eventLocation,
+      eventBorough,
+      startDateTime,
+      endDateTime,
+      streetClosureType,
+      communityBoard,
+      isPublic,
+    } = req.body;
+
+    const event = await events.userCreateEvent(
+      req.session.user._id,
+      eventName,
+      eventType,
+      eventLocation,
+      eventBorough,
+      startDateTime,
+      endDateTime,
+      streetClosureType,
+      communityBoard,
+      isPublic
+    );
+
+    res.redirect("/events/create/success");
+  } catch (e) {
+    res.status(400).render("createEvent", {
+      title: "Create New Event",
+      error: e,
+      formData: req.body,
+    });
+  }
+});
+
+router.get("/create/success", requireLogin, (req, res) => {
+  res.render("createEventSuccess", {
+    title: "Event Created Successfully",
+    user: req.session.user,
+  });
+});
 
 router.get("/search", async (req, res) => {
   try {
     let { keyword, borough, eventType, startDate, endDate } = req.query;
 
     borough = Array.isArray(borough) ? borough : borough ? [borough] : [];
-    eventType = Array.isArray(eventType) ? eventType : eventType ? [eventType] : [];
+    eventType = Array.isArray(eventType)
+      ? eventType
+      : eventType
+      ? [eventType]
+      : [];
 
     const eventTypes = (await events.getDistinctEventTypes()).sort();
     const boroughs = (await events.getDistinctBoroughs()).sort();
@@ -41,13 +100,15 @@ router.get("/search", async (req, res) => {
 
     let savedList = [];
     if (req.session.user) {
-      savedList = (await users.getSavedEvents(req.session.user._id)).map(id => id.toString());
+      savedList = (await users.getSavedEvents(req.session.user._id)).map((id) =>
+        id.toString()
+      );
     }
 
-    const eventIds = results.map(e => e._id.toString());
+    const eventIds = results.map((e) => e._id.toString());
     const countMap = await users.countUsersWhoSavedMany(eventIds);
 
-    results.forEach(evt => {
+    results.forEach((evt) => {
       const id = evt._id.toString();
       evt.saved = savedList.includes(id);
       evt.userCount = countMap[id] || 0;
@@ -64,7 +125,6 @@ router.get("/search", async (req, res) => {
       boroughs,
       currentUrl: req.originalUrl,
     });
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -77,7 +137,6 @@ router.post("/:id/save", requireLogin, async (req, res) => {
 
     const userCount = await users.countUsersWhoSaved(eventId);
     res.json({ saved: true, userCount });
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -90,7 +149,6 @@ router.post("/:id/unsave", requireLogin, async (req, res) => {
 
     const userCount = await users.countUsersWhoSaved(eventId);
     res.json({ saved: false, userCount });
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -104,7 +162,7 @@ router.get("/:id", async (req, res) => {
     let saved = false;
     if (req.session.user) {
       const savedList = await users.getSavedEvents(req.session.user._id);
-      saved = savedList.map(x => x.toString()).includes(req.params.id);
+      saved = savedList.map((x) => x.toString()).includes(req.params.id);
     }
 
     const userCount = await users.countUsersWhoSaved(req.params.id);
@@ -116,7 +174,6 @@ router.get("/:id", async (req, res) => {
       userCount,
       returnTo: req.query.returnTo || "/events/search",
     });
-
   } catch (e) {
     res.status(404).send("Event not found");
   }
@@ -139,7 +196,6 @@ router.post("/:id/comments", requireLogin, async (req, res) => {
     );
 
     res.json({ success: true, comment });
-
   } catch (e) {
     res.status(400).json({ error: e.message });
   }
@@ -147,9 +203,12 @@ router.post("/:id/comments", requireLogin, async (req, res) => {
 
 router.delete("/:id/comments/:commentId", requireLogin, async (req, res) => {
   try {
-    await events.deleteComment(req.params.id, req.params.commentId, req.session.user._id);
+    await events.deleteComment(
+      req.params.id,
+      req.params.commentId,
+      req.session.user._id
+    );
     res.json({ success: true });
-
   } catch (e) {
     res.status(400).json({ error: e.message });
   }
