@@ -8,9 +8,9 @@ const exportedMethods = {
     // User functions
     validUsername(username,args) {
         let login = false 
-        if(args && typeof args === object) {
+        if(args && typeof args === 'object') {
             if(args.login) {
-                register = args.login;
+                login = args.login;
             }
         }
         if (!username) {
@@ -36,7 +36,7 @@ const exportedMethods = {
     },
     validPassword(password,args) {
         let login = false;
-        if(args && typeof args === object) {
+        if(args && typeof args === 'object') {
             if(args.login) {
                 login = args.login;
             }
