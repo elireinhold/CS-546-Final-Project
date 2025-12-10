@@ -22,7 +22,7 @@ const constructorMethod = (app) => {
   app.get("/testlogin", (req, res) => {
     req.session.user = {
       _id: "6935b41a74e0dabcb657159b",
-      username: "ru_test"
+      username: "ru_test",
     };
 
     res.send("Logged in as test user: ru_test");

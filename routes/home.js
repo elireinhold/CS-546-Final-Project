@@ -6,17 +6,17 @@ const router = Router();
 router.get("/", async (req, res) => {
   try {
     let recommendedEvents = [];
-    let events = [];
+    let eventLocation = [];
 
     if (req.session.user) {
-      const userId = req.session.user._id;
+      const userId = req.session.user._id;      
       recommendedEvents = await getRecommendedEventsForUser(userId, 5);
-      events = await getAllSavedEventsWithCoordinates(userId);
+      eventLocation = await getAllSavedEventsWithCoordinates(userId);
     } 
 
     res.render("home", {
       recommendedEvents,
-      events
+      eventLocation
     });
 
   } catch (e) {
