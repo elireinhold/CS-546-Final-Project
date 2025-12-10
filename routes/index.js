@@ -21,8 +21,8 @@ const constructorMethod = (app) => {
   //don't delete this, it's a fakeid for temporary testing purposes
   app.get("/testlogin", (req, res) => {
     req.session.user = {
-      _id: "6935b41a74e0dabcb657159b",
-      username: "ru_test",
+      _id: "6938e8e49c9d5c9ebb6e259f",
+      username: "ru_test"
     };
 
     res.send("Logged in as test user: ru_test");
