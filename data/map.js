@@ -41,6 +41,7 @@ export async function getAllSavedEventsWithCoordinates(userId) {
             result.push({
                 title: event.eventName,
                 location: event.eventLocation,
+                id: event._id,
                 lat: coordinates.lat,
                 lon: coordinates.lon
             });

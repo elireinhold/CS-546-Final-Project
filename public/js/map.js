@@ -13,7 +13,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (ev.lat && ev.lon) {
       L.marker([ev.lat, ev.lon])
         .addTo(map)
-        .bindPopup(`<b>${ev.title}</b><br>${ev.location}`);
+        .bindPopup(`<b>${ev.title}</b><br>
+          ${ev.location}<br>
+          <a href="/events/${ev.id}">View Event</a>
+        `);
       bounds.push([ev.lat, ev.lon]);
           
     }
