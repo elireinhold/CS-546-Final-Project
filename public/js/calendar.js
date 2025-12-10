@@ -1,9 +1,12 @@
 (async function() {  
+
+  const calendarDiv = document.getElementById("calendar");
+
   function renderCalendar(year, month) {
     if(!year || typeof year !== "number" || year < 1900 || year > 2100) {
       throw "Error: Invalid year"
     }
-    if(!month || typeof month !== "number" || month < 0 || month > 11) {
+    if(typeof month !== "number" || month < 0 || month > 11) {
       throw "Error: Invalid month"
     }
     if(!calendarDiv) {
@@ -131,7 +134,6 @@
   }
 
   // Render calendar initial
-  const calendarDiv = document.getElementById("calendar");
   if(calendarDiv) {
     let monthYear = document.getElementById("month-year");
       if(monthYear) {
