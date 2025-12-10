@@ -79,4 +79,5 @@ export async function getEventWithCoordinates(eventId) {
     }
     return result;
   }
+
   
