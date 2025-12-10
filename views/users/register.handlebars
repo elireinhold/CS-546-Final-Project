@@ -44,11 +44,11 @@
                 </label>
                 <select name="borough" id="borough" class="form-input">
                     <option value="">...</option>
-                    <option>The Bronx</option>
-                    <option>Brooklyn</option>
-                    <option>Manhattan</option>
-                    <option>Queens</option>
-                    <option>Staten Island</option>
+                    <option value="bronx">The Bronx</option>
+                    <option value="brooklyn">Brooklyn</option>
+                    <option value="manhatten">Manhattan</option>
+                    <option value="queens">Queens</option>
+                    <option value="staten island">Staten Island</option>
                 </select>
             </div>
             <div class="form-group">
@@ -65,11 +65,10 @@
                 </label>
                 <input type="date" name="birthday" id="birthday" class="form-input">
                 <script>
-                    const curDate = new Date();
-                    const mm = (curDate.getMonth()+1).toString().padStart(2,0);
-                    const dd = curDate.getDate().toString().padStart(2,0);
-                    const min = `${curDate.getFullYear()-122}-${mm}-${dd}`
-                    const max = `${curDate.getFullYear()-13}-${mm}-${dd}`
+                    const d = new Date();
+                    const today = (d.toISOString().split("T")[0].split("-"))
+                    const min = `${d.getFullYear()-122}-${today[1]}-${today[2]}`
+                    const max = `${d.getFullYear()-13}-${today[1]}-${today[2]}`
                     let bdayInput = document.getElementById('birthday');
                     bdayInput.setAttribute('min',min);
                     bdayInput.setAttribute('max',max);
