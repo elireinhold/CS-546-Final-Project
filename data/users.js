@@ -3,18 +3,17 @@ import { users } from "../config/mongoCollections.js";
 import helpers from "../helpers/userHelpers.js";
 import bcrypt from "bcrypt";
 
+// User input validation. Creates new user and adds them to database. Returns { registrationCompleted: true }
 export async function register(
   userName,
   firstName,
   lastName,
   password,
-  borough,
-  preferedEvent,
+  preferredBorough,
+  preferredEventType,
   email,
   birthday
 ) {
-  // User input validation. Creates new user and adds them to database. Returns { registrationCompleted: true }
-
   /* Input Validation */
   //Required Inputs
   if (!firstName) {
@@ -29,17 +28,17 @@ export async function register(
   password = helpers.validPassword(password);
   email = helpers.validEmail(email);
   birthday = helpers.validAge(birthday);
+  preferredEventType = helpers.validEventType(preferredEventType);
 
   //Optional Inputs
-  if (!borough) {
-    borough = null;
+  if (
+    preferredBorough === null ||
+    !preferredBorough ||
+    preferredBorough.trim() === ""
+  ) {
+    preferredBorough = null;
   } else {
-    borough = helpers.validBorough(borough);
-  }
-  if (!preferedEvent) {
-    preferedEvent = null;
-  } else {
-    preferedEvent = helpers.validEventType(preferedEvent);
+    preferredBorough = helpers.validBorough(preferredBorough);
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -50,8 +49,8 @@ export async function register(
     password: hashedPassword,
     firstName: firstName,
     lastName: lastName,
-    homeBorough: borough,
-    favoriteEventTypes: [preferedEvent],
+    homeBorough: preferredBorough,
+    favoriteEventTypes: [preferredEventType],
     birthday: birthday,
     savedEvents: [],
     publicEvents: [],
@@ -179,7 +178,7 @@ const exportedMethods = {
   unsaveEvent,
   countUsersWhoSaved,
   countUsersWhoSavedMany,
-  getSavedEvents
+  getSavedEvents,
 };
 
 export default exportedMethods;
