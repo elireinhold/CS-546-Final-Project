@@ -9,14 +9,15 @@ router.get("/", requireLogin, async (req, res) => {
   try {
     const userId = req.session.user._id;
     const eventIds = await usersData.getSavedEvents(userId);
-    
     // Fetch each event by ID
     const events = [];
-    for (const id of eventIds) {
-      const ev = await getEventById(id);
-      events.push(ev);
+    if(eventIds) {
+      for (const id of eventIds) {
+        const ev = await getEventById(id);
+        events.push(ev);
+      }
     }
-
+    
     res.render("calendar", { events });
 
   } catch (e) {

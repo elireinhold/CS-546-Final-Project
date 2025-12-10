@@ -1,7 +1,14 @@
-(async function() {
-  const calendarDiv = document.getElementById("calendar");
-  
+(async function() {  
   function renderCalendar(year, month) {
+    if(!year || typeof year !== "number" || year < 1900 || year > 2100) {
+      throw "Error: Invalid year"
+    }
+    if(!month || typeof month !== "number" || month < 0 || month > 11) {
+      throw "Error: Invalid month"
+    }
+    if(!calendarDiv) {
+      throw "Error: Can not find calendarDiv"
+    }
     // Removes all children to clear the calendar
     while (calendarDiv.firstChild) {
       calendarDiv.removeChild(calendarDiv.firstChild);
@@ -46,6 +53,9 @@
 
   // Converts index to name of month
   function getMonthName(index) {
+    if (typeof index !== "number" || index < 0 || index > 11) {
+      throw "Error: Invalid month index";
+    }
     const monthNames = [
       "January", "February", "March", "April", "May", "June",
       "July", "August", "September", "October", "November", "December"
@@ -55,17 +65,19 @@
 
   // Build event map
   const eventsByDay = {};
-  events.forEach(ev => {
-    
-    const date = new Date(ev.startDateTime);
-    const year = date.getFullYear();
-    const monthstr = String(date.getMonth() + 1).padStart(2, "0");
-    const daystr = String(date.getDate()).padStart(2, "0");
-    const key = `${year}-${monthstr}-${daystr}`;
 
-    if (!eventsByDay[key]) eventsByDay[key] = [];
-    eventsByDay[key].push(ev);
-  });
+  if(events) {
+    events.forEach(ev => {
+      const date = new Date(ev.startDateTime);
+      const year = date.getFullYear();
+      const monthstr = String(date.getMonth() + 1).padStart(2, "0");
+      const daystr = String(date.getDate()).padStart(2, "0");
+      const key = `${year}-${monthstr}-${daystr}`;
+
+      if (!eventsByDay[key]) eventsByDay[key] = [];
+      eventsByDay[key].push(ev);
+    });
+  }
   
 
   // Current month/year
@@ -114,6 +126,7 @@
   }
 
   // Render calendar initial
+  const calendarDiv = document.getElementById("calendar");
   if(calendarDiv) {
     let monthYear = document.getElementById("month-year");
       if(monthYear) {
