@@ -1,5 +1,19 @@
 <div class="content-wrapper-center">
     <div class="auth-form">
+        <div id="error-here">
+            {{!-- need to verify how errors are returned
+            {{#if hasErrors}}
+            <div id="server-error" class="form-error">
+                <p>The following errors were returned:</p>
+                {{#each errors}}
+                <ul class="error-list">
+                    <li>{{this}}</li>
+                </ul>
+                {{/each}}
+            </div>
+            {{/if}}
+            --}}
+        </div>
         <form action="/users/login" method="post" id="login-form">
             <div class="form-group">
                 <label for="username">
@@ -16,7 +30,8 @@
             <div class="form-group form-submit">
                 <input type="submit" name="submit" id="submit" class="form-input">
             </div>
-            <input type="hidden" name="formType" value="login">
         </form>
     </div>
 </div>
+
+<script type="module" src="../../public/js/validation/login.js"></script>
