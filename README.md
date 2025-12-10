@@ -115,6 +115,7 @@ CS-546-Final-Project/
 │   ├── calendar.handlebars
 │   ├── createEvent.handlebars
 │   ├── createEventSuccess.handlebars
+│   ├── error.handlebars
 │   ├── eventDetails.handlebars
 │   ├── home.handlebars
 │   ├── logout.handlebars
@@ -122,6 +123,10 @@ CS-546-Final-Project/
 └── public/                    # Static assets
     ├── css/main.css
     └── js/
+        ├── validation/
+            ├── client-helpers.js
+            └── login.js
+        ├── calander.js
         ├── client.js
         ├── eventDetails.js    # Save/unsave, comments/replies
         ├── calendar.js
