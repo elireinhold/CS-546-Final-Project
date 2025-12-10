@@ -1,33 +1,48 @@
-<div>
-    <form action="/users/register" method="post" id="register-form">
-        <div>
-            <label for="username">
-                Username
-            </label>
-            <input type="text" name="username" id="username">
-        </div>
-        <div>
-            <label for="firstName">
-                First Name
-                <input type="text" name="firstName" id="firstName">
-            </label>
-        </div>
-        <div>
-            <label for="lastName">
-                Last Name
-                <input type="text" name="lastName" id="lastName">
-            </label>
-        </div>
-        <div>
-            <label for="password">
-                Password
-                <input type="password" name="password" id="password">
-            </label>
-        </div>
-        <div>
-            <label for="preferedBorough">
-                Preferred Borough
-                <select name="preferedBorough" id="preferedBorough">
+<div class="content-wrapper-center">
+    <div class="auth-form">
+        <form action="/users/register" method="post" id="register-form">
+            <div class="form-group">
+                <label for="username">
+                    Username
+                </label>
+                <input type="text" name="username" id="username" class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="firstName">
+                    First Name
+                </label>
+                <input type="text" name="firstName" id="firstName" class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="lastName">
+                    Last Name
+                </label>
+                <input type="text" name="lastName" id="lastName" class="form-input">
+                
+            </div>
+            <div class="form-group">
+                <label>
+                    Email
+                </label>
+                <input type="text" name="email" id="email" class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="password">
+                    Password
+                </label>
+                <input type="password" name="password" id="password" class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">
+                    Confirm Password
+                </label>
+                <input type="password" name="confirmPassword" id="confirmPassword" class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="borough">
+                    Preferred Borough
+                </label>
+                <select name="borough" id="borough" class="form-input">
                     <option value="">...</option>
                     <option>The Bronx</option>
                     <option>Brooklyn</option>
@@ -35,28 +50,36 @@
                     <option>Queens</option>
                     <option>Staten Island</option>
                 </select>
-            </label>
-        </div>
-        <div>
-            <label for="prefEventType">
-                Preferred Event Type
-                <select name="prefEventType" id="prefEventType">
+            </div>
+            <div class="form-group">
+                <label for="preferedEvent">
+                    Preferred Event Type
+                </label>
+                <select name="preferedEvent" id="preferedEvent" class="form-input">
                     <option value="">???</option>
                 </select>
-            </label>
-        </div>
-        <div>
-            <label for="birthday">
-                Password
-                <input type="date" name="birthday" id="birthday">
-                <!-- TODO: add min/max values based on current day (handelbars??)-->
-                <!-- Min: 13 years to day... Max; 122 years to day -->
-            </label>
-        </div>
-        <div>
-            <input type="submit" name="submit" id="submit">
-        </div>
-        <input type="hidden" name="formType" value="register">
-        <!-- Orginazational idea -->
-    </form>
+            </div>
+            <div class="form-group">
+                <label for="birthday">
+                    Birthday
+                </label>
+                <input type="date" name="birthday" id="birthday" class="form-input">
+                <script>
+                    const curDate = new Date();
+                    const mm = (curDate.getMonth()+1).toString().padStart(2,0);
+                    const dd = curDate.getDate().toString().padStart(2,0);
+                    const min = `${curDate.getFullYear()-122}-${mm}-${dd}`
+                    const max = `${curDate.getFullYear()-13}-${mm}-${dd}`
+                    let bdayInput = document.getElementById('birthday');
+                    bdayInput.setAttribute('min',min);
+                    bdayInput.setAttribute('max',max);
+                </script>
+            </div>
+            <div class="form-group form-submit">
+                <input type="submit" name="submit" id="submit" class="form-input">
+            </div>
+            <input type="hidden" name="formType" value="register">
+            <!-- Orginazational idea -->
+        </form>
+    </div>
 </div>
