@@ -1,8 +1,20 @@
 <div class="content-wrapper-center">
     <div class="auth-form">
-        {{#if error}}
-            <p class="error-message">{{error}}</p>
-        {{/if}}
+
+        <div id="error-here">
+            {{!-- need to verify how errors are returned
+            {{#if hasErrors}}
+            <div id="server-error" class="form-error">
+                <p>The following errors were returned:</p>
+                {{#each errors}}
+                <ul class="error-list">
+                    <li>{{this}}</li>
+                </ul>
+                {{/each}}
+            </div>
+            {{/if}}
+            --}}
+        </div>
         <form action="/users/login" method="post" id="login-form">
             <div class="form-group">
                 <label for="username">
