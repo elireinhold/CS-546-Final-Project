@@ -4,7 +4,12 @@ import session from "express-session";
 import cookieParser from "cookie-parser";
 import configRoutes from "./routes/index.js";
 import { settings } from "./config/settings.js";
-import { requireLogin, attachUser, redirectIfLoggedIn, requestLogger } from './middleware.js';
+import {
+  requireLogin,
+  attachUser,
+  redirectIfLoggedIn,
+  requestLogger,
+} from "./middleware.js";
 
 const app = express();
 
@@ -18,14 +23,15 @@ app.use(
     secret: settings.session.secret,
     resave: false,
     saveUninitialized: false,
+    cookie: { maxAge: 60000 * 60 },
   })
 );
 
 // Session Middleware
-app.use((req,res,next) => {
+app.use((req, res, next) => {
   res.locals.session = req.session;
   next();
-}); 
+});
 
 app.use(attachUser);
 
@@ -51,8 +57,8 @@ const hbs = exphbs.create({
     },
     json(data) {
       return JSON.stringify(data);
-    }
-  }
+    },
+  },
 });
 
 app.engine("handlebars", hbs.engine);

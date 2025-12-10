@@ -13,6 +13,86 @@ router.get("/login", (req, res) => {
   res.render("users/login");
 });
 
+router.post("/login", async (req, res) => {
+  let { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).render("users/login", {
+      error: "Error: Both username and password are required.",
+      title: "Login Error",
+      username: username || "",
+    });
+  }
+
+  if (typeof username !== "string") {
+    return res.status(400).render("users/login", {
+      error: "Error: Username must be a string.",
+      title: "Login Error",
+    });
+  }
+  username = username.trim();
+  if (username.length === 0) {
+    return res.status(400).render("users/login", {
+      error: "Error: Username cannot be an empty string or just spaces.",
+      title: "Login Error",
+    });
+  }
+  if (username.length < 5 || username.length > 10) {
+    return res.status(400).render("users/login", {
+      error: "Error: Username must be between 5 and 10 characters long.",
+      title: "Login Error",
+    });
+  }
+  if (typeof password !== "string") {
+    return res.status(400).render("users/login", {
+      error: "Error: Password must be a string.",
+      title: "Login Error",
+    });
+  }
+  password = password.trim();
+  if (password.length === 0) {
+    return res.status(400).render("users/login", {
+      error: "Error: Password cannot be an empty string or just spaces.",
+      title: "Login Error",
+    });
+  }
+  if (password.length < 8) {
+    return res.status(400).render("users/login", {
+      error: "Error: Password must be at least 8 characters long.",
+      title: "Login Error",
+    });
+  }
+  try {
+    password = userHelpers.validPassword(password);
+  } catch (e) {
+    return res.status(400).render("users/login", {
+      error: "Error: Either the username or password is invalid.",
+      title: "Login Error",
+    });
+  }
+
+  try {
+    const user = await userData.login(username, password);
+    req.session.user = {
+      _id: user._id,
+      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      preferredBorough: user.homeBorough || null,
+      birthday: user.birthday,
+      favoriteEventTypes: user.favoriteEventTypes || [],
+    };
+
+    return res.redirect("/");
+  } catch (e) {
+    return res.status(400).render("users/login", {
+      error: "Error: Either the userId or password is invalid.",
+      title: "Login Error",
+    });
+  }
+});
+
 router.get("/register", (req, res) => {
   res.render("users/register");
 });
@@ -175,13 +255,12 @@ router.post("/register", async (req, res) => {
 });
 
 router.route("/logout").get(async (req, res) => {
-  //code here for GET
   try {
     if (req.session.user) {
       req.session.destroy();
       res.render("logout", { title: "Sign Out" });
     } else {
-      res.redirect("/login");
+      res.redirect("login");
     }
   } catch (e) {
     res.status(500).render("error", {
