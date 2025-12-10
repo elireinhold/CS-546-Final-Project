@@ -10,10 +10,13 @@
 <body>
     <header>
         <nav>
+            {{#if user}}
+                <span>User: {{user.username}}</span>
+            {{/if}}
             <a href="/">Home</a>
             <a href="/events/search">Search Events</a>
             {{#if user}}
-                <span>Welcome, {{user.username}}</span>
+                <a href="/calendar">View Calendar</a>
                 <a href="/users/logout">Logout</a>
             {{else}}
                 <a href="/users/login">Login</a>
