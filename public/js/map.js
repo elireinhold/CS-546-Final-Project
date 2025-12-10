@@ -9,17 +9,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Add event markers
   const bounds = [];
-  if (Array.isArray(eventLocation)) {
-    eventLocation.forEach(ev => {
-      if (ev.lat && ev.lon) {
-        L.marker([ev.lat, ev.lon])
-          .addTo(map)
-          .bindPopup(`<b>${ev.title}</b><br>${ev.location}`);
-        bounds.push([ev.lat, ev.lon]);
+  eventLocation.forEach(ev => {
+    if (ev.lat && ev.lon) {
+      L.marker([ev.lat, ev.lon])
+        .addTo(map)
+        .bindPopup(`<b>${ev.title}</b><br>${ev.location}`);
+      bounds.push([ev.lat, ev.lon]);
           
-      }
-    });
-  }
+    }
+  });
 
   // Center and zoom the map to fit all markers
   if (bounds.length > 0) {

@@ -1,4 +1,6 @@
 (function() {
+  const calendarDiv = document.getElementById("calendar");
+  
   function renderCalendar(year, month) {
     // Removes all children to clear the calendar
     while (calendarDiv.firstChild) {
@@ -31,8 +33,8 @@
         // For each event in the same day append a link to the event page and put it inside
         eventsByDay[date].forEach(ev => {
           const link = document.createElement("a");
-          link.href = `/events/${ev.eventId}`;
-          link.textContent = ev.title;
+          link.href = `/events/${ev._id}`;
+          link.textContent = ev.eventName;
           dayCell.appendChild(link);
           dayCell.appendChild(document.createElement("br"));
         });
@@ -42,15 +44,6 @@
     }
   }
 
-  // Organize events by date
-  const eventsByDay = {};
-  events.forEach(ev => {
-    if (!eventsByDay[ev.date]) {
-      eventsByDay[ev.date] = [];
-    }
-    eventsByDay[ev.date].push(ev);
-  });
-
   // Converts index to name of month
   function getMonthName(index) {
     const monthNames = [
@@ -59,6 +52,20 @@
     ];
     return monthNames[index];
   }
+
+  // Build event map
+  const eventsByDay = {};
+  events.forEach(ev => {
+    const date = new Date(ev.startDateTime);
+    const year = date.getFullYear();
+    const monthstr = String(date.getMonth() + 1).padStart(2, "0");
+    const daystr = String(date.getDate()).padStart(2, "0");
+    const key = `${year}-${monthstr}-${daystr}`;
+
+    if (!eventsByDay[key]) eventsByDay[key] = [];
+    eventsByDay[key].push(ev);
+  });
+  
 
   // Current month/year
   let currentDate = new Date();
@@ -106,7 +113,6 @@
   }
 
   // Render calendar initial
-  const calendarDiv = document.getElementById("calendar");
   if(calendarDiv) {
     let monthYear = document.getElementById("month-year");
       if(monthYear) {
