@@ -25,3 +25,34 @@
   margin-top: 16px;
   border: 1px solid #ccc; /* Optional: border around the map */
 }
+
+/* Forms & related wrappers s*/
+
+.content-wrapper-center {
+  width: 100%;
+  justify-content: center;
+  display: flex;
+}
+
+.auth-form {
+  border: solid;
+  padding: 25px;
+}
+
+label {
+  display: inline-block;
+  margin-bottom: 5px;
+}
+
+.form-input {
+  display: block;
+  padding: 3px;
+}
+
+.form-submit {
+  margin-top: 15px;
+}
+
+.form-group {
+  margin-bottom: 7px;
+}

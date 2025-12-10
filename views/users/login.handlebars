@@ -1,20 +1,22 @@
-<div>
-    <form action="/users/login" method="post" id="login-form">
-        <div>
-            <label for="username">
-                Username
-            </label>
-            <input type="text" name="username" id="username">
-        </div>
-        <div>
-            <label for="password">
-                Password
-                <input type="password" name="password" id="password">
-            </label>
-        </div>
-        <div>
-            <input type="submit" name="submit" id="submit">
-        </div>
-        <input type="hidden" name="formType" value="login">
-    </form>
+<div class="content-wrapper-center">
+    <div class="auth-form">
+        <form action="/users/login" method="post" id="login-form">
+            <div class="form-group">
+                <label for="username">
+                    Username
+                </label>
+                <input type="text" name="username" id="username" class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="password">
+                    Password
+                    <input type="password" name="password" id="password" class="form-input">
+                </label>
+            </div>
+            <div class="form-group form-submit">
+                <input type="submit" name="submit" id="submit" class="form-input">
+            </div>
+            <input type="hidden" name="formType" value="login">
+        </form>
+    </div>
 </div>
