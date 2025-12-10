@@ -27,14 +27,19 @@
     // Add each day
     for (let day = 1; day <= daysInMonth; day++) {
       const dayCell = document.createElement("div");
-      // Set day number
-      dayCell.textContent = day;
-      
 
       // Format YYYY-MM-DD
       const monthstr = String(month + 1).padStart(2, '0')
       const daystr = String(day).padStart(2, '0')
       const date = `${year}-${monthstr}-${daystr}`;
+
+      // Create day which links to search that filters for that day
+      const dayLink = document.createElement("a");
+      dayLink.href = `/events/search?keyword=&startDate=${date}&endDate=${date}`;
+      dayLink.textContent = day;
+
+      dayCell.appendChild(dayLink);
+      dayCell.appendChild(document.createElement("br"));
 
       if (eventsByDay[date]) {
         // For each event in the same day append a link to the event page and put it inside
