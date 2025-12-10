@@ -2,7 +2,7 @@ import express from 'express';
 const router = express.Router();
 import * as usersData from '../data/users.js';
 import { requireLogin } from "../middleware.js";
-import { getEventById } from '../data/events.js'
+import * as eventsData from '../data/events/index.js'
 
 
 router.get("/", requireLogin, async (req, res) => {
@@ -13,10 +13,10 @@ router.get("/", requireLogin, async (req, res) => {
     // Fetch each event by ID
     const events = [];
     for (const id of eventIds) {
-      const ev = await getEventById(id);
+      const ev = await eventsData.getEventById(id);
       events.push(ev);
     }
-
+    
     res.render("calendar", { events });
 
   } catch (e) {

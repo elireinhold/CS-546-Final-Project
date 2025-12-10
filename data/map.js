@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import { getEventById } from "./events.js";
+import * as events from "./events/index.js";
 import { getSavedEvents } from "./users.js"
 
 
@@ -26,7 +26,7 @@ export async function getAllSavedEventsWithCoordinates(userId) {
       // Fetch each event by ID
       const eventsList = [];
       for (const id of eventIds) {
-        const ev = await getEventById(id);
+        const ev = await events.getEventById(id);
         eventsList.push(ev);
       }
 
@@ -53,7 +53,7 @@ export async function getAllSavedEventsWithCoordinates(userId) {
 
 // Uses geocoding to get event with coordinate for event page
 export async function getEventWithCoordinates(eventId) {
-  const eventData = await getEventById(eventId)
+  const eventData = await events.getEventById(eventId)
 
   const result = [];
   if (eventData.eventLocation) {

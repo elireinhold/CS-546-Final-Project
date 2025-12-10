@@ -104,6 +104,8 @@ export async function saveEvent(userId, eventId) {
   return { saved: result.modifiedCount > 0 };
 }
 
+
+
 // Unsave event from savedEvents
 export async function unsaveEvent(userId, eventId) {
   const userCollection = await users();

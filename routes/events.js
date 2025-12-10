@@ -1,5 +1,5 @@
 import { Router } from "express";
-import events from "../data/events.js";     
+import * as events from "../data/events/index.js";     
 import users from "../data/users.js";        
 import { requireLogin } from "../middleware.js";
 import { getEventWithCoordinates } from "../data/map.js";

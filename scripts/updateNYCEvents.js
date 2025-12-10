@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 import { dbConnection } from "../config/mongoConnection.js";
-import { normalizeNYCEvent } from "../data/events.js";
+import * as events from "../data/events/index.js";
 import { settings } from "../config/settings.js";
 
 const NYC_API_URL = `${settings.nycApi.baseUrl}?$limit=${settings.nycApi.limit}`;
@@ -17,7 +17,7 @@ async function updateNYCEvents() {
 
   // For each NYC event, update or insert
   for (const evt of rawEvents) {
-    const cleaned = normalizeNYCEvent(evt);
+    const cleaned = events.normalizeNYCEvent(evt);
 
     const result = await eventCollection.updateOne(
       { eventId: cleaned.eventId },     // match by NYC eventId

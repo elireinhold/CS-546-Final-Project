@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 import { dbConnection } from "../config/mongoConnection.js";
-import { normalizeNYCEvent, insertManyNYCEvents } from "../data/events.js";
+import * as events from "../data/events/index.js";
 import { settings } from "../config/settings.js";
 
 const NYC_API_URL = `${settings.nycApi.baseUrl}?$limit=${settings.nycApi.limit}`;
@@ -13,11 +13,11 @@ async function seedNYC() {
   const rawEvents = await response.json();
   
 
-  const cleanedEvents = rawEvents.map(evt => normalizeNYCEvent(evt));
+  const cleanedEvents = rawEvents.map(evt => events.normalizeNYCEvent(evt));
 
   await eventCollection.deleteMany({ eventSource: "NYC" });
 
-  await insertManyNYCEvents(cleanedEvents);
+  await events.insertManyNYCEvents(cleanedEvents);
 
   process.exit(0);
 }
