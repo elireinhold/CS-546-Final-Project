@@ -22,7 +22,7 @@ if(form) {
             let password = passwordContainer.value;
 
             try{
-                username = helpers.validUsername(username);
+                username = helpers.validUsername(username,{login: true});
             } catch(e) {
                 errorList.push(e);
             }
@@ -42,6 +42,10 @@ if(form) {
 
         } catch(e) {
             event.preventDefault();
+
+            if(!Array.isArray(e)) {
+                e = [e];
+            }
 
             let errs = document.getElementById('client-error');
 

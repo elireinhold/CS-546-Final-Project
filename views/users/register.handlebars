@@ -1,10 +1,10 @@
 <div class="content-wrapper-center">
     <div class="auth-form">
-        {{#if error}}
-            <p class="error-message">{{error}}</p>
-        {{/if}}
-
-
+        <div id="error-here">
+            {{#if error}}
+                <p class="error-message">{{error}}</p>
+            {{/if}}
+        </div>
         <form action="/users/register" method="post" id="register-form">
             <div class="form-group">
                 <label for="username">
@@ -98,8 +98,8 @@
             <div class="form-group form-submit">
                 <input type="submit" name="submit" id="submit" class="form-input">
             </div>
-            <input type="hidden" name="formType" value="register">
-            <!-- Orginazational idea -->
         </form>
     </div>
 </div>
+
+<script type="module" src="../../public/js/validation/register.js"></script>
