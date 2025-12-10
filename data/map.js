@@ -21,7 +21,14 @@ const res = await fetch(url, {
 
 // Uses geocoding to get all events with coordinates that user saved
 export async function getAllSavedEventsWithCoordinates(userId) {
-  const eventsList = await getSavedEvents(userId)
+  const eventIds = await getSavedEvents(userId);
+      
+      // Fetch each event by ID
+      const eventsList = [];
+      for (const id of eventIds) {
+        const ev = await getEventById(id);
+        eventsList.push(ev);
+      }
 
   const result = [];
   // For each event get coordinates and push all obj containing info into result array

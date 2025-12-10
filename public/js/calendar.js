@@ -1,4 +1,4 @@
-(function() {
+(async function() {
   const calendarDiv = document.getElementById("calendar");
   
   function renderCalendar(year, month) {
@@ -56,6 +56,7 @@
   // Build event map
   const eventsByDay = {};
   events.forEach(ev => {
+    
     const date = new Date(ev.startDateTime);
     const year = date.getFullYear();
     const monthstr = String(date.getMonth() + 1).padStart(2, "0");
