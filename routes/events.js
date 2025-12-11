@@ -4,6 +4,7 @@ import users from "../data/users.js";
 import { requireLogin } from "../middleware.js";
 import { getEventWithCoordinates } from "../data/map.js";
 import helpers from "../helpers/eventHelpers.js";
+import xss from "xss";
 
 const router = Router();
 
@@ -29,6 +30,15 @@ router.post("/create", requireLogin, async (req, res) => {
     streetClosureType,
     isPublic,
   } = req.body;
+
+  if (eventName) eventName = xss(eventName);
+  if (eventType) eventType = xss(eventType);
+  if (eventLocation) eventLocation = xss(eventLocation);
+  if (eventBorough) eventBorough = xss(eventBorough);
+  if (startDateTime) startDateTime = xss(startDateTime);
+  if (endDateTime) endDateTime = xss(endDateTime);
+  if (streetClosureType) streetClosureType = xss(streetClosureType);
+  if (isPublic) isPublic = xss(isPublic);
 
   if (
     !eventName ||
