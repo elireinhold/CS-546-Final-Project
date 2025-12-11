@@ -42,13 +42,13 @@
                 <label for="endDateTime">
                     End Date & Time
                 </label>
-                <input type="datetime-local" name="endDateTime" id="endDateTIme" class="form-input">
+                <input type="datetime-local" name="endDateTime" id="endDateTime" class="form-input">
             </div>
             <div class="form-group">
-                <label for="">
+                <label for="streetClosureType">
                     Road Closure
                 </label>
-                <input type="" name="" id="" class="form-input">
+                <input type="text" name="streetClosureType" id="streetClosureType" class="form-input">
             </div>
             <div class="form-group">
                 <label for="communityBoard">
@@ -61,8 +61,8 @@
                         Event Visibility
                     </p>
                     <div class="form-radio">
-                        <label for="private" class="form-radio"><input type="radio" value="private" name="visibility" id="private" class="form-input">Private</label>
-                        <label for="public" class="form-radio"><input type="radio" value="public" name="visibility" id="public" class="form-input">Public</label>
+                        <label for="private" class="form-radio"><input type="radio" value="private" name="publicity" id="private" class="form-input">Private</label>
+                        <label for="public" class="form-radio"><input type="radio" value="public" name="publicity" id="public" class="form-input">Public</label>
                     </div>
             </div>
             <div class="form-group form-submit">
@@ -71,3 +71,5 @@
         </form>
     </div>
 </div>
+
+<script type="module" src="../public/js/validation/createEvent.js"></script>

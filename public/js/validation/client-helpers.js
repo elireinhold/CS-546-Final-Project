@@ -169,9 +169,9 @@ const exportedMethods = {
         }
 
         if (borough == "staten island") {
-        borough = "Staten Island";
+            borough = "Staten Island";
         } else {
-        borough = borough.charAt(0).toUpperCase() + borough.slice(1);
+            borough = borough.charAt(0).toUpperCase() + borough.slice(1);
         }
         return borough;
     },
@@ -205,7 +205,122 @@ const exportedMethods = {
         }
 
         return dateString;
-    }
+    },
+    // Event functions
+    validEventType(eventType) {
+        if (!eventType) {
+        throw "Error: Event type is required.";
+        }
+        if (typeof eventType !== "string") {
+        throw "Error: Event type must be a string.";
+        }
+        eventType = eventType.trim();
+
+        const eventTypes = [
+        "Special Event",
+        "Sport - Adult",
+        "Sport - Youth",
+        "Production Event",
+        "Open Street Partner Event",
+        "Plaza Partner Event",
+        "Street Event",
+        "Religious Event",
+        "Farmers Market",
+        "Sidewalk Sale",
+        "Theater Load in and Load Outs",
+        "Parade",
+        "Miscellaneous",
+        "Plaza Event",
+        "Block Party",
+        "Clean-Up",
+        ];
+
+        if (!eventTypes.includes(eventType)) {
+        throw "Error: Event type must be valid. The valid event types are: 'Special Event', 'Sport - Adult', 'Sport - Youth', 'Production Event','Open Street Partner Event', 'Plaza Partner Event','Street Event','Religious Event','Farmers Market','Sidewalk Sale','Theater Load in and Load Outs','Parade','Miscellaneous','Plaza Event','Block Party','Clean-Up'";
+        }
+        return eventType;
+    },
+    validEventName(eventName) {
+        if (!eventName) {
+        throw "Error: Event name is required.";
+        }
+        if (typeof eventName !== "string") {
+        throw "Error: Event name must be a string.";
+        }
+        eventName = eventName.trim();
+
+        if (eventName.length < 2) {
+        throw "Error: Event name must be at least 2 characters long.";
+        }
+        return eventName;
+    },
+    validLocation(eventLocation) {
+        if (!eventLocation || !(eventLocation.trim())) {
+        throw "Error: Must provide an event location.";
+        }
+        if (typeof eventLocation !== "string") {
+        throw "Error: eventLocation must be a string.";
+        }
+        eventLocation = eventLocation.trim()
+        return eventLocation;
+    },
+    validPublicity(publicity) {
+        if (!publicity) {
+        throw "Error: Must specify if event is public or private.";
+        }
+        if (typeof publicity !== "string") {
+        throw "Error: Publicity must be a string.";
+        }
+        publicity = publicity.trim().toLowerCase();
+        if (publicity === "private") {
+        return false;
+        } else if (publicity === "public") {
+        return true;
+        } else {
+        throw "Error: Publicity must be private or public.";
+        }
+    },
+    validStreetClosure(closure) {
+        if (typeof closure !== "string") {
+        throw "Error: Street closure must be a string.";
+        }
+        closure = closure.trim();
+        if (closure.length < 4) {
+        throw "Error: Street closure infromation must be atleast 4 character long.";
+        }
+        return closure;
+    },
+    validCommunityBoard(communityBoard) {
+        const trimmed = communityBoard.trim();
+        const num = parseInt(trimmed);
+
+        if (isNaN(num)) {
+        throw "Error: Community board must be a positive integer.";
+        }
+
+        if (num < 1 || !Number.isInteger(num)) {
+        throw "Error: Community board must be a positive integer.";
+        }
+        return trimmed;
+    },
+    validDateTime(dateTime) {
+        if(!dateTime) throw "Error: Must provide date/time"
+        const d = new Date(dateTime);
+        try {
+            const ISO = d.toISOString()
+            return ISO.substring(0,ISO.length-1);
+        } catch {
+            throw "Error: Date/time does not exist";
+        }
+    },
+    validStartEndTimeDate(startDateTime, endDateTime) {
+        if(!startDateTime) throw "Error: Must provide start date/time";
+        if(!endDateTime) throw "Error: Must provide end date/time";
+        const sd = new Date(this.validDateTime(startDateTime));
+        const ed = new Date(this.validDateTime(endDateTime));
+        if(sd >= ed) throw "Error: Start date/time must occur before end date/time"
+        return true;
+    },
 }
 
 export default exportedMethods;
