@@ -3,6 +3,7 @@ import events from "../data/events.js";
 import users from "../data/users.js";
 import { requireLogin } from "../middleware.js";
 import { getEventWithCoordinates } from "../data/map.js";
+import helpers from "../helpers/eventHelpers.js";
 
 const router = Router();
 
@@ -17,9 +18,53 @@ router.get("/create", requireLogin, async (req, res) => {
   }
 });
 
-router.post("/", requireLogin, async (req, res) => {
-  try {
-    let {
+router.post("/create", requireLogin, async (req, res) => {
+  let {
+    eventName,
+    eventType,
+    eventLocation,
+    eventBorough,
+    startDateTime,
+    endDateTime,
+    streetClosureType,
+    communityBoard,
+    isPublic,
+  } = req.body;
+
+  if (
+    !eventName ||
+    !eventType ||
+    !eventLocation ||
+    !eventBorough ||
+    !startDateTime ||
+    !endDateTime ||
+    !isPublic
+  ) {
+    let missingFields = [];
+    if (!eventName) {
+      missingFields.push("eventName");
+    }
+    if (!eventType) {
+      missingFields.push("eventType");
+    }
+    if (!eventLocation) {
+      missingFields.push("eventLocation");
+    }
+    if (!eventBorough) {
+      missingFields.push("eventBorough");
+    }
+    if (!startDateTime) {
+      missingFields.push("startDateTime");
+    }
+    if (!endDateTime) {
+      missingFields.push("endDateTime");
+    }
+    if (!isPublic) {
+      missingFields.push("isPublic");
+    }
+    return res.status(400).render("createEvent", {
+      error:
+        "Error: The following fields are missing: " + missingFields.join(", "),
       eventName,
       eventType,
       eventLocation,
@@ -29,8 +74,34 @@ router.post("/", requireLogin, async (req, res) => {
       streetClosureType,
       communityBoard,
       isPublic,
-    } = req.body;
+    });
+  }
+  try {
+    eventName = helpers.validEventName(eventName);
+    eventType = helpers.validEventType(eventType);
+    eventLocation = helpers.validLocation(eventLocation);
+    eventBorough = helpers.validBorough(eventBorough);
+    startDateTime = helpers.validDateTime(startDateTime);
+    endDateTime = helpers.validDateTime(endDateTime);
+    helpers.validStartEndTimeDate(startDateTime, endDateTime);
+    communityBoard = helpers.validCommunityBoard(communityBoard);
+    //isPublic = helpers.validPublicity(isPublic);
+  } catch (e) {
+    return res.status(400).render("createEvent", {
+      error: `${e}`,
+      eventName,
+      eventType,
+      eventLocation,
+      eventBorough,
+      startDateTime,
+      endDateTime,
+      streetClosureType,
+      communityBoard,
+      isPublic,
+    });
+  }
 
+  try {
     const event = await events.userCreateEvent(
       req.session.user._id,
       eventName,
@@ -44,12 +115,26 @@ router.post("/", requireLogin, async (req, res) => {
       isPublic
     );
 
-    res.redirect("/events/create/success");
+    if (event.registrationCompleted) {
+      return res.redirect("/events/create/success");
+    } else {
+      return res.status(500).render("error", {
+        error: "Internal Server Error: Registration failed.",
+        title: "Error",
+      });
+    }
   } catch (e) {
     res.status(400).render("createEvent", {
-      title: "Create New Event",
       error: e,
-      formData: req.body,
+      eventName,
+      eventType,
+      eventLocation,
+      eventBorough,
+      startDateTime,
+      endDateTime,
+      streetClosureType,
+      communityBoard,
+      isPublic,
     });
   }
 });
@@ -60,71 +145,71 @@ router.get("/create/success", requireLogin, (req, res) => {
     user: req.session.user,
   });
 });
+/*
+router.get("/search", async (req, res) => {
+  try {
+    let { keyword, borough, eventType, startDate, endDate } = req.query;
 
-// router.get("/search", async (req, res) => {
-//   try {
-//     let { keyword, borough, eventType, startDate, endDate } = req.query;
+    borough = Array.isArray(borough) ? borough : borough ? [borough] : [];
+    eventType = Array.isArray(eventType) ? eventType : eventType ? [eventType] : [];
 
-//     borough = Array.isArray(borough) ? borough : borough ? [borough] : [];
-//     eventType = Array.isArray(eventType) ? eventType : eventType ? [eventType] : [];
+    const eventTypes = (await events.getDistinctEventTypes()).sort();
+    const boroughs = (await events.getDistinctBoroughs()).sort();
 
-//     const eventTypes = (await events.getDistinctEventTypes()).sort();
-//     const boroughs = (await events.getDistinctBoroughs()).sort();
+    if (startDate && endDate && startDate > endDate) {
+      return res.status(400).render("search", {
+        keyword: keyword || "",
+        borough,
+        eventType,
+        startDate,
+        endDate,
+        results: [],
+        eventTypes,
+        boroughs,
+        error: "Start date cannot be after end date",
+        currentUrl: req.originalUrl,
+      });
+    }
 
-//     if (startDate && endDate && startDate > endDate) {
-//       return res.status(400).render("search", {
-//         keyword: keyword || "",
-//         borough,
-//         eventType,
-//         startDate,
-//         endDate,
-//         results: [],
-//         eventTypes,
-//         boroughs,
-//         error: "Start date cannot be after end date",
-//         currentUrl: req.originalUrl,
-//       });
-//     }
+    const results = await events.searchEvents({
+      keyword: keyword || "",
+      borough,
+      eventType,
+      startDate,
+      endDate,
+    });
 
-//     const results = await events.searchEvents({
-//       keyword: keyword || "",
-//       borough,
-//       eventType,
-//       startDate,
-//       endDate,
-//     });
+    let savedList = [];
+    if (req.session.user) {
+      savedList = (await users.getSavedEvents(req.session.user._id)).map(id => id.toString());
+    }
 
-//     let savedList = [];
-//     if (req.session.user) {
-//       savedList = (await users.getSavedEvents(req.session.user._id)).map(id => id.toString());
-//     }
+    const eventIds = results.map(e => e._id.toString());
+    const countMap = await users.countUsersWhoSavedMany(eventIds);
 
-//     const eventIds = results.map(e => e._id.toString());
-//     const countMap = await users.countUsersWhoSavedMany(eventIds);
+    results.forEach(evt => {
+      const id = evt._id.toString();
+      evt.saved = savedList.includes(id);
+      evt.userCount = countMap[id] || 0;
+    });
 
-//     results.forEach(evt => {
-//       const id = evt._id.toString();
-//       evt.saved = savedList.includes(id);
-//       evt.userCount = countMap[id] || 0;
-//     });
+    res.render("search", {
+      keyword: keyword || "",
+      borough,
+      eventType,
+      startDate,
+      endDate,
+      results,
+      eventTypes,
+      boroughs,
+      currentUrl: req.originalUrl,
+    });
 
-//     res.render("search", {
-//       keyword: keyword || "",
-//       borough,
-//       eventType,
-//       startDate,
-//       endDate,
-//       results,
-//       eventTypes,
-//       boroughs,
-//       currentUrl: req.originalUrl,
-//     });
-
-//   } catch (e) {
-//     res.status(500).json({ error: e.message });
-//   }
-// });
-
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+*/
 router.get("/search", async (req, res) => {
   try {
     let { keyword, borough, eventType, startDate, endDate, page } = req.query;
@@ -163,7 +248,7 @@ router.get("/search", async (req, res) => {
       });
     }
 
-    // ⬇⬇⬇  ✨ 从 searchEvents 取得分页结构 ✨  ⬇⬇⬇
+    // 从 searchEvents 取得分页结构
     const { results, totalEvents, totalPages, currentPage } =
       await events.searchEvents({
         keyword: keyword || "",
@@ -174,7 +259,7 @@ router.get("/search", async (req, res) => {
         page,
       });
 
-    // 是否登录 → 拿 saved events
+    // 是否登录 拿 saved events
     let savedList = [];
     if (req.session.user) {
       savedList = (await users.getSavedEvents(req.session.user._id)).map((id) =>

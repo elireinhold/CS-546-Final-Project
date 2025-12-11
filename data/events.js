@@ -66,7 +66,7 @@ export async function searchEvents({
   eventType,
   startDate,
   endDate,
-  page = 1   
+  page = 1,
 }) {
   const eventCollection = await events();
 
@@ -74,24 +74,31 @@ export async function searchEvents({
 
   if (keyword && keyword.trim()) {
     const lower = keyword.trim().toLowerCase();
-    all = all.filter(evt =>
-      evt.eventName &&
-      evt.eventName.toLowerCase().includes(lower)
+    all = all.filter(
+      (evt) => evt.eventName && evt.eventName.toLowerCase().includes(lower)
     );
   }
 
-  if (Array.isArray(borough) && borough.length > 0 && !borough.includes("all")) {
-    all = all.filter(evt => borough.includes(evt.eventBorough));
+  if (
+    Array.isArray(borough) &&
+    borough.length > 0 &&
+    !borough.includes("all")
+  ) {
+    all = all.filter((evt) => borough.includes(evt.eventBorough));
   }
-  if (Array.isArray(eventType) && eventType.length > 0 && !eventType.includes("all")) {
-    all = all.filter(evt => eventType.includes(evt.eventType));
+  if (
+    Array.isArray(eventType) &&
+    eventType.length > 0 &&
+    !eventType.includes("all")
+  ) {
+    all = all.filter((evt) => eventType.includes(evt.eventType));
   }
 
   if (startDate || endDate) {
     const start = startDate ? new Date(startDate + "T00:00:00") : null;
-    const end   = endDate   ? new Date(endDate   + "T23:59:59") : null;
+    const end = endDate ? new Date(endDate + "T23:59:59") : null;
 
-    all = all.filter(evt => {
+    all = all.filter((evt) => {
       const evtDate = new Date(evt.startDateTime);
       if (isNaN(evtDate)) return false;
 
@@ -115,7 +122,7 @@ export async function searchEvents({
     results,
     totalEvents,
     totalPages,
-    currentPage: safePage
+    currentPage: safePage,
   };
 }
 
@@ -141,20 +148,18 @@ export async function getRecommendedEventsForUser(userId, limit = 5) {
   const user = await userCollection.findOne({ _id: new ObjectId(userId) });
   if (!user) throw "User not found";
 
-  const savedIds = (user.savedEvents || []).map(id => id.toString());
+  const savedIds = (user.savedEvents || []).map((id) => id.toString());
   const now = new Date();
 
   const allEvents = await eventCollection.find({}).toArray();
 
-  const futureEvents = allEvents.filter(evt => {
+  const futureEvents = allEvents.filter((evt) => {
     const dt = new Date(evt.startDateTime);
 
-    return (
-      dt > now && !savedIds.includes(evt._id.toString())      
-    );
+    return dt > now && !savedIds.includes(evt._id.toString());
   });
 
-  const savedEventsDocs = allEvents.filter(evt =>
+  const savedEventsDocs = allEvents.filter((evt) =>
     savedIds.includes(evt._id.toString())
   );
 
@@ -163,8 +168,7 @@ export async function getRecommendedEventsForUser(userId, limit = 5) {
 
   for (const evt of savedEventsDocs) {
     if (evt.eventType) {
-      typeCount[evt.eventType] =
-        (typeCount[evt.eventType] || 0) + 1;
+      typeCount[evt.eventType] = (typeCount[evt.eventType] || 0) + 1;
     }
     if (evt.eventBorough) {
       boroughCount[evt.eventBorough] =
@@ -174,15 +178,15 @@ export async function getRecommendedEventsForUser(userId, limit = 5) {
 
   const maxType = Math.max(0, ...Object.values(typeCount));
   const frequentTypes = Object.keys(typeCount).filter(
-    t => typeCount[t] === maxType
+    (t) => typeCount[t] === maxType
   );
 
   const maxBorough = Math.max(0, ...Object.values(boroughCount));
   const frequentBoroughs = Object.keys(boroughCount).filter(
-    b => boroughCount[b] === maxBorough
+    (b) => boroughCount[b] === maxBorough
   );
 
-  const scored = futureEvents.map(evt => {
+  const scored = futureEvents.map((evt) => {
     let score = 0;
 
     if (user.favoriteEventType && evt.eventType === user.favoriteEventType) {
@@ -206,23 +210,19 @@ export async function getRecommendedEventsForUser(userId, limit = 5) {
 
   scored.sort((a, b) => b.score - a.score);
 
-  let recommendations = scored
-    .slice(0, limit)
-    .map(s => s.evt);
+  let recommendations = scored.slice(0, limit).map((s) => s.evt);
 
   if (recommendations.length < limit) {
     const missing = limit - recommendations.length;
 
     const notPicked = futureEvents.filter(
-      evt => !recommendations.some(r => r._id.toString() === evt._id.toString())
+      (evt) =>
+        !recommendations.some((r) => r._id.toString() === evt._id.toString())
     );
 
     notPicked.sort(() => Math.random() - 0.5);
 
-    recommendations = [
-      ...recommendations,
-      ...notPicked.slice(0, missing)
-    ];
+    recommendations = [...recommendations, ...notPicked.slice(0, missing)];
   }
 
   return recommendations;
@@ -271,7 +271,7 @@ export async function userCreateEvent(
     eventName: eventName,
     startDateTime: startDateTime,
     endDateTime: endDateTime,
-    eventSource: `User Created: ${id}`,
+    eventSource: `User Created: ${id.username}`,
     eventType: eventType,
     eventBorough: eventBorough,
     eventLocation: eventLocation,
@@ -388,7 +388,7 @@ const exportedMethods = {
   userCreateEvent,
   addComment,
   deleteComment,
-  getRecommendedEventsForUser
+  getRecommendedEventsForUser,
 };
 
 export default exportedMethods;
