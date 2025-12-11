@@ -1,42 +1,47 @@
-<h1>NYSee Now</h1>
+{{!--
+<div class="content-wrapper-center">
+    <h1>NYSee Now</h1>
+</div> --}}
 
-{{#if session.user}}
-<h2>Hello {{session.user.username}}!</h2>
-
-<div>
-    <a href="/calendar">View Calendar</a>
-    <a href="/">Create New Event</a>
-    <a href="/events/search">Find Your Next Event</a>
-    
+<div class="home">
+    <div class="home-left">
+        {{#if session.user}}
+        <h2>Hello {{session.user.username}}!</h2>
+        
+        <div>
+            <a href="/calendar">View Calendar</a>
+            <a href="/events/create">Create New Event</a>
+            <a href="/events/search">Find Your Next Event</a>
+        </div>
+        
+        <h3>Saved Events</h3>
+        {{else}}
+            <p>Welcome! Log in to explore events happening in NYC.</p>
+        {{/if}}
+        
+        {{#if user}}
+        <h3>Events you may like:</h3>
+        
+        {{#if recommendedEvents.length}}
+            <ul>
+            {{#each recommendedEvents}}
+                <li>
+                <a href="/events/{{this._id}}">{{this.eventName}}</a>
+                — {{this.eventBorough}} — {{this.eventType}}
+                </li>
+            {{/each}}
+            </ul>
+        {{else}}
+            <p>No recommendations yet. Save more events!</p>
+        {{/if}}
+        
+        {{/if}}
+    </div>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        const eventLocation = {{{json eventLocation}}}
+    </script>
+    <script src="/public/js/map.js"></script>
 </div>
-
-<h2>Saved Events</h2>
-  {{else}}
-    <p>Welcome! Log in to explore events happening in NYC.</p>
-{{/if}}
-
-<div id="map"></div>
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script>
-  const eventLocation = {{{json eventLocation}}}
-</script>
-<script src="/public/js/map.js"></script>
-
-{{#if user}}
-  <h2>Events you may like:</h2>
-
-  {{#if recommendedEvents.length}}
-    <ul>
-      {{#each recommendedEvents}}
-        <li>
-          <a href="/events/{{this._id}}">{{this.eventName}}</a>
-          — {{this.eventBorough}} — {{this.eventType}}
-        </li>
-      {{/each}}
-    </ul>
-  {{else}}
-    <p>No recommendations yet. Save more events!</p>
-  {{/if}}
-  
-{{/if}}
 

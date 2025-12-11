@@ -1,3 +1,59 @@
+body {
+  background-color: aliceblue;
+}
+
+/* Header / Nav */
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  border-bottom-style: solid;
+  padding: 5px 10px;
+  margin-bottom: 10px;
+}
+
+.page-head {
+  display: flex;
+  width: 25%;
+}
+
+nav {
+  padding: 0px 8px 0px 0px;
+}
+
+.auth-head {
+  display: flex;
+  justify-content: right;
+  width: 25%
+}
+
+.head-logo {
+  font-size: 21px
+}
+
+.head-entry {
+  margin: 0em 0em 0em 0.5em;
+}
+
+/* Homepage */
+
+.home {
+  display: flex;
+
+}
+
+.home-left {
+  display: flex;
+  flex-direction: column;
+  width: 100%
+}
+
+.home-map {
+  width: 100%;
+}
+
+/* Calendar / Map */
+
 #calendar {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -87,4 +143,5 @@ div.form-radio {
   flex-direction: column;
   width: 150px;
   padding: 8px;
+  background-color: white;
 }
