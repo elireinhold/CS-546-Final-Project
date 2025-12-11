@@ -380,25 +380,6 @@ export async function deleteComment(eventId, commentId, userId) {
   return { deleted: true };
 }
 
-// Gets all events user saved
-// export async function getAllEventsByUser(userId) {
-//   userId = await helpers.validUserId(userId)
-//   const eventCollection = await events();
-//   const eventData = await eventCollection.find({ userId }).toArray();
-
-//   return eventData.map((event) => ({
-//     title: event.title,
-//     date: event.date,
-//     eventId: event._id.toString(),
-//   }));
-// }
-
-// // Gets all events in database
-// export async function getAllEvents() {
-//   const eventCollection = await events();
-//   return await eventCollection.find({}).toArray();
-// }
-
 const exportedMethods = {
   normalizeNYCEvent,
   insertManyNYCEvents,
@@ -409,8 +390,6 @@ const exportedMethods = {
   userCreateEvent,
   addComment,
   deleteComment,
-  // getAllEventsByUser,
-  // getAllEvents,
   getRecommendedEventsForUser
 };
 
