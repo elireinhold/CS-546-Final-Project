@@ -27,7 +27,6 @@ router.post("/create", requireLogin, async (req, res) => {
     startDateTime,
     endDateTime,
     streetClosureType,
-    communityBoard,
     isPublic,
   } = req.body;
 
@@ -72,7 +71,6 @@ router.post("/create", requireLogin, async (req, res) => {
       startDateTime,
       endDateTime,
       streetClosureType,
-      communityBoard,
       isPublic,
     });
   }
@@ -84,7 +82,6 @@ router.post("/create", requireLogin, async (req, res) => {
     startDateTime = helpers.validDateTime(startDateTime);
     endDateTime = helpers.validDateTime(endDateTime);
     helpers.validStartEndTimeDate(startDateTime, endDateTime);
-    communityBoard = helpers.validCommunityBoard(communityBoard);
     //isPublic = helpers.validPublicity(isPublic);
   } catch (e) {
     return res.status(400).render("createEvent", {
@@ -96,7 +93,6 @@ router.post("/create", requireLogin, async (req, res) => {
       startDateTime,
       endDateTime,
       streetClosureType,
-      communityBoard,
       isPublic,
     });
   }
@@ -111,11 +107,10 @@ router.post("/create", requireLogin, async (req, res) => {
       startDateTime,
       endDateTime,
       streetClosureType,
-      communityBoard,
       isPublic
     );
 
-    await users.saveEvent(req.session.user._id, event.eventId)
+    await users.saveEvent(req.session.user._id, event.eventId);
 
     if (event.registrationCompleted) {
       return res.redirect("/events/create/success");
@@ -135,7 +130,6 @@ router.post("/create", requireLogin, async (req, res) => {
       startDateTime,
       endDateTime,
       streetClosureType,
-      communityBoard,
       isPublic,
     });
   }
