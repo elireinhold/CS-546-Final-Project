@@ -66,59 +66,57 @@ export async function searchEvents({
   eventType,
   startDate,
   endDate,
+  page = 1   
 }) {
   const eventCollection = await events();
-  const query = {};
+
+  let all = await eventCollection.find({}).toArray();
 
   if (keyword && keyword.trim()) {
-    query.eventName = { $regex: keyword.trim(), $options: "i" };
+    const lower = keyword.trim().toLowerCase();
+    all = all.filter(evt =>
+      evt.eventName &&
+      evt.eventName.toLowerCase().includes(lower)
+    );
   }
 
-  if (
-    Array.isArray(borough) &&
-    borough.length > 0 &&
-    !borough.includes("all")
-  ) {
-    query.eventBorough = { $in: borough };
+  if (Array.isArray(borough) && borough.length > 0 && !borough.includes("all")) {
+    all = all.filter(evt => borough.includes(evt.eventBorough));
+  }
+  if (Array.isArray(eventType) && eventType.length > 0 && !eventType.includes("all")) {
+    all = all.filter(evt => eventType.includes(evt.eventType));
   }
 
-  if (
-    Array.isArray(eventType) &&
-    eventType.length > 0 &&
-    !eventType.includes("all")
-  ) {
-    query.eventType = { $in: eventType };
+  if (startDate || endDate) {
+    const start = startDate ? new Date(startDate + "T00:00:00") : null;
+    const end   = endDate   ? new Date(endDate   + "T23:59:59") : null;
+
+    all = all.filter(evt => {
+      const evtDate = new Date(evt.startDateTime);
+      if (isNaN(evtDate)) return false;
+
+      if (start && evtDate < start) return false;
+      if (end && evtDate > end) return false;
+      return true;
+    });
   }
 
-  const dateExpr = [];
-  const dateValue = {
-    $convert: {
-      input: "$startDateTime",
-      to: "date",
-      onError: null,
-      onNull: null,
-    },
+  const pageSize = 50;
+  const totalEvents = all.length;
+  const totalPages = Math.ceil(totalEvents / pageSize) || 1;
+
+  const safePage = Math.max(1, Math.min(page, totalPages));
+  const startIdx = (safePage - 1) * pageSize;
+  const endIdx = startIdx + pageSize;
+
+  const results = all.slice(startIdx, endIdx);
+
+  return {
+    results,
+    totalEvents,
+    totalPages,
+    currentPage: safePage
   };
-
-  if (startDate) {
-    const start = new Date(`${startDate}T00:00:00.000Z`);
-    if (!isNaN(start)) {
-      dateExpr.push({ $gte: [dateValue, start] });
-    }
-  }
-
-  if (endDate) {
-    const end = new Date(`${endDate}T23:59:59.999Z`);
-    if (!isNaN(end)) {
-      dateExpr.push({ $lte: [dateValue, end] });
-    }
-  }
-
-  if (dateExpr.length) {
-    query.$expr = { $and: [{ $ne: [dateValue, null] }, ...dateExpr] };
-  }
-
-  return await eventCollection.find(query).limit(200).toArray();
 }
 
 export async function getDistinctEventTypes() {

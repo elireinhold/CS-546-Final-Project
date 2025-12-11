@@ -58,6 +58,27 @@ const hbs = exphbs.create({
     json(data) {
       return JSON.stringify(data);
     },
+    add(a, b) {
+      return Number(a) + Number(b);
+    },
+    subtract(a, b) {
+      return Number(a) - Number(b);
+    },
+    gt(a, b) {
+      return a > b;
+    },
+    lt(a, b) {
+      return a < b;
+    },
+    contains(arr, value) {
+      if (!arr) return false;
+      if (!Array.isArray(arr)) return arr === value;
+      return arr.includes(value);
+    },
+    toArray(value) {
+      if (!value) return [];
+      return Array.isArray(value) ? value : [value];
+    }
   },
 });
 

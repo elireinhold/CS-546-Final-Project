@@ -2,15 +2,6 @@
 
 <form method="GET" action="/events/search">
 
-  <!-- Keyword -->
-  <input 
-    type="text" 
-    name="keyword" 
-    placeholder="Search by event name"
-    value="{{keyword}}"
-  />
-
-  <!-- Event Types -->
   <h3>Type</h3>
   {{#each eventTypes}}
     <label>
@@ -18,30 +9,36 @@
         type="checkbox"
         name="eventType"
         value="{{this}}"
-        {{#if (contains ../eventType this)}}checked{{/if}}
+        {{#if (contains (toArray ../eventType) this)}}checked{{/if}}
       >
       {{this}}
-    </label><br>
+    </label>
   {{/each}}
 
-  <!-- Boroughs -->
-  <h3>Boroughs</h3>
+  <h3>Borough</h3>
   {{#each boroughs}}
     <label>
       <input 
         type="checkbox"
         name="borough"
         value="{{this}}"
-        {{#if (contains ../borough this)}}checked{{/if}}
+        {{#if (contains (toArray ../borough) this)}}checked{{/if}}
       >
       {{this}}
-    </label><br>
+    </label>
   {{/each}}
 
-  <!-- Date Range -->
-  <h3>Date Range</h3>
+  <h3>Start Date Range</h3>
   Start: <input type="date" name="startDate" value="{{startDate}}">
   End: <input type="date" name="endDate" value="{{endDate}}">
+  <br><br>
+  
+  <input 
+    type="text" 
+    name="keyword" 
+    placeholder="Search by event name"
+    value="{{keyword}}"
+  />
 
   <br><br>
   <button type="submit">Search</button>
@@ -50,10 +47,36 @@
 {{#if error}}
   <p class="error" style="color:red;">{{error}}</p>
 {{/if}}
-
+<br>
 <hr>
 
-<!-- Results -->
+{{#if totalPages}}
+  <div class="pagination">
+    {{#if (gt currentPage 1)}}
+      <a href="/events/search?page={{subtract currentPage 1}}
+        {{#each (toArray keyword)}}&keyword={{this}}{{/each}}
+        {{#each (toArray eventType)}}&eventType={{this}}{{/each}}
+        {{#each (toArray borough)}}&borough={{this}}{{/each}}
+        {{#if startDate}}&startDate={{startDate}}{{/if}}
+        {{#if endDate}}&endDate={{endDate}}{{/if}}
+      ">Previous</a>
+    {{/if}}
+
+    <span>Page {{currentPage}} of {{totalPages}}</span>
+
+    {{#if (lt currentPage totalPages)}}
+      <a href="/events/search?page={{add currentPage 1}}
+        {{#each (toArray keyword)}}&keyword={{this}}{{/each}}
+        {{#each (toArray eventType)}}&eventType={{this}}{{/each}}
+        {{#each (toArray borough)}}&borough={{this}}{{/each}}
+        {{#if startDate}}&startDate={{startDate}}{{/if}}
+        {{#if endDate}}&endDate={{endDate}}{{/if}}
+      ">Next</a>
+    {{/if}}
+  </div>
+  <hr>
+{{/if}}
+
 {{#if results.length}}
   <ul>
     {{#each results}}
@@ -81,12 +104,39 @@
       </li>
     {{/each}}
   </ul>
-
 {{else}}
   <p>No events found.</p>
+{{/if}}
+
+{{#if totalPages}}
+  <hr>
+  <div class="pagination">
+    {{#if (gt currentPage 1)}}
+      <a href="/events/search?page={{subtract currentPage 1}}
+        {{#each (toArray keyword)}}&keyword={{this}}{{/each}}
+        {{#each (toArray eventType)}}&eventType={{this}}{{/each}}
+        {{#each (toArray borough)}}&borough={{this}}{{/each}}
+        {{#if startDate}}&startDate={{startDate}}{{/if}}
+        {{#if endDate}}&endDate={{endDate}}{{/if}}
+      ">Previous</a>
+    {{/if}}
+
+    <span>Page {{currentPage}} of {{totalPages}}</span>
+
+    {{#if (lt currentPage totalPages)}}
+      <a href="/events/search?page={{add currentPage 1}}
+        {{#each (toArray keyword)}}&keyword={{this}}{{/each}}
+        {{#each (toArray eventType)}}&eventType={{this}}{{/each}}
+        {{#each (toArray borough)}}&borough={{this}}{{/each}}
+        {{#if startDate}}&startDate={{startDate}}{{/if}}
+        {{#if endDate}}&endDate={{endDate}}{{/if}}
+      ">Next</a>
+    {{/if}}
+  </div>
 {{/if}}
 
 <script>
   const returnTo = "{{currentUrl}}";
 </script>
+
 <script src="/public/js/search.js"></script>
