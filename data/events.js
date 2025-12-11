@@ -238,7 +238,6 @@ export async function userCreateEvent(
   startDateTime,
   endDateTime,
   streetClosureType,
-  communityBoard,
   isPublic
 ) {
   // Optional Fields
@@ -246,12 +245,6 @@ export async function userCreateEvent(
     streetClosureType = null;
   } else {
     streetClosureType = helpers.validStreetClosure(streetClosureType);
-  }
-
-  if (!communityBoard) {
-    communityBoard = null;
-  } else {
-    communityBoard = helpers.validCommunityBoard(communityBoard);
   }
 
   //Required input validation
@@ -266,18 +259,26 @@ export async function userCreateEvent(
   endDateTime = helpers.validDateTime(endDateTime);
   helpers.validStartEndTimeDate(startDateTime, endDateTime);
 
+  const usersCollection = await users();
+  const user = await usersCollection.findOne({ _id: new ObjectId(id) });
+
+  if (!user) {
+    throw "Error: User not found";
+  }
+
+  const username = user.username;
   const newEvent = {
     eventId: null,
     eventName: eventName,
     startDateTime: startDateTime,
     endDateTime: endDateTime,
-    eventSource: `User Created: ${id.username}`,
+    eventSource: `User Created: ${username}`,
     eventType: eventType,
     eventBorough: eventBorough,
     eventLocation: eventLocation,
     eventStreetSide: null,
     streetClosureType: streetClosureType,
-    communityBoard: communityBoard,
+    communityBoard: null,
     coordinates: null,
     userIdWhoCreatedEvent: id,
     isPublic: isPublic,
@@ -291,10 +292,10 @@ export async function userCreateEvent(
   if (!insertInfo.acknowledged || !insertInfo.insertedId) {
     throw "Error: Could not add event.";
   }
-  return { 
-  registrationCompleted: true,
-  eventId: insertInfo.insertedId.toString() 
-};
+  return {
+    registrationCompleted: true,
+    eventId: insertInfo.insertedId.toString(),
+  };
 }
 
 // eventsComments
