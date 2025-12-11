@@ -6,16 +6,86 @@ import { getEventWithCoordinates } from "../data/map.js";
 
 const router = Router();
 
+// router.get("/search", async (req, res) => {
+//   try {
+//     let { keyword, borough, eventType, startDate, endDate } = req.query;
+
+//     borough = Array.isArray(borough) ? borough : borough ? [borough] : [];
+//     eventType = Array.isArray(eventType) ? eventType : eventType ? [eventType] : [];
+
+//     const eventTypes = (await events.getDistinctEventTypes()).sort();
+//     const boroughs = (await events.getDistinctBoroughs()).sort();
+
+//     if (startDate && endDate && startDate > endDate) {
+//       return res.status(400).render("search", {
+//         keyword: keyword || "",
+//         borough,
+//         eventType,
+//         startDate,
+//         endDate,
+//         results: [],
+//         eventTypes,
+//         boroughs,
+//         error: "Start date cannot be after end date",
+//         currentUrl: req.originalUrl,
+//       });
+//     }
+
+//     const results = await events.searchEvents({
+//       keyword: keyword || "",
+//       borough,
+//       eventType,
+//       startDate,
+//       endDate,
+//     });
+
+//     let savedList = [];
+//     if (req.session.user) {
+//       savedList = (await users.getSavedEvents(req.session.user._id)).map(id => id.toString());
+//     }
+
+//     const eventIds = results.map(e => e._id.toString());
+//     const countMap = await users.countUsersWhoSavedMany(eventIds);
+
+//     results.forEach(evt => {
+//       const id = evt._id.toString();
+//       evt.saved = savedList.includes(id);
+//       evt.userCount = countMap[id] || 0;
+//     });
+
+//     res.render("search", {
+//       keyword: keyword || "",
+//       borough,
+//       eventType,
+//       startDate,
+//       endDate,
+//       results,
+//       eventTypes,
+//       boroughs,
+//       currentUrl: req.originalUrl,
+//     });
+
+//   } catch (e) {
+//     res.status(500).json({ error: e.message });
+//   }
+// });
 router.get("/search", async (req, res) => {
   try {
-    let { keyword, borough, eventType, startDate, endDate } = req.query;
+    let { keyword, borough, eventType, startDate, endDate, page } = req.query;
 
+    // page 转成数字，并且至少为 1
+    page = parseInt(page) || 1;
+    if (page < 1) page = 1;
+
+    // normalize types
     borough = Array.isArray(borough) ? borough : borough ? [borough] : [];
     eventType = Array.isArray(eventType) ? eventType : eventType ? [eventType] : [];
 
+    // distinct lists
     const eventTypes = (await events.getDistinctEventTypes()).sort();
     const boroughs = (await events.getDistinctBoroughs()).sort();
 
+    // date validation
     if (startDate && endDate && startDate > endDate) {
       return res.status(400).render("search", {
         keyword: keyword || "",
@@ -26,27 +96,41 @@ router.get("/search", async (req, res) => {
         results: [],
         eventTypes,
         boroughs,
-        error: "Start date cannot be after end date",
         currentUrl: req.originalUrl,
+        error: "Start date cannot be after end date",
+        totalPages: 0,
+        currentPage: 1
       });
     }
 
-    const results = await events.searchEvents({
+    // ⬇⬇⬇  ✨ 从 searchEvents 取得分页结构 ✨  ⬇⬇⬇
+    const {
+      results,
+      totalEvents,
+      totalPages,
+      currentPage
+    } = await events.searchEvents({
       keyword: keyword || "",
       borough,
       eventType,
       startDate,
       endDate,
+      page
     });
 
+    // 是否登录 → 拿 saved events
     let savedList = [];
     if (req.session.user) {
-      savedList = (await users.getSavedEvents(req.session.user._id)).map(id => id.toString());
+      savedList = (await users.getSavedEvents(req.session.user._id)).map(id =>
+        id.toString()
+      );
     }
 
+    // userCount
     const eventIds = results.map(e => e._id.toString());
     const countMap = await users.countUsersWhoSavedMany(eventIds);
 
+    // annotate results
     results.forEach(evt => {
       const id = evt._id.toString();
       evt.saved = savedList.includes(id);
@@ -62,7 +146,10 @@ router.get("/search", async (req, res) => {
       results,
       eventTypes,
       boroughs,
-      currentUrl: req.originalUrl,
+      totalEvents,
+      totalPages,
+      currentPage,
+      currentUrl: req.originalUrl
     });
 
   } catch (e) {
