@@ -1,73 +1,95 @@
-<h1>{{event.eventName}}</h1>
-<p><strong>Type:</strong> {{event.eventType}}</p>
-<p><strong>Borough:</strong> {{event.eventBorough}}</p>
-<p><strong>Location:</strong> {{event.eventLocation}}</p>
-<p><strong>Road Closure:</strong> 
-  {{#if event.streetClosureType}}
-    {{event.streetClosureType}}
-  {{else}}
-    N/A
-  {{/if}}
-</p>
-<p><strong>Source:</strong> {{event.eventSource}}</p>
-<p><strong>Start:</strong> {{event.startDateTime}}</p>
-<p><strong>End:</strong> {{event.endDateTime}}</p>
-<hr>
+<!-- Two-column container -->
+<div class="container">
+  <!-- Left column: event details + comments -->
+  <div class="left-side">
+    <h1>{{event.eventName}}</h1>
+    <p><strong>Type:</strong> {{event.eventType}}</p>
+    <p><strong>Borough:</strong> {{event.eventBorough}}</p>
+    <p><strong>Location:</strong> {{event.eventLocation}}</p>
+    <p><strong>Road Closure:</strong> 
+      {{#if event.streetClosureType}}
+        {{event.streetClosureType}}
+      {{else}}
+        N/A
+      {{/if}}
+    </p>
+    <p><strong>Source:</strong> {{event.eventSource}}</p>
+    <p><strong>Start:</strong> {{event.startDateTime}}</p>
+    <p><strong>End:</strong> {{event.endDateTime}}</p>
 
-<p id="save-count-{{event._id}}">
-  {{userCount}} user(s) saved this
-</p>
+    <!-- Inline saved count + save button -->
+    <div class="save-row">
+      <p id="save-count-{{event._id}}">
+        {{userCount}} User(s) Saved This
+      </p>
 
-{{#if saved}}
-  <button 
-    id="save-btn-{{event._id}}"
-    data-event-id="{{event._id}}"
-    data-saved="true"
-  >
-    Unsave
-  </button>
-{{else}}
-  <button 
-    id="save-btn-{{event._id}}"
-    data-event-id="{{event._id}}"
-    data-saved="false"
-  >
-    Save
-  </button>
-{{/if}}
+      {{#if saved}}
+        <button 
+          id="save-btn-{{event._id}}"
+          data-event-id="{{event._id}}"
+          data-saved="true"
+        >
+          Unsave
+        </button>
+      {{else}}
+        <button 
+          id="save-btn-{{event._id}}"
+          data-event-id="{{event._id}}"
+          data-saved="false"
+        >
+          Save
+        </button>
+      {{/if}}
+    </div>
 
-<hr>
+    <!-- Comments section directly under save button -->
+    <div id="comments-section">
+      <hr>
+      <h2>Comments</h2>
+      <div id="comments-container">
+        <div id="comments-list">
+          {{#if event.comments}}
+            {{#each event.comments}}
+              <div class="comment">
+                <strong>{{this.username}}:</strong> {{this.text}}
+              </div>
+            {{/each}}
+          {{else}}
+            <p>No comments yet.</p>
+          {{/if}}
+        </div>
+      </div>
 
-<h2>Event Location</h2>
-<div id="map"></div>
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script>
-  const eventLocation = {{{json eventLocation}}}
-</script>
-<script src="/public/js/eventMap.js"></script>
+      {{#if user}}
+        <div id="add-comment-section">
+          <h3>Add a Comment</h3>
+          <textarea id="comment-text" rows="4" cols="50" placeholder="Write your comment here..."></textarea>
+          <br>
+          <button id="submit-comment-btn">Submit Comment</button>
+        </div>
+      {{else}}
+        <p><a href="/users/login">Login</a> to add a comment.</p>
+      {{/if}}
+    </div>
+  </div>
 
-</hr>
-
-<hr>
-<h2>Comments</h2>
-<div id="comments-container">
-  <div id="comments-list"></div>
+  <!-- Right column: map -->
+  <div class="right-side">
+    <h2>Event Location</h2>
+    <div id="map"></div>
+  </div>
 </div>
 
-{{#if user}}
-  <div id="add-comment-section">
-    <h3>Add a Comment</h3>
-    <textarea id="comment-text" rows="4" cols="50" placeholder="Write your comment here..."></textarea>
-    <br>
-    <button id="submit-comment-btn">Submit Comment</button>
-  </div>
-{{else}}
-  <p><a href="/users/login">Login</a> to add a comment.</p>
-{{/if}}
-
 <hr>
-
 <a id="back-link" href="{{returnTo}}">← Back to Results</a>
+
+<!-- Scripts -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+  const eventLocation = {{{json eventLocation}}};
+</script>
+<script src="/public/js/eventMap.js"></script>
+<script src="/public/js/eventDetails.js"></script>
 
 <script>
   const returnTo = "{{returnTo}}";
@@ -75,11 +97,12 @@
   const currentUserId = {{#if user}}"{{user._id}}"{{else}}null{{/if}};
   const currentUsername = {{#if user}}"{{user.username}}"{{else}}null{{/if}};
   const allComments = {{#if event.comments}}{{{json event.comments}}}{{else}}[]{{/if}};
-  // Prefer actual previous page; fall back to returnTo; default to search
+
+  // Handle back link
   const backLink = document.getElementById("back-link");
   const fallback = returnTo || "/events/search";
-  const target = document.referrer && document.referrer !== window.location.href
-    ? document.referrer
+  const target = window.document.referrer && window.document.referrer !== window.location.href
+    ? window.document.referrer
     : fallback;
   backLink.setAttribute("href", target);
   backLink.addEventListener("click", (e) => {
@@ -87,4 +110,3 @@
     window.location.href = target;
   });
 </script>
-<script src="/public/js/eventDetails.js"></script>
