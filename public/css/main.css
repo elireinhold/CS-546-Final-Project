@@ -127,3 +127,7 @@ h1 {
 .right-side ul {
   margin-top: 0;
 }
+
+.nav-username {
+    margin-right: 15px;
+}
