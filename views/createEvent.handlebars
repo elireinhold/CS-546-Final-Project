@@ -1,9 +1,13 @@
-<div>
+<div class="content-wrapper-center">
+    <h1>Create a New Event</h1>
+</div>
+
+<div class="content-wrapper-center">
     <div>
         <div id="error-here">
 
         </div>
-        <form action="/" method="POST" id="event-form">
+        <form action="/events/create" method="POST" id="event-form">
             <div class="form-group">
                 <label for="eventName">
                     Event Name
@@ -29,24 +33,41 @@
                 <input type="text" name="eventBorough" id="eventBorough" class="form-input">
             </div>
             <div class="form-group">
+                <label for="startDateTime">
+                    Start Date / Time
+                </label>
+                <input type="datetime-local" name="startDateTime" id="startDateTime" class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="endDateTime">
+                    End Date / Time
+                </label>
+                <input type="datetime-local" name="endDateTime" id="endDateTIme" class="form-input">
+            </div>
+            <div class="form-group">
                 <label for="">
-                    
+                    Road Closure
                 </label>
                 <input type="" name="" id="" class="form-input">
             </div>
             <div class="form-group">
-                <label for="">
-                    
+                <label for="communityBoard">
+                    Community Board
                 </label>
-                <input type="" name="" id="" class="form-input">
+                <input type="text" name="communityBoard" id="communityBoard" class="form-input">
             </div>
             <div class="form-group">
-                <label for="">
-                    
-                </label>
-                <input type="" name="" id="" class="form-input">
+                    <p class="form-label">
+                        Event Visibility
+                    </p>
+                    <div class="form-radio">
+                        <label for="private" class="form-radio"><input type="radio" value="private" name="visibility" id="private" class="form-input">Private</label>
+                        <label for="public" class="form-radio"><input type="radio" value="public" name="visibility" id="public" class="form-input">Public</label>
+                    </div>
             </div>
-
+            <div class="form-group form-submit">
+                <input type="submit" name="submit" id="submit" class="form-input">
+            </div>
         </form>
     </div>
 </div>

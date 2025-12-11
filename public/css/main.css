@@ -44,6 +44,11 @@ label {
   margin-bottom: 5px;
 }
 
+p.form-label {
+  margin-top: 0px;
+  margin-bottom: 5px;
+}
+
 .form-input {
   display: block;
   padding: 3px;
@@ -70,4 +75,16 @@ div.form-error {
 ul.form-error {
   padding-left: 15px;
   text-align: left;
+}
+
+label.form-radio {
+  display: inline-flex;
+}
+
+div.form-radio {
+  border: solid;
+  border-width: 1px;
+  flex-direction: column;
+  width: 150px;
+  padding: 8px;
 }
