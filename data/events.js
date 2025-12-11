@@ -291,7 +291,10 @@ export async function userCreateEvent(
   if (!insertInfo.acknowledged || !insertInfo.insertedId) {
     throw "Error: Could not add event.";
   }
-  return { registrationCompleted: true };
+  return { 
+  registrationCompleted: true,
+  eventId: insertInfo.insertedId.toString() 
+};
 }
 
 // eventsComments

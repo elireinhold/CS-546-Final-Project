@@ -53,25 +53,13 @@
 {{#if totalPages}}
   <div class="pagination">
     {{#if (gt currentPage 1)}}
-      <a href="/events/search?page={{subtract currentPage 1}}
-        {{#each (toArray keyword)}}&keyword={{this}}{{/each}}
-        {{#each (toArray eventType)}}&eventType={{this}}{{/each}}
-        {{#each (toArray borough)}}&borough={{this}}{{/each}}
-        {{#if startDate}}&startDate={{startDate}}{{/if}}
-        {{#if endDate}}&endDate={{endDate}}{{/if}}
-      ">Previous</a>
+      <a href="/events/search?{{queryString page=(subtract currentPage 1) keyword=keyword eventType=eventType borough=borough startDate=startDate endDate=endDate}}">Previous</a>
     {{/if}}
 
     <span>Page {{currentPage}} of {{totalPages}}</span>
 
     {{#if (lt currentPage totalPages)}}
-      <a href="/events/search?page={{add currentPage 1}}
-        {{#each (toArray keyword)}}&keyword={{this}}{{/each}}
-        {{#each (toArray eventType)}}&eventType={{this}}{{/each}}
-        {{#each (toArray borough)}}&borough={{this}}{{/each}}
-        {{#if startDate}}&startDate={{startDate}}{{/if}}
-        {{#if endDate}}&endDate={{endDate}}{{/if}}
-      ">Next</a>
+      <a href="/events/search?{{queryString page=(add currentPage 1) keyword=keyword eventType=eventType borough=borough startDate=startDate endDate=endDate}}">Next</a>
     {{/if}}
   </div>
   <hr>
@@ -112,25 +100,13 @@
   <hr>
   <div class="pagination">
     {{#if (gt currentPage 1)}}
-      <a href="/events/search?page={{subtract currentPage 1}}
-        {{#each (toArray keyword)}}&keyword={{this}}{{/each}}
-        {{#each (toArray eventType)}}&eventType={{this}}{{/each}}
-        {{#each (toArray borough)}}&borough={{this}}{{/each}}
-        {{#if startDate}}&startDate={{startDate}}{{/if}}
-        {{#if endDate}}&endDate={{endDate}}{{/if}}
-      ">Previous</a>
+      <a href="/events/search?{{queryString page=(subtract currentPage 1) keyword=keyword eventType=eventType borough=borough startDate=startDate endDate=endDate}}">Previous</a>
     {{/if}}
 
     <span>Page {{currentPage}} of {{totalPages}}</span>
 
     {{#if (lt currentPage totalPages)}}
-      <a href="/events/search?page={{add currentPage 1}}
-        {{#each (toArray keyword)}}&keyword={{this}}{{/each}}
-        {{#each (toArray eventType)}}&eventType={{this}}{{/each}}
-        {{#each (toArray borough)}}&borough={{this}}{{/each}}
-        {{#if startDate}}&startDate={{startDate}}{{/if}}
-        {{#if endDate}}&endDate={{endDate}}{{/if}}
-      ">Next</a>
+      <a href="/events/search?{{queryString page=(add currentPage 1) keyword=keyword eventType=eventType borough=borough startDate=startDate endDate=endDate}}">Next</a>
     {{/if}}
   </div>
 {{/if}}
