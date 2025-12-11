@@ -115,6 +115,8 @@ router.post("/create", requireLogin, async (req, res) => {
       isPublic
     );
 
+    await users.saveEvent(req.session.user._id, event.eventId)
+
     if (event.registrationCompleted) {
       return res.redirect("/events/create/success");
     } else {

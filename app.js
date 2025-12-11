@@ -70,17 +70,27 @@ const hbs = exphbs.create({
     lt(a, b) {
       return a < b;
     },
-    contains(arr, value) {
-      if (!arr) return false;
-      if (!Array.isArray(arr)) return arr === value;
-      return arr.includes(value);
-    },
     toArray(value) {
       if (!value) return [];
       return Array.isArray(value) ? value : [value];
+    },
+    queryString(options) {
+      const params = [];
+      for (const key in options.hash) {
+        const value = options.hash[key];
+        if (value) {
+          if (Array.isArray(value)) {
+            value.forEach(v => params.push(`${encodeURIComponent(key)}=${encodeURIComponent(v)}`));
+          } else {
+            params.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
+          }
+        }
+      }
+      return params.join("&");
     }
   },
 });
+
 
 app.engine("handlebars", hbs.engine);
 app.set("view engine", "handlebars");
