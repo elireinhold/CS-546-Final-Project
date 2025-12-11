@@ -26,9 +26,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const ev = eventLocation[0];
 
     if (ev.lat && ev.lon) {
-      // Center map on event
-      map.setView([ev.lat, ev.lon], 13);
-
       // Add marker
       L.marker([ev.lat, ev.lon])
         .addTo(map)
@@ -37,6 +34,8 @@ document.addEventListener("DOMContentLoaded", () => {
           ${ev.location}<br>
           <a href="/events/${ev.id}">View Event</a>
         `)
+
+        map.flyTo([ev.lat, ev.lon], 13);
     }
   }
 });
