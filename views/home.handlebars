@@ -41,7 +41,7 @@
   <!-- Right column: map on top, saved events below -->
   <div class="home-right-side">
     {{#if session.user}}
-      <h2>Map With Saved Events</h2>
+      <h2>Map of Saved Events</h2>
     {{/if}}
     <div id="map"></div>
   </div>
@@ -49,6 +49,7 @@
 
 <!-- Scripts -->
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/geolib@3.3.4/lib/index.min.js"></script>
 <script>
   const eventLocation = {{{json eventLocation}}};
 </script>
