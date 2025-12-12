@@ -200,6 +200,14 @@ const exportedMethods = {
     }
     return id;
   },
+  async validId(id, varName) {
+    if (!id) throw `${varName} is required`;
+    if (typeof id !== "string") throw `${varName} must be a string`;
+    id = id.trim();
+    if (id.length === 0) throw `${varName} cannot be empty`;
+    if (!ObjectId.isValid(id)) throw `${varName} is not a valid ObjectId`;
+    return id;
+  }
 };
 
 
