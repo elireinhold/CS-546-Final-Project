@@ -32,4 +32,7 @@ coverage/
 # ignore package-lock.json to keep repo clean
 package-lock.json
 
+# tesing files
+test.js
+
 # Don't store the NYC dataset locally!

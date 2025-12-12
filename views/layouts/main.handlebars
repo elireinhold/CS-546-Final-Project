@@ -8,6 +8,28 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 </head>
 <body>
+    <header class="head">
+        <div class="page-head">
+            <span class="head-logo">NYSee Now</span>
+        </div>
+        <nav>
+            <a href="/" class="head-entry">Home</a>
+            <a href="/events/search" class="head-entry">Search Events</a>
+            {{#if user}}
+            <a href="/calendar" class="head-entry">View Calendar</a>
+            {{/if}}
+        </nav>
+        <div class="auth-head">
+            {{#if user}}
+            <span class="head-entry">User: {{user.username}}</span>
+            <a href="/users/logout" class="head-entry">Logout</a>
+            {{else}}
+            <a href="/users/login" class="head-entry">Login</a>
+            <a href="/users/register" class="head-entry">Register</a>
+            {{/if}}
+        </div>
+      
+    {{!-- 
     <header>
     <nav>
         {{#if user}}
@@ -27,6 +49,7 @@
         {{/if}}
     </nav>
     <hr>
+    --}}
     </header>
     <main>
         {{{body}}}
