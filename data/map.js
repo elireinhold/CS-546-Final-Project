@@ -1,7 +1,9 @@
 import fetch from "node-fetch";
-import { getEventById } from "./events.js";
+import { getEventById, getAllEvents, getEventsByBorough } from "./events.js";
 import { getSavedEvents } from "./users.js"
 import helpers from "../helpers/eventHelpers.js";
+import { getDistance } from "geolib";
+
 
 // For geocodeLocation to speed up times
 function delay(ms) {
@@ -114,5 +116,79 @@ export async function getEventWithCoordinates(eventId) {
     }
     return result;
   }
+
+export async function getUpcomingEventsWithCoordinates(userHomeBorough) {
+  const allEvents = await getAllEvents();
+
+  const now = new Date();
+  const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+
+  // Filter events to get events happening within 3 days
+  const upcomingEvents = allEvents.filter(event => {
+    if (!event.startDateTime || !event.eventBorough) return false;
+
+    const start = new Date(event.startDateTime);
+    return (
+      start >= now &&
+      start <= threeDaysFromNow &&
+      event.eventBorough.toLowerCase() === userHomeBorough.toLowerCase()
+    );
+  });
+
+  const result = [];
+  let counter = 0
+  const maxEvents = 20
+  for (const event of upcomingEvents) {
+    try {
+      const parkName =
+        event.eventLocation.split(":")[0].trim() + ", New York, NY";
+
+      const coordinates = await geocodeLocation(parkName);
+
+      if (coordinates) {
+        result.push({
+          title: event.eventName,
+          id: event._id,
+          location: event.eventLocation,
+          lat: coordinates.lat,
+          lon: coordinates.lon,
+          startDateTime: event.startDateTime,
+        });
+      }
+      counter += 1
+      if(counter >= maxEvents) {
+        return result;
+      }
+    } catch (err) {
+      console.error("Error processing event:", event._id, err);
+    }
+  }
+
+  return result;
+}
+
+
+export async function getClosestEvents(userLat, userLon, events) {
+  const result = [];
+
+  for (const event of events) {
+    if (event.lat && event.lon) {
+      const distance = getDistance(
+        { latitude: userLat, longitude: userLon },
+        { latitude: event.lat, longitude: event.lon }
+      );
+
+      // Push a copied event object with distance added
+      result.push({
+        ...event,
+        distance
+      });
+    }
+  }
+
+  // Sort and return closest 10
+  result.sort((a, b) => a.distance - b.distance);
+  return result.slice(0, 10);
+}
 
   
