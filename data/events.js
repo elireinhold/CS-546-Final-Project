@@ -1,5 +1,5 @@
 import { events } from "../config/mongoCollections.js";
-import { ObjectId } from "mongodb";
+import { ObjectId, ReturnDocument } from "mongodb";
 import helpers from "../helpers/eventHelpers.js";
 import { users } from "../config/mongoCollections.js";
 
@@ -289,13 +289,78 @@ export async function userCreateEvent(
 
   const eventCollection = await events();
   const insertInfo = await eventCollection.insertOne(newEvent);
+
   if (!insertInfo.acknowledged || !insertInfo.insertedId) {
     throw "Error: Could not add event.";
   }
+
+  // insert into user made events
+  if(isPublic) {
+    usersCollection.updateOne(
+      {"_id": new ObjectId(id)},
+      {$push: {"publicEvents":insertInfo.insertedId}}
+    )
+  } else {
+    usersCollection.updateOne(
+      {"_id": new Object(id)},
+      {$push: {"personalEvents":insertInfo.insertedId}}
+    )
+  }
+
   return {
     registrationCompleted: true,
     eventId: insertInfo.insertedId.toString(),
   };
+}
+
+export async function editEvent(
+  eventId,
+  userId,
+  eventName,
+  eventType,
+  eventLocation,
+  eventBorough,
+  startDateTime,
+  endDateTime,
+  streetClosureType,
+  isPublic
+) {
+
+  userId = await helpers.validUserId(userId);
+  eventId = await helpers.validEventId(eventId);
+
+  eventName = helpers.validEventName(eventName);
+  eventType = helpers.validEventType(eventType);
+  eventLocation = helpers.validLocation(eventLocation);
+  eventBorough = helpers.validBorough(eventBorough);
+  startDateTime = helpers.validDateTime(startDateTime,'Start');
+  endDateTime = helpers.validDateTime(endDateTime, 'End');
+  helpers.validStartEndTimeDate(startDateTime,endDateTime);
+  streetClosureType = helpers.validStreetClosure(streetClosureType);
+  isPublic = helpers.validPublicity(isPublic);
+
+  const eventInfo = {eventName,eventType,eventLocation,eventBorough,startDateTime,endDateTime,streetClosureType,isPublic};
+
+  const eventCollection = await events();
+  const event = await eventCollection.findOne(
+    {_id: new ObjectId(eventId)},
+    {projection: {userIdWhoCreatedEvent:1}}
+  )
+
+  if(!event) throw "Error: Could not edit event";
+
+  if(event.userIdWhoCreatedEvent !== userId) throw "Error: User cannot edit this event";
+
+  const updatedEvent = await eventCollection.findOneAndUpdate(
+    {_id: new ObjectId(eventId)},
+    {$set: eventInfo},
+    {returnDocument: 'after'}
+  );
+
+  if(!updatedEvent) throw "Error: Could not edit event";
+
+  return {edited:true};
+
 }
 
 // eventsComments
@@ -390,6 +455,7 @@ const exportedMethods = {
   getDistinctEventTypes,
   getDistinctBoroughs,
   userCreateEvent,
+  editEvent,
   addComment,
   deleteComment,
   getRecommendedEventsForUser,

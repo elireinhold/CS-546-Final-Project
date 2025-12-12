@@ -332,6 +332,169 @@ router.post("/:id/unsave", requireLogin, async (req, res) => {
   }
 });
 
+router.get("/:id/edit", requireLogin, async (req, res) => {
+  try {
+    const eventId = req.params.id;
+    const userId = req.session.user._id;
+    const eventInfo = await events.getEventById(eventId);
+
+    if(eventInfo.userIdWhoCreatedEvent !== userId) {
+      return res.status(403).render("error",{title: "403 forbidden", error:"You do not have access to this page"});
+    }
+
+    let {eventName,eventType,eventLocation,eventBorough,startDateTime,endDateTime,streetClosureType,isPublic} = eventInfo;
+
+    isPublic = helpers.publicityString(isPublic);
+
+    eventBorough = eventBorough.toLowerCase();
+
+    res.render('editEvent',{
+      eventId,
+      userId,
+      eventName,
+      eventType,
+      eventLocation,
+      eventBorough,
+      streetClosureType,
+      startDateTime,
+      endDateTime,
+      isPublic
+    })
+
+  } catch (e) {
+    res.status(500).json({error: e.message })
+  }
+})
+.post("/:id/edit", requireLogin, async (req, res) => {
+  let {
+    eventName,
+    eventType,
+    eventLocation,
+    eventBorough,
+    startDateTime,
+    endDateTime,
+    streetClosureType,
+    isPublic
+  } = req.body;
+
+  let userId = req.session.user._id;
+  let eventId = req.params.id;
+
+  if (eventName) eventName = xss(eventName);
+  if (eventType) eventType = xss(eventType);
+  if (eventLocation) eventLocation = xss(eventLocation);
+  if (eventBorough) eventBorough = xss(eventBorough);
+  if (startDateTime) startDateTime = xss(startDateTime);
+  if (endDateTime) endDateTime = xss(endDateTime);
+  if (streetClosureType) streetClosureType = xss(streetClosureType);
+  if (isPublic) isPublic = xss(isPublic);
+
+  if (
+    !eventName ||
+    !eventType ||
+    !eventLocation ||
+    !eventBorough ||
+    !startDateTime ||
+    !endDateTime ||
+    !isPublic
+  ) {
+    let missingFields = [];
+    if (!eventName) {
+      missingFields.push("eventName");
+    }
+    if (!eventType) {
+      missingFields.push("eventType");
+    }
+    if (!eventLocation) {
+      missingFields.push("eventLocation");
+    }
+    if (!eventBorough) {
+      missingFields.push("eventBorough");
+    }
+    if (!startDateTime) {
+      missingFields.push("startDateTime");
+    }
+    if (!endDateTime) {
+      missingFields.push("endDateTime");
+    }
+    if (!isPublic) {
+      missingFields.push("isPublic");
+    }
+    return res.status(400).render("editEvent", {
+      error:
+        "Error: The following fields are missing: " + missingFields.join(", "),
+      eventName,
+      eventType,
+      eventLocation,
+      eventBorough,
+      startDateTime,
+      endDateTime,
+      streetClosureType,
+      isPublic,
+    });
+  }
+  try {
+    eventName = helpers.validEventName(eventName);
+    eventType = helpers.validEventType(eventType);
+    eventLocation = helpers.validLocation(eventLocation);
+    eventBorough = helpers.validBorough(eventBorough);
+    startDateTime = helpers.validDateTime(startDateTime,'Start');
+    endDateTime = helpers.validDateTime(endDateTime,'End');
+    streetClosureType = helpers.validStreetClosure(streetClosureType);
+    isPublic = helpers.validPublicity(isPublic);
+
+    //isPublic = helpers.validPublicity(isPublic);
+  } catch(e) {
+    res.status(400).render({
+      error:e,
+      eventName,
+      eventType,
+      eventLocation,
+      evenBorough,
+      startDateTime,
+      endDateTime,
+      isPublic,
+      eventId
+    })
+  }
+
+  try{
+    const newEvent = await events.editEvent(
+      eventId,
+      userId,
+      eventName,
+      eventType,
+      eventLocation,
+      eventBorough,
+      startDateTime,
+      endDateTime,
+      streetClosureType,
+      isPublic
+    );
+
+    if(newEvent.edited){
+      return res.redirect(`/events/${eventId}`);
+    } else {
+      return res.status(500).render("error", {
+        error: "Internal Server Error: Registration failed.",
+        title: "Error",
+      });
+    }
+
+  } catch(e) {
+    res.status(400).render({
+      error: e,
+      eventName,
+      eventType,
+      eventLocation,
+      eventBorough,
+      startDateTime,
+      endDateTime,
+      isPublic,
+    })
+  }
+})
+
 router.get("/:id", async (req, res) => {
   try {
     const eventId = req.params.id
