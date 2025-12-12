@@ -61,17 +61,12 @@ All event data is stored in MongoDB, and NYC data is synchronized through script
 
 ## Extra Features
 
-### 1. Event Rating System
-- Users can rate events from 1–5 stars or "like" them
-- Display the most popular events
-- Implementation: store ratings as numbers in each event document and compute the average
-
-### 2. User Profile Page
+### 1. User Profile Page
 - Display user information, saved events, and comments
 - Show personalized event recommendations
 - Implementation: simple profile route that fetches data from existing user collections
 
-### 3. Event Sharing
+### 2. Event Sharing
 - Users can share an event link with others via a generated URL
 - Implementation: generate a shareable route like `/event/:id` that anyone can open
 
@@ -85,23 +80,24 @@ CS-546-Final-Project/
 ├── package.json
 ├── middleware.js
 ├── README.md
+├── .gitignore
 ├── config/
-│   ├── mongoConnection.js     # MongoDB connection
 │   ├── mongoCollections.js
+│   ├── mongoConnection.js     # MongoDB connection
 │   └── settings.js            # Session and app settings
 ├── data/                      # Data access layer
 │   ├── events.js              # Events (search, comments, save counts)
 │   ├── map.js
-│   ├── users.js               # Users (auth, save/unsave helpers)
-│   └── savedEvents.js         # Saved events store
+│   └── users.js               # Users (auth, save/unsave helpers)
 ├── helpers/                   # Validation & utility helpers
 │   ├── userHelpers.js
+│   ├── handlebarsHelpers.js
 │   └── eventHelpers.js
 ├── routes/                    # Route handlers
-│   ├── index.js               # Route configuration
+│   ├── calendar.js            # Calendar view
 │   ├── events.js              # Event search/details/save/comments
 │   ├── home.js                # Home
-│   ├── calendar.js            # Calendar view
+│   ├── index.js               # Route configuration
 │   └── users.js               # Auth routes
 ├── scripts/                   # Data sync
 │   ├── seedNYCEvents.js       # Seed NYC data
@@ -119,18 +115,21 @@ CS-546-Final-Project/
 │   ├── eventDetails.handlebars
 │   ├── home.handlebars
 │   ├── logout.handlebars
-│   └── search.handlebars
-└── public/                    # Static assets
+│   ├── search.handlebars
+│   └── userProfile.handlebars
+└── public/                
     ├── css/main.css
     └── js/
         ├── validation/
             ├── client-helpers.js
-            └── login.js
+            ├── createEvent.js
+            ├── login.js
+            └── register.js
         ├── calander.js
         ├── client.js
         ├── eventDetails.js    # Save/unsave, comments/replies
-        ├── calendar.js
-        ├── map.js
+        ├── eventMap.js
+        ├── homeMap.js
         └── search.js
 ```
 
