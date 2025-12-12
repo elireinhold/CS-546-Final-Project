@@ -5,9 +5,11 @@
 <div class="content-wrapper-center">
     <div>
         <div id="error-here">
-
+            {{#if error}}
+            <p>{{error}}</p>
+            {{/if}}
         </div>
-        <form action="/events" method="POST" id="event-form">
+        <form action="/events/create" method="POST" id="event-form">
             <div class="form-group">
                 <label for="eventName">
                     Event Name
@@ -18,7 +20,25 @@
                 <label for="eventType">
                     Event Type
                 </label>
-                <input type="text" name="eventType" id="eventType" class="form-input">
+                <select name="eventType" id="eventType" class="form-input">
+                    <option value="">...</option>
+                    <option value="Special Event">Special Event</option>
+                    <option value="Sport - Adult">Sport - Adult</option>
+                    <option value="Sport - Youth">Sport - Youth</option>
+                    <option value="Production Event">Production Event</option>
+                    <option value="Open Street Partner Event">Open Street Partner Event</option>
+                    <option value="Plaza Partner Event">Plaza Partner Event</option>
+                    <option value="Street Event">Street Event</option>
+                    <option value="Religious Event">Religious Event</option>
+                    <option value="Farmers Market">Farmers Market</option>
+                    <option value="Sidewalk Sale">Sidewalk Sale</option>
+                    <option value="Theater Load in and Load Outs">Theater Load in and Load Outs</option>
+                    <option value="Parade">Parade</option>
+                    <option value="Miscellaneous">Miscellaneous</option>
+                    <option value="Plaza Event">Plaza Event</option>
+                    <option value="Block Party">Block Party</option>
+                    <option value="Clean-Up">Clean-Up</option>
+                </select>
             </div>
             <div class="form-group">
                 <label for="eventLocation">
@@ -30,17 +50,24 @@
                 <label for="eventBorough">
                     Borough
                 </label>
-                <input type="text" name="eventBorough" id="eventBorough" class="form-input">
+                <select name="eventBorough" id="eventBorough" class="form-input">
+                    <option value="">...</option>
+                    <option value="bronx">Bronx</option>
+                    <option value="brooklyn">Brooklyn</option>
+                    <option value="manhattan">Manhattan</option>
+                    <option value="queens">Queens</option>
+                    <option value="staten island">Staten Island</option>
+                </select>
             </div>
             <div class="form-group">
                 <label for="startDateTime">
-                    Start Date & Time
+                    Start Date and Time
                 </label>
                 <input type="datetime-local" name="startDateTime" id="startDateTime" class="form-input">
             </div>
             <div class="form-group">
                 <label for="endDateTime">
-                    End Date & Time
+                    End Date and Time
                 </label>
                 <input type="datetime-local" name="endDateTime" id="endDateTime" class="form-input">
             </div>
@@ -51,19 +78,13 @@
                 <input type="text" name="streetClosureType" id="streetClosureType" class="form-input">
             </div>
             <div class="form-group">
-                <label for="communityBoard">
-                    Community Board
+                <label for="isPublic">
+                    Event Visibility
                 </label>
-                <input type="text" name="communityBoard" id="communityBoard" class="form-input">
-            </div>
-            <div class="form-group">
-                    <p class="form-label">
-                        Event Visibility
-                    </p>
-                    <div class="form-radio">
-                        <label for="private" class="form-radio"><input type="radio" value="private" name="publicity" id="private" class="form-input">Private</label>
-                        <label for="public" class="form-radio"><input type="radio" value="public" name="publicity" id="public" class="form-input">Public</label>
-                    </div>
+                <select name="isPublic" id="isPublic" class="form-input">
+                    <option value="public">Public</option>
+                    <option value="private">Private</option>
+                </select>
             </div>
             <div class="form-group form-submit">
                 <input type="submit" name="submit" id="submit" class="form-input">

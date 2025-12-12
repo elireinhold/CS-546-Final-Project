@@ -4,8 +4,8 @@ import session from "express-session";
 import cookieParser from "cookie-parser";
 import configRoutes from "./routes/index.js";
 import { settings } from "./config/settings.js";
+import handlebarsHelpers from "./helpers/handlebarsHelpers.js";
 import {
-  requireLogin,
   attachUser,
   redirectIfLoggedIn,
   requestLogger,
@@ -39,27 +39,9 @@ app.use(requestLogger);
 
 const hbs = exphbs.create({
   defaultLayout: "main",
-  helpers: {
-    ifEquals(a, b, options) {
-      return a === b ? options.fn(this) : options.inverse(this);
-    },
-    contains(arr, value) {
-      if (!arr) return false;
-      if (!Array.isArray(arr)) return arr === value;
-      return arr.includes(value);
-    },
-    toString(value) {
-      if (!value) return "";
-      return value.toString();
-    },
-    eq(a, b) {
-      return String(a) === String(b);
-    },
-    json(data) {
-      return JSON.stringify(data);
-    },
-  },
+  helpers: handlebarsHelpers
 });
+
 
 app.engine("handlebars", hbs.engine);
 app.set("view engine", "handlebars");

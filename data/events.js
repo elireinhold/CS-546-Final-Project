@@ -3,14 +3,7 @@ import { ObjectId } from "mongodb";
 import helpers from "../helpers/eventHelpers.js";
 import { users } from "../config/mongoCollections.js";
 
-// // Normalize NYC data; borough abbreviations map
-// const boroughMap = {
-//   M: "Manhattan",
-//   BX: "Bronx",
-//   BK: "Brooklyn",
-//   Q: "Queens",
-//   SI: "Staten Island",
-// };
+//NYCevents
 function formatDateTime(dt) {
   if (!dt) return null;
   const d = new Date(dt);
@@ -40,7 +33,6 @@ export function normalizeNYCEvent(rawEvent) {
   };
 }
 
-// Insert NYC events
 export async function insertManyNYCEvents(eventArray) {
   if (!Array.isArray(eventArray)) {
     throw "insertManyNYCEvents: argument must be an array";
@@ -50,13 +42,12 @@ export async function insertManyNYCEvents(eventArray) {
   return result.insertedCount;
 }
 
-// Clear NYC events
 export async function clearNYCEvents() {
   const eventCollection = await events();
   return await eventCollection.deleteMany({ eventSource: "NYC" });
 }
 
-// Get one event
+//eventsDetails
 export async function getEventById(id) {
   const eventCollection = await events();
 
@@ -68,19 +59,24 @@ export async function getEventById(id) {
   return event;
 }
 
-// Search events with keyword/borough/type/date range
+// eventsSearch
 export async function searchEvents({
   keyword,
   borough,
   eventType,
   startDate,
   endDate,
+  page = 1,
 }) {
   const eventCollection = await events();
-  const query = {};
+
+  let all = await eventCollection.find({}).toArray();
 
   if (keyword && keyword.trim()) {
-    query.eventName = { $regex: keyword.trim(), $options: "i" };
+    const lower = keyword.trim().toLowerCase();
+    all = all.filter(
+      (evt) => evt.eventName && evt.eventName.toLowerCase().includes(lower)
+    );
   }
 
   if (
@@ -88,57 +84,54 @@ export async function searchEvents({
     borough.length > 0 &&
     !borough.includes("all")
   ) {
-    query.eventBorough = { $in: borough };
+    all = all.filter((evt) => borough.includes(evt.eventBorough));
   }
-
   if (
     Array.isArray(eventType) &&
     eventType.length > 0 &&
     !eventType.includes("all")
   ) {
-    query.eventType = { $in: eventType };
+    all = all.filter((evt) => eventType.includes(evt.eventType));
   }
 
-  const dateExpr = [];
-  const dateValue = {
-    $convert: {
-      input: "$startDateTime",
-      to: "date",
-      onError: null,
-      onNull: null,
-    },
+  if (startDate || endDate) {
+    const start = startDate ? new Date(startDate + "T00:00:00") : null;
+    const end = endDate ? new Date(endDate + "T23:59:59") : null;
+
+    all = all.filter((evt) => {
+      const evtDate = new Date(evt.startDateTime);
+      if (isNaN(evtDate)) return false;
+
+      if (start && evtDate < start) return false;
+      if (end && evtDate > end) return false;
+      return true;
+    });
+  }
+
+  const pageSize = 50;
+  const totalEvents = all.length;
+  const totalPages = Math.ceil(totalEvents / pageSize) || 1;
+
+  const safePage = Math.max(1, Math.min(page, totalPages));
+  const startIdx = (safePage - 1) * pageSize;
+  const endIdx = startIdx + pageSize;
+
+  const results = all.slice(startIdx, endIdx);
+
+  return {
+    results,
+    totalEvents,
+    totalPages,
+    currentPage: safePage,
   };
-
-  if (startDate) {
-    const start = new Date(`${startDate}T00:00:00.000Z`);
-    if (!isNaN(start)) {
-      dateExpr.push({ $gte: [dateValue, start] });
-    }
-  }
-
-  if (endDate) {
-    const end = new Date(`${endDate}T23:59:59.999Z`);
-    if (!isNaN(end)) {
-      dateExpr.push({ $lte: [dateValue, end] });
-    }
-  }
-
-  if (dateExpr.length) {
-    query.$expr = { $and: [{ $ne: [dateValue, null] }, ...dateExpr] };
-  }
-
-  return await eventCollection.find(query).limit(200).toArray();
 }
 
-// Get distinct event types
 export async function getDistinctEventTypes() {
   const eventCollection = await events();
   const types = await eventCollection.distinct("eventType");
-
   return types.filter((t) => t && t.trim());
 }
 
-// Get distinct boroughs
 export async function getDistinctBoroughs() {
   const eventCollection = await events();
   const boroughs = await eventCollection.distinct("eventBorough");
@@ -146,75 +139,96 @@ export async function getDistinctBoroughs() {
   return boroughs.filter((b) => b && b.trim());
 }
 
+// eventsRecommendations
 export async function getRecommendedEventsForUser(userId, limit = 5) {
   const userCollection = await users();
   const eventCollection = await events();
+
+  userId = await helpers.validUserId(userId);
   const user = await userCollection.findOne({ _id: new ObjectId(userId) });
   if (!user) throw "User not found";
-  const savedEvents = user.savedEvents || [];
-  if (savedEvents.length === 0) {
-    return await eventCollection
-      .aggregate([
-        { $match: { startDateTime: { $gte: new Date().toISOString() } } },
-        { $sample: { size: limit } }
-      ])
-      .toArray();
-  }
-  const lastFiveIds = savedEvents.slice(-5).map(id => new ObjectId(id));
-  const lastFiveEvents = await eventCollection
-    .find({ _id: { $in: lastFiveIds } })
-    .toArray();
-  const boroughCounts = {};
-  const typeCounts = {};
-  lastFiveEvents.forEach(evt => {
-    if (evt.eventBorough)
-      boroughCounts[evt.eventBorough] =
-        (boroughCounts[evt.eventBorough] || 0) + 1;
-    if (evt.eventType)
-      typeCounts[evt.eventType] =
-        (typeCounts[evt.eventType] || 0) + 1;
+
+  const savedIds = (user.savedEvents || []).map((id) => id.toString());
+  const now = new Date();
+
+  const allEvents = await eventCollection.find({}).toArray();
+
+  const futureEvents = allEvents.filter((evt) => {
+    const dt = new Date(evt.startDateTime);
+
+    return dt > now && !savedIds.includes(evt._id.toString());
   });
-  const most = obj =>
-    Object.keys(obj).sort((a, b) => obj[b] - obj[a])[0];
-  const favoriteBorough = most(boroughCounts);
-  const favoriteType = most(typeCounts);
-  const now = new Date().toISOString();
-  const candidates = await eventCollection
-    .find({
-      _id: { $nin: savedEvents.map(id => new ObjectId(id)) },
-      startDateTime: { $gte: now }
-    })
-    .toArray();
-  const scored = candidates.map(evt => {
+
+  const savedEventsDocs = allEvents.filter((evt) =>
+    savedIds.includes(evt._id.toString())
+  );
+
+  const typeCount = {};
+  const boroughCount = {};
+
+  for (const evt of savedEventsDocs) {
+    if (evt.eventType) {
+      typeCount[evt.eventType] = (typeCount[evt.eventType] || 0) + 1;
+    }
+    if (evt.eventBorough) {
+      boroughCount[evt.eventBorough] =
+        (boroughCount[evt.eventBorough] || 0) + 1;
+    }
+  }
+
+  const maxType = Math.max(0, ...Object.values(typeCount));
+  const frequentTypes = Object.keys(typeCount).filter(
+    (t) => typeCount[t] === maxType
+  );
+
+  const maxBorough = Math.max(0, ...Object.values(boroughCount));
+  const frequentBoroughs = Object.keys(boroughCount).filter(
+    (b) => boroughCount[b] === maxBorough
+  );
+
+  const scored = futureEvents.map((evt) => {
     let score = 0;
-    if (evt.eventBorough === favoriteBorough) score++;
-    if (evt.eventType === favoriteType) score++;
+
+    if (user.favoriteEventType && evt.eventType === user.favoriteEventType) {
+      score += 2;
+    }
+
+    if (user.homeBorough && evt.eventBorough === user.homeBorough) {
+      score += 2;
+    }
+
+    if (frequentTypes.includes(evt.eventType)) {
+      score += 1;
+    }
+
+    if (frequentBoroughs.includes(evt.eventBorough)) {
+      score += 1;
+    }
+
     return { evt, score };
   });
-  scored.sort((a, b) => b.score - a.score);
-  let recommendations = scored
-    .filter(s => s.score > 0)
-    .slice(0, limit)
-    .map(s => s.evt);
-  if (recommendations.length < limit) {
-    const missingCount = limit - recommendations.length;
-    const randomFiller = await eventCollection
-      .aggregate([
-        { $match: { 
-            startDateTime: { $gte: now },
-            _id: { $nin: [...savedEvents.map(id => new ObjectId(id)), ...recommendations.map(r => r._id)] }
-        }},
-        { $sample: { size: missingCount } }
-      ])
-      .toArray();
 
-    recommendations = [...recommendations, ...randomFiller];
+  scored.sort((a, b) => b.score - a.score);
+
+  let recommendations = scored.slice(0, limit).map((s) => s.evt);
+
+  if (recommendations.length < limit) {
+    const missing = limit - recommendations.length;
+
+    const notPicked = futureEvents.filter(
+      (evt) =>
+        !recommendations.some((r) => r._id.toString() === evt._id.toString())
+    );
+
+    notPicked.sort(() => Math.random() - 0.5);
+
+    recommendations = [...recommendations, ...notPicked.slice(0, missing)];
   }
 
   return recommendations;
 }
 
-// Called when user submits a create event form. Validates input, creates event, and adds it to the database.
+// EventsCreate
 export async function userCreateEvent(
   id, //mongoDB _id of user who created the event
   eventName,
@@ -224,7 +238,6 @@ export async function userCreateEvent(
   startDateTime,
   endDateTime,
   streetClosureType,
-  communityBoard,
   isPublic
 ) {
   // Optional Fields
@@ -232,12 +245,6 @@ export async function userCreateEvent(
     streetClosureType = null;
   } else {
     streetClosureType = helpers.validStreetClosure(streetClosureType);
-  }
-
-  if (!communityBoard) {
-    communityBoard = null;
-  } else {
-    communityBoard = helpers.validCommunityBoard(communityBoard);
   }
 
   //Required input validation
@@ -252,18 +259,26 @@ export async function userCreateEvent(
   endDateTime = helpers.validDateTime(endDateTime);
   helpers.validStartEndTimeDate(startDateTime, endDateTime);
 
+  const usersCollection = await users();
+  const user = await usersCollection.findOne({ _id: new ObjectId(id) });
+
+  if (!user) {
+    throw "Error: User not found";
+  }
+
+  const username = user.username;
   const newEvent = {
     eventId: null,
     eventName: eventName,
     startDateTime: startDateTime,
     endDateTime: endDateTime,
-    eventSource: `User Created: ${id}`,
+    eventSource: `User Created: ${username}`,
     eventType: eventType,
     eventBorough: eventBorough,
     eventLocation: eventLocation,
     eventStreetSide: null,
     streetClosureType: streetClosureType,
-    communityBoard: communityBoard,
+    communityBoard: null,
     coordinates: null,
     userIdWhoCreatedEvent: id,
     isPublic: isPublic,
@@ -277,10 +292,13 @@ export async function userCreateEvent(
   if (!insertInfo.acknowledged || !insertInfo.insertedId) {
     throw "Error: Could not add event.";
   }
-  return { registrationCompleted: true };
+  return {
+    registrationCompleted: true,
+    eventId: insertInfo.insertedId.toString(),
+  };
 }
 
-// Add comment or reply to event (parentId is null for top-level comments)
+// eventsComments
 export async function addComment(
   eventId,
   userId,
@@ -297,7 +315,6 @@ export async function addComment(
   const event = await eventCollection.findOne({ _id: new ObjectId(eventId) });
   if (!event) throw "Event not found";
 
-  // If parentId is provided, verify parent comment exists
   if (parentId) {
     const parentComment = event.comments.find(
       (c) => c._id.toString() === parentId
@@ -323,7 +340,6 @@ export async function addComment(
   return comment;
 }
 
-// Delete comment or reply from event (supports any level)
 export async function deleteComment(eventId, commentId, userId) {
   if (!ObjectId.isValid(eventId)) throw "Invalid event ID";
   if (!ObjectId.isValid(commentId)) throw "Invalid comment ID";
@@ -351,7 +367,6 @@ export async function deleteComment(eventId, commentId, userId) {
 
   collectChildren(commentId);
 
-  // Delete all collected comments in one operation
   const result = await eventCollection.updateOne(
     { _id: new ObjectId(eventId) },
     {
@@ -367,25 +382,6 @@ export async function deleteComment(eventId, commentId, userId) {
   return { deleted: true };
 }
 
-// Gets all events user saved
-export async function getAllEventsByUser(userId) {
-  userId = await helpers.validUserId(userId)
-  const eventCollection = await events();
-  const eventData = await eventCollection.find({ userId }).toArray();
-
-  return eventData.map((event) => ({
-    title: event.title,
-    date: event.date,
-    eventId: event._id.toString(),
-  }));
-}
-
-// Gets all events in database
-export async function getAllEvents() {
-  const eventCollection = await events();
-  return await eventCollection.find({}).toArray();
-}
-
 const exportedMethods = {
   normalizeNYCEvent,
   insertManyNYCEvents,
@@ -396,9 +392,7 @@ const exportedMethods = {
   userCreateEvent,
   addComment,
   deleteComment,
-  getAllEventsByUser,
-  getAllEvents,
-  getRecommendedEventsForUser
+  getRecommendedEventsForUser,
 };
 
 export default exportedMethods;

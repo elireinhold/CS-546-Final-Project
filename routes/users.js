@@ -2,7 +2,12 @@ import { Router } from "express";
 const router = Router();
 import * as userData from "../data/users.js";
 import userHelpers from "../helpers/userHelpers.js";
-
+import xss from "xss";
+import { users, events } from "../config/mongoCollections.js";
+import { getSavedEvents } from "../data/users.js";
+import { getEventById } from "../data/events.js";
+import { ObjectId } from "mongodb";
+import { getRecommendedEventsForUser } from "../data/events.js";
 // Placeholder routes — you can replace later
 
 router.get("/", (req, res) => {
@@ -15,6 +20,9 @@ router.get("/login", (req, res) => {
 
 router.post("/login", async (req, res) => {
   let { username, password } = req.body;
+
+  if (username) username = xss(username);
+  if (password) password = xss(password);
 
   if (!username || !password) {
     return res.status(400).render("users/login", {
@@ -109,6 +117,16 @@ router.post("/register", async (req, res) => {
     preferredEventType,
     birthday,
   } = req.body;
+
+  if (username) username = xss(username);
+  if (firstName) firstName = xss(firstName);
+  if (lastName) lastName = xss(lastName);
+  if (password) password = xss(password);
+  if (confirmPassword) confirmPassword = xss(confirmPassword);
+  if (email) email = xss(email);
+  if (preferredBorough) preferredBorough = xss(preferredBorough);
+  if (preferredEventType) preferredEventType = xss(preferredEventType);
+  if (birthday) birthday = xss(birthday);
 
   if (
     !username ||
@@ -269,4 +287,65 @@ router.route("/logout").get(async (req, res) => {
     });
   }
 });
+
+router.get("/:userId/profile", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    if (!userId) {
+      throw "Error: You need to login before seeing this page";
+    }
+    const userCollection = await users();
+    const eventCollection = await events();
+
+    // Get user information
+    const user = await userCollection.findOne({ _id: new ObjectId(userId) });
+    if (!user) {
+      throw "Error: User not found";
+    }
+
+    // Get events that user saved
+    const savedEventIds = await getSavedEvents(userId);
+    const savedEvents = [];
+    for (const id of savedEventIds) {
+      const event = await getEventById(id);
+      if (event) {
+        savedEvents.push(event);
+      }
+    }
+
+    // Fetch comments from events
+    const userComments = [];
+    const allEvents = await eventCollection.find({}).toArray();
+    for (const ev of allEvents) {
+      if (ev.comments && ev.comments.length > 0) {
+        ev.comments.forEach((comment) => {
+          if (comment.userId.toString() === userId) {
+            userComments.push({
+              text: comment.text,
+              eventId: ev._id,
+              eventName: ev.eventName,
+            });
+          }
+        });
+      }
+    }
+
+    let recommendedEvents = [];
+    recommendedEvents = await getRecommendedEventsForUser(userId, 5);
+
+    // Render profile page
+    res.render("userProfile", {
+      user,
+      savedEvents,
+      comments: userComments,
+      recommendedEvents,
+    });
+  } catch (e) {
+    res.status(500).render("error", {
+      error: e,
+      title: "Error",
+    });
+  }
+});
+
 export default router;

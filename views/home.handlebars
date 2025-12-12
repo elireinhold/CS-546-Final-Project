@@ -45,3 +45,55 @@
     <script src="/public/js/map.js"></script>
 </div>
 
+{{!--
+<div class="container">
+  <!-- Left column: headings, links, recommendations -->
+  <div class="left-side">
+    <h1>NYSee Now</h1>
+
+    {{#if session.user}}
+      <h2>Hello {{session.user.username}}!</h2>
+
+      <div class="links">
+        <a href="/calendar">View Calendar</a>
+        <a href="/events/create">Create New Event</a>
+        <a href="/events/search">Find Your Next Event</a>
+      </div>
+
+      {{#if user}}
+        <h2>Events You May Like:</h2>
+
+        {{#if recommendedEvents.length}}
+          <ul>
+            {{#each recommendedEvents}}
+              <li>
+                <a href="/events/{{this._id}}">{{this.eventName}}</a>
+                — {{this.eventBorough}} — {{this.eventType}}
+              </li>
+            {{/each}}
+          </ul>
+        {{else}}
+          <p>No recommendations yet. Save more events!</p>
+        {{/if}}
+      {{/if}}
+    {{else}}
+      <p>Welcome! Log in to explore events happening in NYC.</p>
+    {{/if}}
+  </div>
+
+  <!-- Right column: map on top, saved events below -->
+  <div class="right-side">
+    {{#if session.user}}
+      <h2>Map With Saved Events</h2>
+    {{/if}}
+    <div id="map"></div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+  const eventLocation = {{{json eventLocation}}};
+</script>
+<script src="/public/js/homeMap.js"></script>
+--}}
