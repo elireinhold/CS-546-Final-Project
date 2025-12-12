@@ -1,8 +1,12 @@
 import { Router } from "express";
 import events from "../data/events.js";
-import users from "../data/users.js";
+import * as usersd from "../data/users.js";
+import { users } from "../config/mongoCollections.js";
+import { ObjectId } from "mongodb";
+
+
 import { requireLogin } from "../middleware.js";
-import { getEventWithCoordinates } from "../data/map.js";
+import { getEventWithCoordinates, getUpcomingEventsWithCoordinates, getClosestEvents } from "../data/map.js";
 import helpers from "../helpers/eventHelpers.js";
 import xss from "xss";
 
@@ -122,7 +126,7 @@ router.post("/create", requireLogin, async (req, res) => {
     const userId = req.session.user._id
     const eventId = event.eventId
 
-    await users.saveEvent(userId, eventId);
+    await usersd.saveEvent(userId, eventId);
 
     if (event.registrationCompleted) {
       return res.redirect("/events/create/success");
@@ -201,19 +205,37 @@ router.get("/search", async (req, res) => {
 
     let savedList = [];
     if (req.session.user) {
-      savedList = (await users.getSavedEvents(req.session.user._id)).map((id) =>
+      savedList = (await usersd.getSavedEvents(req.session.user._id)).map((id) =>
         id.toString()
       );
     }
 
     const eventIds = results.map((e) => e._id.toString());
-    const countMap = await users.countUsersWhoSavedMany(eventIds);
+    const countMap = await usersd.countUsersWhoSavedMany(eventIds);
 
     results.forEach((evt) => {
       const id = evt._id.toString();
       evt.saved = savedList.includes(id);
       evt.userCount = countMap[id] || 0;
     });
+
+    let eventLocation = []
+    if (req.session.user) {
+      const userId = req.session.user._id;
+      if (userId) {
+        const userCollection = await users();
+
+        // Get user information
+        const user = await userCollection.findOne({ _id: new ObjectId(userId) });
+        if (!user) {
+          throw "Error: User not found";
+        }
+
+        let userHomeBorough = user.homeBorough || null;
+        eventLocation = await getUpcomingEventsWithCoordinates(userHomeBorough);
+
+      }
+    }
 
     res.render("search", {
       keyword: keyword || "",
@@ -228,6 +250,7 @@ router.get("/search", async (req, res) => {
       totalPages,
       currentPage,
       currentUrl: req.originalUrl,
+      eventLocation
     });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -239,9 +262,9 @@ router.post("/:id/save", requireLogin, async (req, res) => {
     const eventId = req.params.id
     const userId = req.session.user._id
     
-    await users.saveEvent(userId, eventId);
+    await usersd.saveEvent(userId, eventId);
 
-    const userCount = await users.countUsersWhoSaved(eventId);
+    const userCount = await usersd.countUsersWhoSaved(eventId);
     res.json({ saved: true, userCount });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -252,9 +275,9 @@ router.post("/:id/unsave", requireLogin, async (req, res) => {
   try {
     const eventId = req.params.id
     const userId = req.session.user._id
-    await users.unsaveEvent(userId, eventId);
+    await usersd.unsaveEvent(userId, eventId);
 
-    const userCount = await users.countUsersWhoSaved(eventId);
+    const userCount = await usersd.countUsersWhoSaved(eventId);
     res.json({ saved: false, userCount });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -271,11 +294,11 @@ router.get("/:id", async (req, res) => {
     let saved = false;
     if (req.session.user) {
       const userId = req.session.user._id
-      const savedList = await users.getSavedEvents(userId);
+      const savedList = await usersd.getSavedEvents(userId);
       saved = savedList.map((x) => x.toString()).includes(eventId);
     }
 
-    const userCount = await users.countUsersWhoSaved(eventId);
+    const userCount = await usersd.countUsersWhoSaved(eventId);
 
     res.render("eventDetails", {
       event,

@@ -115,4 +115,13 @@
   const returnTo = "{{currentUrl}}";
 </script>
 
+<div id="map"></div>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/geolib@3.3.4/lib/index.min.js"></script>
+
+<script>
+  const eventLocation = {{{json eventLocation}}};
+</script>
+<script src="/public/js/closestEventMap.js"></script>
+
 <script src="/public/js/search.js"></script>
