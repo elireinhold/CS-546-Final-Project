@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   const map = L.map("map").setView([40.7128, -74.0060], 12);
+  if (!map) return;
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: '&copy; OpenStreetMap contributors'
@@ -24,10 +25,10 @@ document.addEventListener("DOMContentLoaded", () => {
           { latitude: Number(ev.lat) , longitude: Number(ev.lon) }
         )
       }));
-      // Sort by distance, take top 5 closest
+      // Sort by distance, take top 10 closest
       const closestEvents = eventsWithDistance
         .sort((a, b) => a.distance - b.distance)
-        .slice(0, 5);
+        .slice(0, 10);
 
       // Add markers for closest events
       const bounds = [];
@@ -38,6 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
             .bindPopup(`
               <b>${ev.title}</b><br>
               ${ev.location}<br>
+              Distance: ${ev.distance} meters<br>
               <a href="/events/${ev.id}">View Event</a>
             `);
           bounds.push([ev.lat, ev.lon]);

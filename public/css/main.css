@@ -185,5 +185,27 @@ span.req {
   padding-left: .15em;
 }
 
+.search-map-container {
+  display: flex;
+  gap: 20px; /* space between left and right */
+  align-items: flex-start;
+  margin-top: 16px;
+  box-sizing: border-box;
+}
+
+/* Left column: form + results */
+.search-left {
+  flex: 1.5;
+}
+
+/* Right column: map */
+.search-right {
+  flex: 1;
+}
+
+#calendar div.weekday {
+  font-weight: bold;
+  text-align: center;
+}
 
 
