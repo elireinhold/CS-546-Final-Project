@@ -6,19 +6,21 @@
     <div>
         <div id="error-here">
             {{#if error}}
-            <p>{{error}}</p>
+            <div id="server-error">
+                <p>{{error}}</p>
+            </div>
             {{/if}}
         </div>
         <form action="/events/create" method="POST" id="event-form">
             <div class="form-group">
                 <label for="eventName">
-                    Event Name
+                    Event Name<span class="req">*</span>
                 </label>
                 <input type="text" name="eventName" id="eventName" class="form-input">
             </div>
             <div class="form-group">
                 <label for="eventType">
-                    Event Type
+                    Event Type<span class="req">*</span>
                 </label>
                 <select name="eventType" id="eventType" class="form-input">
                     <option value="">...</option>
@@ -42,13 +44,13 @@
             </div>
             <div class="form-group">
                 <label for="eventLocation">
-                    Location
+                    Location<span class="req">*</span>
                 </label>
                 <input type="text" name="eventLocation" id="eventLocation" class="form-input">
             </div>
             <div class="form-group">
                 <label for="eventBorough">
-                    Borough
+                    Borough<span class="req">*</span>
                 </label>
                 <select name="eventBorough" id="eventBorough" class="form-input">
                     <option value="">...</option>
@@ -61,25 +63,27 @@
             </div>
             <div class="form-group">
                 <label for="startDateTime">
-                    Start Date and Time
+                    Start Date and Time<span class="req">*</span>
                 </label>
-                <input type="datetime-local" name="startDateTime" id="startDateTime" class="form-input">
+                <input type="datetime-local" id="startDateTime" class="form-input">
+                <input type="hidden" name="startDateTime" id="startReturn">
             </div>
             <div class="form-group">
                 <label for="endDateTime">
-                    End Date and Time
+                    End Date and Time<span class="req">*</span>
                 </label>
-                <input type="datetime-local" name="endDateTime" id="endDateTime" class="form-input">
+                <input type="datetime-local" id="endDateTime" class="form-input">
+                <input type="hidden" name="endDateTime" id="endReturn">
             </div>
             <div class="form-group">
                 <label for="streetClosureType">
-                    Road Closure
+                    Street Closure
                 </label>
                 <input type="text" name="streetClosureType" id="streetClosureType" class="form-input">
             </div>
             <div class="form-group">
                 <label for="isPublic">
-                    Event Visibility
+                    Event Visibility<span class="req">*</span>
                 </label>
                 <select name="isPublic" id="isPublic" class="form-input">
                     <option value="public">Public</option>
@@ -87,7 +91,7 @@
                 </select>
             </div>
             <div class="form-group form-submit">
-                <input type="submit" name="submit" id="submit" class="form-input">
+                <input type="submit" id="submit" class="form-input">
             </div>
         </form>
     </div>

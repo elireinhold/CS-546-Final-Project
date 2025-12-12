@@ -89,9 +89,6 @@ if(form) {
                 throw errorList;
             }
 
-            console.log(username);
-            console.log(password);
-
         } catch(e) {
             event.preventDefault();
 

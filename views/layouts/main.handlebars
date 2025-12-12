@@ -21,7 +21,7 @@
         </nav>
         <div class="auth-head">
             {{#if user}}
-            <span class="head-entry">User: {{user.username}}</span>
+            <span class="head-entry">User: <a href="/users/{{user._id}}/profile">{{user.username}}</a></span>
             <a href="/users/logout" class="head-entry">Logout</a>
             {{else}}
             <a href="/users/login" class="head-entry">Login</a>
@@ -35,7 +35,7 @@
         {{#if user}}
             <span>User:</span>
             <span class="nav-username">
-                <a href="/users/{{user._id}}/profile">{{user.username}}</a>
+                
             </span>
         {{/if}}
         <a href="/">Home</a>
