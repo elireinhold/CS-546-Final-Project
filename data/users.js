@@ -26,7 +26,7 @@ export async function register(
   firstName = helpers.validFirstOrLastName(firstName);
   lastName = helpers.validFirstOrLastName(lastName);
   password = helpers.validPassword(password);
-  email = helpers.validEmail(email);
+  email = await helpers.validEmailServer(email);
   birthday = helpers.validAge(birthday);
   preferredEventType = helpers.validEventType(preferredEventType);
 

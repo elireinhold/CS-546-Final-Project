@@ -200,7 +200,7 @@ router.post("/register", async (req, res) => {
         preferredEventType: preferredEventType || "",
       });
     }
-    email = userHelpers.validEmail(email);
+    email = await userHelpers.validEmailServer(email);
 
     birthday = userHelpers.validAge(birthday);
 
