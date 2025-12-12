@@ -3,11 +3,13 @@ const router = express.Router();
 import * as usersData from '../data/users.js';
 import { requireLogin } from "../middleware.js";
 import { getEventById } from '../data/events.js'
+import xss from "xss";
+import helpers from "../helpers/eventHelpers.js"
 
 
 router.get("/", requireLogin, async (req, res) => {
   try {
-    const userId = req.session.user._id;
+    const userId = req.session.user._id
     const eventIds = await usersData.getSavedEvents(userId);
     // Fetch each event by ID
     const events = [];

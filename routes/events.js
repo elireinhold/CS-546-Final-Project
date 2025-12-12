@@ -119,8 +119,10 @@ router.post("/create", requireLogin, async (req, res) => {
       streetClosureType,
       isPublic
     );
+    const userId = req.session.user._id
+    const eventId = event.eventId
 
-    await users.saveEvent(req.session.user._id, event.eventId);
+    await users.saveEvent(userId, eventId);
 
     if (event.registrationCompleted) {
       return res.redirect("/events/create/success");
@@ -305,8 +307,10 @@ router.get("/search", async (req, res) => {
 
 router.post("/:id/save", requireLogin, async (req, res) => {
   try {
-    const eventId = req.params.id;
-    await users.saveEvent(req.session.user._id, eventId);
+    const eventId = req.params.id
+    const userId = req.session.user._id
+    
+    await users.saveEvent(userId, eventId);
 
     const userCount = await users.countUsersWhoSaved(eventId);
     res.json({ saved: true, userCount });
@@ -317,8 +321,9 @@ router.post("/:id/save", requireLogin, async (req, res) => {
 
 router.post("/:id/unsave", requireLogin, async (req, res) => {
   try {
-    const eventId = req.params.id;
-    await users.unsaveEvent(req.session.user._id, eventId);
+    const eventId = req.params.id
+    const userId = req.session.user._id
+    await users.unsaveEvent(userId, eventId);
 
     const userCount = await users.countUsersWhoSaved(eventId);
     res.json({ saved: false, userCount });
@@ -329,16 +334,19 @@ router.post("/:id/unsave", requireLogin, async (req, res) => {
 
 router.get("/:id", async (req, res) => {
   try {
-    const event = await events.getEventById(req.params.id);
-    const eventLocation = await getEventWithCoordinates(req.params.id);
+    const eventId = req.params.id
+
+    const event = await events.getEventById(eventId);
+    const eventLocation = await getEventWithCoordinates(eventId);
 
     let saved = false;
     if (req.session.user) {
-      const savedList = await users.getSavedEvents(req.session.user._id);
-      saved = savedList.map((x) => x.toString()).includes(req.params.id);
+      const userId = req.session.user._id
+      const savedList = await users.getSavedEvents(userId);
+      saved = savedList.map((x) => x.toString()).includes(eventId);
     }
 
-    const userCount = await users.countUsersWhoSaved(req.params.id);
+    const userCount = await users.countUsersWhoSaved(eventId);
 
     res.render("eventDetails", {
       event,
@@ -354,15 +362,21 @@ router.get("/:id", async (req, res) => {
 
 router.post("/:id/comments", requireLogin, async (req, res) => {
   try {
-    const { commentText, parentId } = req.body;
+    let { commentText, parentId } = req.body;
+    if (commentText) commentText = xss(commentText);
+    if (parentId) parentId = xss(parentId);
+    
 
     if (!commentText || !commentText.trim()) {
       return res.status(400).json({ error: "Comment text is required" });
     }
 
+    const eventId = req.params.id
+    const userId = req.session.user._id
+
     const comment = await events.addComment(
-      req.params.id,
-      req.session.user._id,
+      eventId,
+      userId,
       req.session.user.username,
       commentText,
       parentId || null
@@ -376,10 +390,14 @@ router.post("/:id/comments", requireLogin, async (req, res) => {
 
 router.delete("/:id/comments/:commentId", requireLogin, async (req, res) => {
   try {
+    const eventId = req.params.id
+    const userId = req.session.user._id
+    const commentId = req.params.commentId
+
     await events.deleteComment(
-      req.params.id,
-      req.params.commentId,
-      req.session.user._id
+      eventId,
+      commentId,
+      userId
     );
     res.json({ success: true });
   } catch (e) {
