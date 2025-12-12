@@ -1,7 +1,9 @@
 import { Router } from "express";
 import { getRecommendedEventsForUser } from "../data/events.js";
 import { getAllSavedEventsWithCoordinates } from "../data/map.js";
+import helpers from "../helpers/eventHelpers.js"
 const router = Router();
+import xss from "xss";
 
 router.get("/", async (req, res) => {
   try {
@@ -9,7 +11,7 @@ router.get("/", async (req, res) => {
     let eventLocation = [];
 
     if (req.session.user) {
-      const userId = req.session.user._id;      
+      const userId = req.session.user._id   
       recommendedEvents = await getRecommendedEventsForUser(userId, 5);
       eventLocation = await getAllSavedEventsWithCoordinates(userId);
     } 
