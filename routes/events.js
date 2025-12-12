@@ -153,80 +153,15 @@ router.get("/create/success", requireLogin, (req, res) => {
     user: req.session.user,
   });
 });
-/*
-router.get("/search", async (req, res) => {
-  try {
-    let { keyword, borough, eventType, startDate, endDate } = req.query;
 
-    borough = Array.isArray(borough) ? borough : borough ? [borough] : [];
-    eventType = Array.isArray(eventType) ? eventType : eventType ? [eventType] : [];
 
-    const eventTypes = (await events.getDistinctEventTypes()).sort();
-    const boroughs = (await events.getDistinctBoroughs()).sort();
-
-    if (startDate && endDate && startDate > endDate) {
-      return res.status(400).render("search", {
-        keyword: keyword || "",
-        borough,
-        eventType,
-        startDate,
-        endDate,
-        results: [],
-        eventTypes,
-        boroughs,
-        error: "Start date cannot be after end date",
-        currentUrl: req.originalUrl,
-      });
-    }
-
-    const results = await events.searchEvents({
-      keyword: keyword || "",
-      borough,
-      eventType,
-      startDate,
-      endDate,
-    });
-
-    let savedList = [];
-    if (req.session.user) {
-      savedList = (await users.getSavedEvents(req.session.user._id)).map(id => id.toString());
-    }
-
-    const eventIds = results.map(e => e._id.toString());
-    const countMap = await users.countUsersWhoSavedMany(eventIds);
-
-    results.forEach(evt => {
-      const id = evt._id.toString();
-      evt.saved = savedList.includes(id);
-      evt.userCount = countMap[id] || 0;
-    });
-
-    res.render("search", {
-      keyword: keyword || "",
-      borough,
-      eventType,
-      startDate,
-      endDate,
-      results,
-      eventTypes,
-      boroughs,
-      currentUrl: req.originalUrl,
-    });
-
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
-*/
 router.get("/search", async (req, res) => {
   try {
     let { keyword, borough, eventType, startDate, endDate, page } = req.query;
 
-    // page 转成数字，并且至少为 1
     page = parseInt(page) || 1;
     if (page < 1) page = 1;
 
-    // normalize types
     borough = Array.isArray(borough) ? borough : borough ? [borough] : [];
     eventType = Array.isArray(eventType)
       ? eventType
@@ -234,11 +169,9 @@ router.get("/search", async (req, res) => {
       ? [eventType]
       : [];
 
-    // distinct lists
     const eventTypes = (await events.getDistinctEventTypes()).sort();
     const boroughs = (await events.getDistinctBoroughs()).sort();
 
-    // date validation
     if (startDate && endDate && startDate > endDate) {
       return res.status(400).render("search", {
         keyword: keyword || "",
@@ -256,7 +189,6 @@ router.get("/search", async (req, res) => {
       });
     }
 
-    // 从 searchEvents 取得分页结构
     const { results, totalEvents, totalPages, currentPage } =
       await events.searchEvents({
         keyword: keyword || "",
@@ -267,7 +199,6 @@ router.get("/search", async (req, res) => {
         page,
       });
 
-    // 是否登录 拿 saved events
     let savedList = [];
     if (req.session.user) {
       savedList = (await users.getSavedEvents(req.session.user._id)).map((id) =>
@@ -275,11 +206,9 @@ router.get("/search", async (req, res) => {
       );
     }
 
-    // userCount
     const eventIds = results.map((e) => e._id.toString());
     const countMap = await users.countUsersWhoSavedMany(eventIds);
 
-    // annotate results
     results.forEach((evt) => {
       const id = evt._id.toString();
       evt.saved = savedList.includes(id);
@@ -384,6 +313,7 @@ router.post("/:id/comments", requireLogin, async (req, res) => {
 
     res.json({ success: true, comment });
   } catch (e) {
+    console.error("comment error:", e);
     res.status(400).json({ error: e.message });
   }
 });
@@ -401,6 +331,7 @@ router.delete("/:id/comments/:commentId", requireLogin, async (req, res) => {
     );
     res.json({ success: true });
   } catch (e) {
+    console.error("delete comment error:", e);
     res.status(400).json({ error: e.message });
   }
 });
