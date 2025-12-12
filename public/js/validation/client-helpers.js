@@ -280,31 +280,25 @@ const exportedMethods = {
         throw "Error: Publicity must be private or public.";
         }
     },
-    validStreetClosure(closure) {
-        if (typeof closure !== "string") {
-        throw "Error: Street closure must be a string.";
+    validStreetClosure(closure,optional='false') {
+        if(closure) {
+            if (typeof closure !== "string") {
+                throw "Error: Street closure must be a string.";
+            }
+            closure = closure.trim();
+            if (closure.length < 4) {
+            throw "Error: Street closure infromation must be atleast 4 character long.";
+            }
+            return closure;
         }
-        closure = closure.trim();
-        if (closure.length < 4) {
-        throw "Error: Street closure infromation must be atleast 4 character long.";
-        }
-        return closure;
     },
-    validCommunityBoard(communityBoard) {
-        const trimmed = communityBoard.trim();
-        const num = parseInt(trimmed);
+    validDateTime(dateTime,when="") {
+        if(when) {when=`${when.trim()} `}
 
-        if (isNaN(num)) {
-        throw "Error: Community board must be a positive integer.";
-        }
-
-        if (num < 1 || !Number.isInteger(num)) {
-        throw "Error: Community board must be a positive integer.";
-        }
-        return trimmed;
-    },
-    validDateTime(dateTime) {
-        if(!dateTime) throw "Error: Must provide date/time"
+        if(typeof dateTime !== "string") throw `Error: ${when}Date/time must be a string.`;
+        dateTime = dateTime.trim();
+        if(!dateTime) throw `Error: ${when}date/time is required`;
+        
         const d = new Date(dateTime);
         try {
             const ISO = d.toISOString()
@@ -314,8 +308,15 @@ const exportedMethods = {
         }
     },
     validStartEndTimeDate(startDateTime, endDateTime) {
+        if(typeof startDateTime !== 'string') throw "Error: Start date/time must be a string.";
+        if(typeof endDateTime !== 'string') throw 'Error: End date/time must be a string.'; 
+
+        startDateTime = startDateTime.trim();
+        endDateTime = endDateTime.trim();
+
         if(!startDateTime) throw "Error: Must provide start date/time";
         if(!endDateTime) throw "Error: Must provide end date/time";
+
         const sd = new Date(this.validDateTime(startDateTime));
         const ed = new Date(this.validDateTime(endDateTime));
         if(sd >= ed) throw "Error: Start date/time must occur before end date/time"

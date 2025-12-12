@@ -9,9 +9,8 @@ if(form) {
     const boroughContainer = document.getElementById('eventBorough');
     const startContainer = document.getElementById('startDateTime');
     const endContainer = document.getElementById('endDateTime');
-    const roadClosureContainer = document.getElementById('streetClosureType');
-    const communityBoardContainer = document.getElementById('communityBoard');
-    const publicityContainer = document.getElementsByName('publicity');
+    const roadClosureContainer = document.getElementById('streetClosureType')
+    const isPublicContainer = document.getElementById('isPublic');
 
     const errorContainer = document.getElementById('error-here');
     const serverError = document.getElementById('server-error');
@@ -32,8 +31,7 @@ if(form) {
             let startDateTime = startContainer.value;
             let endDateTime = endContainer.value;
             let roadClosureType = roadClosureContainer.value;
-            let communityBoard = communityBoardContainer.value;
-            let publicity = publicityContainer;
+            let isPublic = isPublicContainer.value;
 
             try{
                 eventName = helpers.validEventName(eventName);
@@ -60,13 +58,13 @@ if(form) {
             }
 
             try {
-                startDateTime = helpers.validDateTime(startDateTime);
+                startDateTime = helpers.validDateTime(startDateTime,'Start');
             } catch(e) {
                 errorList.push(e);
             }
 
             try{
-                endDateTime = helpers.validDateTime(endDateTime);
+                endDateTime = helpers.validDateTime(endDateTime,'End');
                 helpers.validStartEndTimeDate(startDateTime,endDateTime);
             } catch(e) {
                 errorList.push(e);
@@ -79,17 +77,7 @@ if(form) {
             }
 
             try {
-                communityBoard = helpers.validCommunityBoard(communityBoard);
-            } catch(e) {
-                errorList.push(e);
-            }
-
-            try {
-                let good = false;
-                publicity.forEach((d) => {
-                    if(!good) good = Boolean(d.checked);
-                });
-                if(!good) throw "Error: visibility cannot be blank." 
+                
             } catch(e) {
                 errorList.push(e);
             }
@@ -98,11 +86,9 @@ if(form) {
                 throw errorList;
             }
 
-            endContainer.value = endDateTime;
-            startContainer.value = startDateTime;
-
-            document.getElementById('submit').disabled = true;
-
+            document.getElementById('startReturn').value = startDateTime;
+            document.getElementById('endReturn').value = endDateTime;
+ 
         } catch(e) {
             event.preventDefault();
 
