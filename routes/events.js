@@ -253,7 +253,19 @@ router.get("/search", async (req, res) => {
       eventLocation
     });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    console.error("search error:", e);
+    return res.status(400).render("search", {
+      error: e.toString(),
+      keyword: req.query.keyword || "",
+      borough: req.query.borough || [],
+      eventType: req.query.eventType || [],
+      startDate: req.query.startDate || "",
+      endDate: req.query.endDate || "",
+      results: [],
+      eventTypes: await events.getDistinctEventTypes(),
+      boroughs: await events.getDistinctBoroughs(),
+      currentUrl: req.originalUrl
+    });
   }
 });
 

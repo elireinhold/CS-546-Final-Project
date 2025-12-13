@@ -2,6 +2,7 @@ import { events } from "../config/mongoCollections.js";
 import { ObjectId } from "mongodb";
 import helpers from "../helpers/eventHelpers.js";
 import { users } from "../config/mongoCollections.js";
+import xss from "xss";
 
 //NYCevents
 function formatDateTime(dt) {
@@ -69,11 +70,11 @@ export async function searchEvents({
   page = 1,
 }) {
   const eventCollection = await events();
-
   let all = await eventCollection.find({}).toArray();
-
   if (keyword && keyword.trim()) {
-    const lower = keyword.trim().toLowerCase();
+    keyword = helpers.validEventName(keyword);
+    keyword = xss(keyword);
+    const lower = keyword.toLowerCase();
     all = all.filter(
       (evt) => evt.eventName && evt.eventName.toLowerCase().includes(lower)
     );
@@ -230,7 +231,7 @@ export async function getRecommendedEventsForUser(userId, limit = 5) {
 
 // EventsCreate
 export async function userCreateEvent(
-  id, //mongoDB _id of user who created the event
+  id, 
   eventName,
   eventType,
   eventLocation,
@@ -240,14 +241,12 @@ export async function userCreateEvent(
   streetClosureType,
   isPublic
 ) {
-  // Optional Fields
   if (!streetClosureType) {
     streetClosureType = null;
   } else {
     streetClosureType = helpers.validStreetClosure(streetClosureType);
   }
 
-  //Required input validation
   eventName = helpers.validEventName(eventName);
   eventType = helpers.validEventType(eventType);
   eventLocation = helpers.validLocation(eventLocation);
