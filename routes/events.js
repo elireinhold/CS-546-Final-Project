@@ -5,7 +5,7 @@ import { users } from "../config/mongoCollections.js";
 import { ObjectId } from "mongodb";
 
 
-import { requireLogin } from "../middleware.js";
+import { requireLogin, requireLoginAjax } from "../middleware.js";
 import { getEventWithCoordinates, getUpcomingEventsWithCoordinates, getClosestEvents } from "../data/map.js";
 import helpers from "../helpers/eventHelpers.js";
 import xss from "xss";
@@ -269,7 +269,7 @@ router.get("/search", async (req, res) => {
   }
 });
 
-router.post("/:id/save", requireLogin, async (req, res) => {
+router.post("/:id/save", requireLoginAjax, async (req, res) => {
   try {
     const eventId = req.params.id
     const userId = req.session.user._id
@@ -283,7 +283,7 @@ router.post("/:id/save", requireLogin, async (req, res) => {
   }
 });
 
-router.post("/:id/unsave", requireLogin, async (req, res) => {
+router.post("/:id/unsave", requireLoginAjax, async (req, res) => {
   try {
     const eventId = req.params.id
     const userId = req.session.user._id
@@ -324,7 +324,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.post("/:id/comments", requireLogin, async (req, res) => {
+router.post("/:id/comments", requireLoginAjax, async (req, res) => {
   try {
     let { commentText, parentId } = req.body;
     if (commentText) commentText = xss(commentText);
@@ -353,7 +353,7 @@ router.post("/:id/comments", requireLogin, async (req, res) => {
   }
 });
 
-router.delete("/:id/comments/:commentId", requireLogin, async (req, res) => {
+router.delete("/:id/comments/:commentId", requireLoginAjax, async (req, res) => {
   try {
     const eventId = req.params.id
     const userId = req.session.user._id

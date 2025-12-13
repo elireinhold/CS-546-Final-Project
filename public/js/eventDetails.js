@@ -35,8 +35,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const response = await fetch(url, { method: "POST" });
         const data = await response.json();
 
-        if (data.error) {
-          alert(data.error);
+        if (!response.ok || data.error) {
+          alert(data.error || "Error updating save status");
           return;
         }
 
@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       } catch (err) {
         console.error(err);
-        alert("Something went wrong");
+        alert("Error updating save status. Please try again.");
       }
     });
   }
