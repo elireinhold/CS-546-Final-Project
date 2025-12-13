@@ -4,20 +4,13 @@ import helpers from "../helpers/eventHelpers.js";
 import { users } from "../config/mongoCollections.js";
 import xss from "xss";
 
-//NYCevents
-function formatDateTime(dt) {
-  if (!dt) return null;
-  const d = new Date(dt);
-  if (isNaN(d)) return null;
-  return d.toISOString().replace("T", " ").split(".")[0];
-}
-
+// NYCevents
 export function normalizeNYCEvent(rawEvent) {
   return {
     eventId: rawEvent.event_id || null,
     eventName: rawEvent.event_name || "Unnamed Event",
-    startDateTime: formatDateTime(rawEvent.start_date_time) || null,
-    endDateTime: formatDateTime(rawEvent.end_date_time) || null,
+    startDateTime: helpers.formatDateTime(rawEvent.start_date_time) || null,
+    endDateTime: helpers.formatDateTime(rawEvent.end_date_time) || null,
     eventSource: "NYC",
     eventType: rawEvent.event_type || null,
     eventBorough: rawEvent.event_borough || null,

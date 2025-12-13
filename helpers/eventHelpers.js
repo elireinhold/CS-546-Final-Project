@@ -217,6 +217,12 @@ const exportedMethods = {
     if (id.length === 0) throw `${varName} cannot be empty`;
     if (!ObjectId.isValid(id)) throw `${varName} is not a valid ObjectId`;
     return id;
+  },
+  async formatDateTime(dt) {
+    if (!dt) return null;
+    const d = new Date(dt);
+    if (isNaN(d)) return null;
+    return d.toISOString().replace("T", " ").split(".")[0];
   }
 };
 

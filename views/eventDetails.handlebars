@@ -14,8 +14,8 @@
       {{/if}}
     </p>
     <p><strong>Source:</strong> {{event.eventSource}}</p>
-    <p><strong>Start:</strong> {{event.startDateTime}}</p>
-    <p><strong>End:</strong> {{event.endDateTime}}</p>
+    <p><strong>Start:</strong> {{formatDateTime event.startDateTime}}</p>
+    <p><strong>End:</strong> {{formatDateTime event.endDateTime}}</p>
 
     <!-- Inline saved count + save button -->
     <div class="save-row">
