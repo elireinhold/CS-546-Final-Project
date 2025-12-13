@@ -179,23 +179,21 @@ const exportedMethods = {
   },
   // Validates that startDateTime or endDateTime format [2025-11-15T09:00:00.000]. Date must be real date, time must be real time. Return validiated time.
   validDateTime(dateTime) {
-    if(!dateTime) throw "Error: Must provide date/time"
-    const dateTimePattern = /^[\d]{4}-[\d]{2}-[\d]{2}T[\d]{2}:[\d]{2}:[\d]{2}.[\d]{3}$/;
-    if(!dateTimePattern.test(dateTime)) throw "Error: Date/Time must be valid ISO string";
+    if (!dateTime) throw "Error: Must provide date/time";
+
     const d = new Date(dateTime);
-    try {
-      const ISO = d.toISOString()
-      return ISO.substring(0,ISO.length-1);
-    } catch {
-        throw "Error: Date/time does not exist";
-    }
+    if (isNaN(d.getTime())) throw "Error: Date/Time must be valid";
+
+    // Return a proper Date object instead of string
+    return d;
   },
+
   // Validates that startDateTime occurs before endDateTime. Returns True if no error.
   validStartEndTimeDate(startDateTime, endDateTime) {
     if(!startDateTime) throw "Error: Must provide start date/time";
     if(!endDateTime) throw "Error: Must provide end date/time";
-    const sd = new Date(validDateTime(startDateTime));
-    const ed = new Date(validDateTime(endDateTime));
+    const sd = new Date(exportedMethods.validDateTime(startDateTime));
+    const ed = new Date(exportedMethods.validDateTime(endDateTime));
     if(sd >= ed) throw "Error: Start date/time must occur before end date/time"
     return true;
   },

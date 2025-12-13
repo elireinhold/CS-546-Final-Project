@@ -17,8 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .bindPopup("You are here")
         .openPopup();
 
-      const ev = eventLocation; // single event object
-
+      const ev = eventLocation[0];
       if (ev.lat && ev.lon) {
         // Compute distance to this event
         const distance = geolib.getDistance(

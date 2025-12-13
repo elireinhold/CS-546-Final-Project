@@ -24,6 +24,7 @@
     "express-handlebars": "^7.1.0",
     "express-session": "^1.17.3",
     "geolib": "^3.3.4",
+    "luxon": "^3.7.2",
     "mongodb": "^6.6.0",
     "node-fetch": "^3.3.2",
     "xss": "^1.0.15"

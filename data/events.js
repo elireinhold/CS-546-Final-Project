@@ -8,8 +8,8 @@ export function normalizeNYCEvent(rawEvent) {
   return {
     eventId: rawEvent.event_id || null,
     eventName: rawEvent.event_name || "Unnamed Event",
-    startDateTime: helpers.formatDateTime(rawEvent.start_date_time) || null,
-    endDateTime: helpers.formatDateTime(rawEvent.end_date_time) || null,
+    startDateTime: rawEvent.start_date_time ? new Date(rawEvent.start_date_time) : null,
+    endDateTime: rawEvent.end_date_time ? new Date(rawEvent.end_date_time) : null,
     eventSource: "NYC",
     eventType: rawEvent.event_type || null,
     eventBorough: rawEvent.event_borough || null,
@@ -228,8 +228,8 @@ export async function userCreateEvent(
   eventType,
   eventLocation,
   eventBorough,
-  startDateTime,
-  endDateTime,
+  startDateTimestr,
+  endDateTimestr,
   streetClosureType,
   isPublic
 ) {
@@ -246,9 +246,9 @@ export async function userCreateEvent(
   isPublic = helpers.validPublicity(isPublic);
   id = await helpers.validUserId(id);
 
-  startDateTime = helpers.validDateTime(startDateTime);
-  endDateTime = helpers.validDateTime(endDateTime);
-  helpers.validStartEndTimeDate(startDateTime, endDateTime);
+  // startDateTime = helpers.validDateTime(startDateTimestr);
+  // endDateTime = helpers.validDateTime(endDateTimestr);
+  helpers.validStartEndTimeDate(startDateTimestr, endDateTimestr);
 
   const usersCollection = await users();
   const user = await usersCollection.findOne({ _id: new ObjectId(id) });
@@ -257,12 +257,15 @@ export async function userCreateEvent(
     throw "Error: User not found";
   }
 
+  const startDateTimeNY = new Date(new Date(startDateTimestr).getTime() - 5 * 60 * 60 * 1000);
+  const endDateTimeNY = new Date(new Date(endDateTimestr).getTime() - 5 * 60 * 60 * 1000);
+
   const username = user.username;
   const newEvent = {
     eventId: null,
     eventName: eventName,
-    startDateTime: startDateTime,
-    endDateTime: endDateTime,
+    startDateTime: startDateTimeNY,
+    endDateTime: endDateTimeNY,
     eventSource: `User Created: ${username}`,
     eventType: eventType,
     eventBorough: eventBorough,
