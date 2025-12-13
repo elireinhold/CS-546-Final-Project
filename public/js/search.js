@@ -9,8 +9,8 @@ async function updateSaveStatus(eventId, isSaved) {
   
       const data = await res.json();
   
-      if (data.error) {
-        alert(data.error);
+      if (!res.ok || data.error) {
+        alert(data.error || "Error updating save status");
         return;
       }
   
@@ -33,6 +33,6 @@ async function updateSaveStatus(eventId, isSaved) {
       count.textContent = `${data.userCount} user(s) saved this`;
     } catch (e) {
       console.error(e);
-      alert("Error updating save status");
+      alert("Error updating save status. Please try again.");
     }
   }
