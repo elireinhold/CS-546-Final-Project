@@ -78,6 +78,17 @@
             <div id="save-count-{{this._id}}">
               {{this.userCount}} user(s) saved this
             </div>
+            {{#if this.saved}}
+              <button id="save-btn-{{this._id}}"
+                onclick="updateSaveStatus('{{this._id}}', true)">
+              Unsave
+              </button>
+            {{else}}
+              <button id="save-btn-{{this._id}}"
+                onclick="updateSaveStatus('{{this._id}}', false)">
+              Save
+            </button>
+            {{/if}}
           </li>
         {{/each}}
       </ul>
@@ -85,7 +96,6 @@
       <p>No events found.</p>
     {{/if}}
   </div>
-
   <div class="search-right">
     {{#if session.user}}
     <h2>Map of Nearest Events in Home Borough</h2>
@@ -120,5 +130,4 @@
   const eventLocation = {{{json eventLocation}}};
 </script>
 <script src="/public/js/closestEventMap.js"></script>
-
 <script src="/public/js/search.js"></script>
