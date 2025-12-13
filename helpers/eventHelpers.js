@@ -200,15 +200,29 @@ const exportedMethods = {
     return true;
   },
   async validUserId(id) {
-    id = exportedMethods.checkId(id);
+    // id = exportedMethods.checkId(id);
 
-    const usersCollection = await users();
-    const user = await usersCollection.findOne({ _id: new ObjectId(id) });
+    // const usersCollection = await users();
+    // const user = await usersCollection.findOne({ _id: new ObjectId(id) });
 
-    if (!user) {
-      throw "Error: No user with that id";
-    }
-    return id;
+    // if (!user) {
+    //   throw "Error: No user with that id";
+    // }
+    // return id;
+      if (!id || typeof id !== "string") throw "userId must be a string";
+      id = id.trim();
+      if (id.length === 0) throw "userId cannot be empty";
+    
+      // 2. must be objectId string
+      if (!ObjectId.isValid(id)) throw "userId is not a valid ObjectId";
+    
+      // 3. check existence in DB
+      const usersCollection = await users();
+      const user = await usersCollection.findOne({ _id: new ObjectId(id) });
+      if (!user) throw "User not found";
+    
+      // always return string form
+      return id;
   },
   async validId(id, varName) {
     if (!id) throw `${varName} is required`;
@@ -217,8 +231,35 @@ const exportedMethods = {
     if (id.length === 0) throw `${varName} cannot be empty`;
     if (!ObjectId.isValid(id)) throw `${varName} is not a valid ObjectId`;
     return id;
+  },
+  async formatDateTime(dt) {
+    if (!dt) return null;
+    const d = new Date(dt);
+    if (isNaN(d)) return null;
+    return d.toISOString().replace("T", " ").split(".")[0];
+  },
+ async validateDateMMDDYYYY(dateStr) {
+  if (!dateStr) return null;
+  if (!/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+    throw "Date must be in mm/dd/yyyy format";
   }
-};
+  const [mm, dd, yyyy] = dateStr.split("/").map(Number);
 
+  if (mm < 1 || mm > 12) throw "Invalid month in date";
+  const d = new Date(`${yyyy}-${mm}-${dd}T00:00:00`);
+
+  if (isNaN(d.getTime())) throw "Invalid date";
+
+  if (
+    d.getUTCFullYear() !== yyyy ||
+    d.getUTCMonth() + 1 !== mm ||
+    d.getUTCDate() !== dd
+  ) {
+    throw "Invalid calendar date";
+  }
+
+  return dateStr;
+}
+}
 
 export default exportedMethods;

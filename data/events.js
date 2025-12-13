@@ -2,22 +2,14 @@ import { events } from "../config/mongoCollections.js";
 import { ObjectId } from "mongodb";
 import helpers from "../helpers/eventHelpers.js";
 import { users } from "../config/mongoCollections.js";
-import xss from "xss";
 
-//NYCevents
-function formatDateTime(dt) {
-  if (!dt) return null;
-  const d = new Date(dt);
-  if (isNaN(d)) return null;
-  return d.toISOString().replace("T", " ").split(".")[0];
-}
-
+// NYCevents
 export function normalizeNYCEvent(rawEvent) {
   return {
     eventId: rawEvent.event_id || null,
     eventName: rawEvent.event_name || "Unnamed Event",
-    startDateTime: formatDateTime(rawEvent.start_date_time) || null,
-    endDateTime: formatDateTime(rawEvent.end_date_time) || null,
+    startDateTime: helpers.formatDateTime(rawEvent.start_date_time) || null,
+    endDateTime: helpers.formatDateTime(rawEvent.end_date_time) || null,
     eventSource: "NYC",
     eventType: rawEvent.event_type || null,
     eventBorough: rawEvent.event_borough || null,
@@ -73,7 +65,6 @@ export async function searchEvents({
   let all = await eventCollection.find({}).toArray();
   if (keyword && keyword.trim()) {
     keyword = helpers.validEventName(keyword);
-    keyword = xss(keyword);
     const lower = keyword.toLowerCase();
     all = all.filter(
       (evt) => evt.eventName && evt.eventName.toLowerCase().includes(lower)
@@ -95,6 +86,7 @@ export async function searchEvents({
     all = all.filter((evt) => eventType.includes(evt.eventType));
   }
 
+  
   if (startDate || endDate) {
     const start = startDate ? new Date(startDate + "T00:00:00") : null;
     const end = endDate ? new Date(endDate + "T23:59:59") : null;
@@ -336,6 +328,8 @@ export async function addComment(eventId, userId, username, commentText, parentI
   return newComment;
 }
 
+
+
 export async function deleteComment(eventId, commentId, userId) {
   if (!ObjectId.isValid(eventId)) throw "Invalid event ID";
   if (!ObjectId.isValid(commentId)) throw "Invalid comment ID";
@@ -375,6 +369,7 @@ export async function deleteComment(eventId, commentId, userId) {
 
   return { deleted: true };
 }
+
 
 // Gets all events in the database
 export async function getAllEvents() {

@@ -176,9 +176,10 @@ router.get("/search", async (req, res) => {
     const eventTypes = (await events.getDistinctEventTypes()).sort();
     const boroughs = (await events.getDistinctBoroughs()).sort();
 
-    if (startDate && endDate && startDate > endDate) {
-      return res.status(400).render("search", {
-        keyword: keyword || "",
+    if (keyword && keyword.trim().length === 1) {
+      return res.render("search", {
+        error: "Keyword must be at least 2 characters long.",
+        keyword,
         borough,
         eventType,
         startDate,
@@ -186,10 +187,67 @@ router.get("/search", async (req, res) => {
         results: [],
         eventTypes,
         boroughs,
-        currentUrl: req.originalUrl,
-        error: "Start date cannot be after end date",
         totalPages: 0,
         currentPage: 1,
+        currentUrl: req.originalUrl
+      });
+    }
+
+    function isValidDate(d) {
+      return d instanceof Date && !isNaN(d);
+    }
+
+    let start = startDate ? new Date(startDate) : null;
+    let end = endDate ? new Date(endDate) : null;
+
+    if (startDate && !isValidDate(start)) {
+      return res.render("search", {
+        error: "Invalid start date.",
+        keyword,
+        borough,
+        eventType,
+        startDate,
+        endDate,
+        results: [],
+        eventTypes,
+        boroughs,
+        totalPages: 0,
+        currentPage: 1,
+        currentUrl: req.originalUrl
+      });
+    }
+
+    if (endDate && !isValidDate(end)) {
+      return res.render("search", {
+        error: "Invalid end date.",
+        keyword,
+        borough,
+        eventType,
+        startDate,
+        endDate,
+        results: [],
+        eventTypes,
+        boroughs,
+        totalPages: 0,
+        currentPage: 1,
+        currentUrl: req.originalUrl
+      });
+    }
+
+    if (start && end && start > end) {
+      return res.render("search", {
+        error: "Start date cannot be after end date.",
+        keyword,
+        borough,
+        eventType,
+        startDate,
+        endDate,
+        results: [],
+        eventTypes,
+        boroughs,
+        totalPages: 0,
+        currentPage: 1,
+        currentUrl: req.originalUrl
       });
     }
 
@@ -254,7 +312,7 @@ router.get("/search", async (req, res) => {
     });
   } catch (e) {
     console.error("search error:", e);
-    return res.status(400).render("search", {
+    return res.render("search", {
       error: e.toString(),
       keyword: req.query.keyword || "",
       borough: req.query.borough || [],
@@ -264,13 +322,16 @@ router.get("/search", async (req, res) => {
       results: [],
       eventTypes: await events.getDistinctEventTypes(),
       boroughs: await events.getDistinctBoroughs(),
-      currentUrl: req.originalUrl
+      currentUrl: req.originalUrl,
+      totalPages: 0,
+      currentPage: 1
     });
   }
 });
 
 router.post("/:id/save", requireLoginAjax, async (req, res) => {
   try {
+
     const eventId = req.params.id
     const userId = req.session.user._id
     
@@ -355,9 +416,9 @@ router.post("/:id/comments", requireLoginAjax, async (req, res) => {
 
 router.delete("/:id/comments/:commentId", requireLoginAjax, async (req, res) => {
   try {
-    const eventId = req.params.id
-    const userId = req.session.user._id
-    const commentId = req.params.commentId
+    const eventId = xss(req.params.id);
+    const userId = req.session.user._id;
+    const commentId = xss(req.params.commentId);
 
     await events.deleteComment(
       eventId,
