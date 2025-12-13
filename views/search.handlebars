@@ -65,36 +65,44 @@
   <hr>
 {{/if}}
 
-{{#if results.length}}
-  <ul>
-    {{#each results}}
-      <li>
-        <a href="/events/{{this._id}}?returnTo={{../currentUrl}}">
-          {{this.eventName}}
-        </a>
-        — {{this.eventBorough}}
-
-        <div id="save-count-{{this._id}}">
-          {{this.userCount}} user(s) saved this
-        </div>
-
-        {{#if this.saved}}
-          <button id="save-btn-{{this._id}}"
-                  onclick="updateSaveStatus('{{this._id}}', true)">
-            Unsave
-          </button>
-        {{else}}
-          <button id="save-btn-{{this._id}}"
-                  onclick="updateSaveStatus('{{this._id}}', false)">
-            Save
-          </button>
-        {{/if}}
-      </li>
-    {{/each}}
-  </ul>
-{{else}}
-  <p>No events found.</p>
-{{/if}}
+<div class="search-map-container">
+  <div class="search-left">
+    {{#if results.length}}
+      <ul>
+        {{#each results}}
+          <li>
+            <a href="/events/{{this._id}}?returnTo={{../currentUrl}}">
+              {{this.eventName}}
+            </a>
+            — {{this.eventBorough}}
+            <div id="save-count-{{this._id}}">
+              {{this.userCount}} user(s) saved this
+            </div>
+            {{#if this.saved}}
+              <button id="save-btn-{{this._id}}"
+                onclick="updateSaveStatus('{{this._id}}', true)">
+              Unsave
+              </button>
+            {{else}}
+              <button id="save-btn-{{this._id}}"
+                onclick="updateSaveStatus('{{this._id}}', false)">
+              Save
+            </button>
+            {{/if}}
+          </li>
+        {{/each}}
+      </ul>
+    {{else}}
+      <p>No events found.</p>
+    {{/if}}
+  </div>
+  <div class="search-right">
+    {{#if session.user}}
+    <h2>Map of Nearest Events in Home Borough</h2>
+    <div id="map"></div>
+    {{/if}}
+  </div>
+</div>
 
 {{#if totalPages}}
   <hr>
@@ -115,4 +123,12 @@
   const returnTo = "{{currentUrl}}";
 </script>
 
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/geolib@3.3.4/lib/index.min.js"></script>
+
+<script>
+  const eventLocation = {{{json eventLocation}}};
+</script>
+<script src="/public/js/closestEventMap.js"></script>
 <script src="/public/js/search.js"></script>
+<script src="/public/js/searchValidation.js"></script>

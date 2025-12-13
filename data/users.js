@@ -26,7 +26,7 @@ export async function register(
   firstName = helpers.validFirstOrLastName(firstName);
   lastName = helpers.validFirstOrLastName(lastName);
   password = helpers.validPassword(password);
-  email = helpers.validEmail(email);
+  email = await helpers.validEmailServer(email);
   birthday = helpers.validAge(birthday);
   preferredEventType = helpers.validEventType(preferredEventType);
 
@@ -137,38 +137,57 @@ export async function countUsersWhoSaved(eventId) {
 
 // Count users who saved many events (batch)
 export async function countUsersWhoSavedMany(eventIds) {
+  // const userCollection = await users();
+
+  // const objIds = eventIds.map((id) => toObjectId(id));
+
+  // const pipeline = [
+  //   { $match: { savedEvents: { $in: objIds } } },
+  //   { $unwind: "$savedEvents" },
+  //   { $match: { savedEvents: { $in: objIds } } },
+  //   {
+  //     $group: {
+  //       _id: "$savedEvents",
+  //       count: { $sum: 1 },
+  //     },
+  //   },
+  // ];
+
+  // const results = await userCollection.aggregate(pipeline).toArray();
+
+  // const countMap = {};
+  // for (const r of results) {
+  //   countMap[r._id.toString()] = r.count;
+  // }
+
+  // for (const id of eventIds) {
+  //   if (!countMap[id]) countMap[id] = 0;
+  // }
+
+  // return countMap;
   const userCollection = await users();
+  const objIds = eventIds.map(id => toObjectId(id));
 
-  // Convert to ObjectId list
-  const objIds = eventIds.map((id) => toObjectId(id));
+  const allUsers = await userCollection.find({}).toArray();
 
-  // One MongoDB aggregation (fast)
-  const pipeline = [
-    { $match: { savedEvents: { $in: objIds } } },
-    { $unwind: "$savedEvents" },
-    { $match: { savedEvents: { $in: objIds } } },
-    {
-      $group: {
-        _id: "$savedEvents",
-        count: { $sum: 1 },
-      },
-    },
-  ];
-
-  const results = await userCollection.aggregate(pipeline).toArray();
-
-  // Convert aggregation result to lookup map
-  const countMap = {};
-  for (const r of results) {
-    countMap[r._id.toString()] = r.count;
-  }
-
-  // Ensure all eventIds exist in map (even with 0 saves)
+  const result = {};
+ 
   for (const id of eventIds) {
-    if (!countMap[id]) countMap[id] = 0;
+    result[id] = 0;
   }
 
-  return countMap;
+  for (const user of allUsers) {
+    if (!Array.isArray(user.savedEvents)) continue;
+
+    for (const savedId of user.savedEvents) {
+      const key = savedId.toString();
+      if (result.hasOwnProperty(key)) {
+        result[key] += 1;
+      }
+    }
+  }
+
+  return result;
 }
 
 const exportedMethods = {

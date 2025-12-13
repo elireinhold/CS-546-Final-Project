@@ -1,41 +1,44 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // Initialize map centered on NYC
   const map = L.map("map").setView([40.7128, -74.0060], 12);
+  if (!map) return;
 
-  // Add OpenStreetMap tiles
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: '&copy; OpenStreetMap contributors'
   }).addTo(map);
 
-  // Try to get user's location
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(async (position) => {
-      const lat = position.coords.latitude;
-      const lon = position.coords.longitude;
+  if (navigator.geolocation && eventLocation) {
+    navigator.geolocation.getCurrentPosition(position => {
+      const userLat = position.coords.latitude;
+      const userLon = position.coords.longitude;
 
-      // Add a marker for user's location
-      L.marker([lat, lon])
+      // Add user marker
+      L.marker([userLat, userLon])
         .addTo(map)
         .bindPopup("You are here")
         .openPopup();
-    });
-  }
 
-  // Add event marker
-  if (Array.isArray(eventLocation) && eventLocation.length > 0) {
-    const ev = eventLocation[0];
+      const ev = eventLocation[0];
+      if (ev.lat && ev.lon) {
+        // Compute distance to this event
+        const distance = geolib.getDistance(
+          { latitude: userLat, longitude: userLon },
+          { latitude: Number(ev.lat), longitude: Number(ev.lon) }
+        );
 
-    if (ev.lat && ev.lon) {
-      // Add marker
-      L.marker([ev.lat, ev.lon])
-        .addTo(map)
-        .bindPopup(`
-          <b>${ev.title}</b><br>
-          ${ev.location}<br>
-          <a href="/events/${ev.id}">View Event</a>
-        `)
+        console.log(`Distance to ${ev.title}: ${distance} meters`);
+
+        // Add marker for the event
+        L.marker([ev.lat, ev.lon])
+          .addTo(map)
+          .bindPopup(`
+            <b>${ev.title}</b><br>
+            ${ev.location}<br>
+            Distance: ${distance} meters<br>
+            <a href="/events/${ev.id}">View Event</a>
+          `);
 
         map.flyTo([ev.lat, ev.lon], 13);
-    }
+      }
+    }, err => console.error("Geolocation error:", err));
   }
 });

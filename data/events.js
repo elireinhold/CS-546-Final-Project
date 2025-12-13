@@ -3,20 +3,13 @@ import { ObjectId, ReturnDocument } from "mongodb";
 import helpers from "../helpers/eventHelpers.js";
 import { users } from "../config/mongoCollections.js";
 
-//NYCevents
-function formatDateTime(dt) {
-  if (!dt) return null;
-  const d = new Date(dt);
-  if (isNaN(d)) return null;
-  return d.toISOString().replace("T", " ").split(".")[0];
-}
-
+// NYCevents
 export function normalizeNYCEvent(rawEvent) {
   return {
     eventId: rawEvent.event_id || null,
     eventName: rawEvent.event_name || "Unnamed Event",
-    startDateTime: formatDateTime(rawEvent.start_date_time) || null,
-    endDateTime: formatDateTime(rawEvent.end_date_time) || null,
+    startDateTime: rawEvent.start_date_time ? new Date(rawEvent.start_date_time) : null,
+    endDateTime: rawEvent.end_date_time ? new Date(rawEvent.end_date_time) : null,
     eventSource: "NYC",
     eventType: rawEvent.event_type || null,
     eventBorough: rawEvent.event_borough || null,
@@ -69,11 +62,10 @@ export async function searchEvents({
   page = 1,
 }) {
   const eventCollection = await events();
-
   let all = await eventCollection.find({}).toArray();
-
   if (keyword && keyword.trim()) {
-    const lower = keyword.trim().toLowerCase();
+    keyword = helpers.validEventName(keyword);
+    const lower = keyword.toLowerCase();
     all = all.filter(
       (evt) => evt.eventName && evt.eventName.toLowerCase().includes(lower)
     );
@@ -94,6 +86,7 @@ export async function searchEvents({
     all = all.filter((evt) => eventType.includes(evt.eventType));
   }
 
+  
   if (startDate || endDate) {
     const start = startDate ? new Date(startDate + "T00:00:00") : null;
     const end = endDate ? new Date(endDate + "T23:59:59") : null;
@@ -230,24 +223,22 @@ export async function getRecommendedEventsForUser(userId, limit = 5) {
 
 // EventsCreate
 export async function userCreateEvent(
-  id, //mongoDB _id of user who created the event
+  id, 
   eventName,
   eventType,
   eventLocation,
   eventBorough,
-  startDateTime,
-  endDateTime,
+  startDateTimestr,
+  endDateTimestr,
   streetClosureType,
   isPublic
 ) {
-  // Optional Fields
   if (!streetClosureType) {
     streetClosureType = null;
   } else {
     streetClosureType = helpers.validStreetClosure(streetClosureType);
   }
 
-  //Required input validation
   eventName = helpers.validEventName(eventName);
   eventType = helpers.validEventType(eventType);
   eventLocation = helpers.validLocation(eventLocation);
@@ -255,9 +246,9 @@ export async function userCreateEvent(
   isPublic = helpers.validPublicity(isPublic);
   id = await helpers.validUserId(id);
 
-  startDateTime = helpers.validDateTime(startDateTime);
-  endDateTime = helpers.validDateTime(endDateTime);
-  helpers.validStartEndTimeDate(startDateTime, endDateTime);
+  // startDateTime = helpers.validDateTime(startDateTimestr);
+  // endDateTime = helpers.validDateTime(endDateTimestr);
+  helpers.validStartEndTimeDate(startDateTimestr, endDateTimestr);
 
   const usersCollection = await users();
   const user = await usersCollection.findOne({ _id: new ObjectId(id) });
@@ -266,12 +257,15 @@ export async function userCreateEvent(
     throw "Error: User not found";
   }
 
+  const startDateTimeNY = new Date(new Date(startDateTimestr).getTime() - 5 * 60 * 60 * 1000);
+  const endDateTimeNY = new Date(new Date(endDateTimestr).getTime() - 5 * 60 * 60 * 1000);
+
   const username = user.username;
   const newEvent = {
     eventId: null,
     eventName: eventName,
-    startDateTime: startDateTime,
-    endDateTime: endDateTime,
+    startDateTime: startDateTimeNY,
+    endDateTime: endDateTimeNY,
     eventSource: `User Created: ${username}`,
     eventType: eventType,
     eventBorough: eventBorough,
@@ -408,6 +402,8 @@ export async function addComment(
   return newComment;
 }
 
+
+
 export async function deleteComment(eventId, commentId, userId) {
   if (!ObjectId.isValid(eventId)) throw "Invalid event ID";
   if (!ObjectId.isValid(commentId)) throw "Invalid comment ID";
@@ -448,6 +444,28 @@ export async function deleteComment(eventId, commentId, userId) {
   return { deleted: true };
 }
 
+
+// Gets all events in the database
+export async function getAllEvents() {
+  const eventCollection = await events();
+
+  const allEvents = await eventCollection.find({}).toArray();
+
+  return allEvents.map(event => ({
+    ...event,
+    _id: event._id.toString(),
+  }));
+}
+
+// Gets all events in the specified borough
+export async function getEventsByBorough(borough) {
+  const eventCollection = await events();
+  
+  const eventsInBorough = await eventCol.find({eventBorough: borough}).toArray();
+
+  return eventsInBorough.map(e => ({ ...e, _id: e._id.toString() }));
+}
+
 const exportedMethods = {
   normalizeNYCEvent,
   insertManyNYCEvents,
@@ -460,6 +478,8 @@ const exportedMethods = {
   addComment,
   deleteComment,
   getRecommendedEventsForUser,
+  getAllEvents,
+  getEventsByBorough
 };
 
 export default exportedMethods;

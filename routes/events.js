@@ -1,8 +1,12 @@
 import { Router } from "express";
 import events from "../data/events.js";
-import users from "../data/users.js";
-import { requireLogin } from "../middleware.js";
-import { getEventWithCoordinates } from "../data/map.js";
+import * as usersd from "../data/users.js";
+import { users } from "../config/mongoCollections.js";
+import { ObjectId } from "mongodb";
+
+
+import { requireLogin, requireLoginAjax } from "../middleware.js";
+import { getEventWithCoordinates, getUpcomingEventsWithCoordinates, getClosestEvents } from "../data/map.js";
 import helpers from "../helpers/eventHelpers.js";
 import xss from "xss";
 
@@ -92,6 +96,14 @@ router.post("/create", requireLogin, async (req, res) => {
     startDateTime = helpers.validDateTime(startDateTime);
     endDateTime = helpers.validDateTime(endDateTime);
     helpers.validStartEndTimeDate(startDateTime, endDateTime);
+
+    const start = new Date(startDateTime);
+    const end = new Date(endDateTime);
+
+    // Check if valid
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      throw new Error("Invalid date input");
+    }
     //isPublic = helpers.validPublicity(isPublic);
   } catch (e) {
     return res.status(400).render("createEvent", {
@@ -108,6 +120,7 @@ router.post("/create", requireLogin, async (req, res) => {
   }
 
   try {
+
     const event = await events.userCreateEvent(
       req.session.user._id,
       eventName,
@@ -122,7 +135,7 @@ router.post("/create", requireLogin, async (req, res) => {
     const userId = req.session.user._id
     const eventId = event.eventId
 
-    await users.saveEvent(userId, eventId);
+    await usersd.saveEvent(userId, eventId);
 
     if (event.registrationCompleted) {
       return res.redirect("/events/create/success");
@@ -172,9 +185,10 @@ router.get("/search", async (req, res) => {
     const eventTypes = (await events.getDistinctEventTypes()).sort();
     const boroughs = (await events.getDistinctBoroughs()).sort();
 
-    if (startDate && endDate && startDate > endDate) {
-      return res.status(400).render("search", {
-        keyword: keyword || "",
+    if (keyword && keyword.trim().length === 1) {
+      return res.render("search", {
+        error: "Keyword must be at least 2 characters long.",
+        keyword,
         borough,
         eventType,
         startDate,
@@ -182,10 +196,67 @@ router.get("/search", async (req, res) => {
         results: [],
         eventTypes,
         boroughs,
-        currentUrl: req.originalUrl,
-        error: "Start date cannot be after end date",
         totalPages: 0,
         currentPage: 1,
+        currentUrl: req.originalUrl
+      });
+    }
+
+    function isValidDate(d) {
+      return d instanceof Date && !isNaN(d);
+    }
+
+    let start = startDate ? new Date(startDate) : null;
+    let end = endDate ? new Date(endDate) : null;
+
+    if (startDate && !isValidDate(start)) {
+      return res.render("search", {
+        error: "Invalid start date.",
+        keyword,
+        borough,
+        eventType,
+        startDate,
+        endDate,
+        results: [],
+        eventTypes,
+        boroughs,
+        totalPages: 0,
+        currentPage: 1,
+        currentUrl: req.originalUrl
+      });
+    }
+
+    if (endDate && !isValidDate(end)) {
+      return res.render("search", {
+        error: "Invalid end date.",
+        keyword,
+        borough,
+        eventType,
+        startDate,
+        endDate,
+        results: [],
+        eventTypes,
+        boroughs,
+        totalPages: 0,
+        currentPage: 1,
+        currentUrl: req.originalUrl
+      });
+    }
+
+    if (start && end && start > end) {
+      return res.render("search", {
+        error: "Start date cannot be after end date.",
+        keyword,
+        borough,
+        eventType,
+        startDate,
+        endDate,
+        results: [],
+        eventTypes,
+        boroughs,
+        totalPages: 0,
+        currentPage: 1,
+        currentUrl: req.originalUrl
       });
     }
 
@@ -201,13 +272,13 @@ router.get("/search", async (req, res) => {
 
     let savedList = [];
     if (req.session.user) {
-      savedList = (await users.getSavedEvents(req.session.user._id)).map((id) =>
+      savedList = (await usersd.getSavedEvents(req.session.user._id)).map((id) =>
         id.toString()
       );
     }
 
     const eventIds = results.map((e) => e._id.toString());
-    const countMap = await users.countUsersWhoSavedMany(eventIds);
+    const countMap = await usersd.countUsersWhoSavedMany(eventIds);
 
     results.forEach((evt) => {
       const id = evt._id.toString();
@@ -215,46 +286,87 @@ router.get("/search", async (req, res) => {
       evt.userCount = countMap[id] || 0;
     });
 
+    let eventLocation = []
+    if (req.session.user) {
+      const userId = req.session.user._id;
+      if (userId) {
+        const userCollection = await users();
+
+        // Get user information
+        const user = await userCollection.findOne({ _id: new ObjectId(userId) });
+        if (!user) {
+          throw "Error: User not found";
+        }
+
+        let userHomeBorough = user.homeBorough || null;
+        eventLocation = await getUpcomingEventsWithCoordinates(userHomeBorough);
+
+      }
+    }
+
+    const resultsWithLocalTime = results.map(evt => ({
+      ...evt,
+      startDateTimeLocal: new Date(evt.startDateTime).toLocaleString("en-US", { timeZone: "America/New_York" }),
+      endDateTimeLocal: new Date(evt.endDateTime).toLocaleString("en-US", { timeZone: "America/New_York" })
+    }));
+
+
     res.render("search", {
       keyword: keyword || "",
       borough,
       eventType,
       startDate,
       endDate,
-      results,
+      results: resultsWithLocalTime,
       eventTypes,
       boroughs,
       totalEvents,
       totalPages,
       currentPage,
       currentUrl: req.originalUrl,
+      eventLocation
     });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    console.error("search error:", e);
+    return res.render("search", {
+      error: e.toString(),
+      keyword: req.query.keyword || "",
+      borough: req.query.borough || [],
+      eventType: req.query.eventType || [],
+      startDate: req.query.startDate || "",
+      endDate: req.query.endDate || "",
+      results: [],
+      eventTypes: await events.getDistinctEventTypes(),
+      boroughs: await events.getDistinctBoroughs(),
+      currentUrl: req.originalUrl,
+      totalPages: 0,
+      currentPage: 1
+    });
   }
 });
 
-router.post("/:id/save", requireLogin, async (req, res) => {
+router.post("/:id/save", requireLoginAjax, async (req, res) => {
   try {
+
     const eventId = req.params.id
     const userId = req.session.user._id
     
-    await users.saveEvent(userId, eventId);
+    await usersd.saveEvent(userId, eventId);
 
-    const userCount = await users.countUsersWhoSaved(eventId);
+    const userCount = await usersd.countUsersWhoSaved(eventId);
     res.json({ saved: true, userCount });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
 
-router.post("/:id/unsave", requireLogin, async (req, res) => {
+router.post("/:id/unsave", requireLoginAjax, async (req, res) => {
   try {
     const eventId = req.params.id
     const userId = req.session.user._id
-    await users.unsaveEvent(userId, eventId);
+    await usersd.unsaveEvent(userId, eventId);
 
-    const userCount = await users.countUsersWhoSaved(eventId);
+    const userCount = await usersd.countUsersWhoSaved(eventId);
     res.json({ saved: false, userCount });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -434,14 +546,20 @@ router.get("/:id", async (req, res) => {
     let saved = false;
     if (req.session.user) {
       const userId = req.session.user._id
-      const savedList = await users.getSavedEvents(userId);
+      const savedList = await usersd.getSavedEvents(userId);
       saved = savedList.map((x) => x.toString()).includes(eventId);
     }
 
-    const userCount = await users.countUsersWhoSaved(eventId);
+    const userCount = await usersd.countUsersWhoSaved(eventId);
+
+    const eventLocal = {
+      ...event,
+      startDateTimeLocal: new Date(event.startDateTime).toLocaleString("en-US", { timeZone: "America/New_York" }),
+      endDateTimeLocal: new Date(event.endDateTime).toLocaleString("en-US", { timeZone: "America/New_York" })
+    };
 
     res.render("eventDetails", {
-      event,
+      event: eventLocal,
       eventLocation,
       saved,
       userCount,
@@ -452,7 +570,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.post("/:id/comments", requireLogin, async (req, res) => {
+router.post("/:id/comments", requireLoginAjax, async (req, res) => {
   try {
     let { commentText, parentId } = req.body;
     if (commentText) commentText = xss(commentText);
@@ -481,11 +599,11 @@ router.post("/:id/comments", requireLogin, async (req, res) => {
   }
 });
 
-router.delete("/:id/comments/:commentId", requireLogin, async (req, res) => {
+router.delete("/:id/comments/:commentId", requireLoginAjax, async (req, res) => {
   try {
-    const eventId = req.params.id
-    const userId = req.session.user._id
-    const commentId = req.params.commentId
+    const eventId = xss(req.params.id);
+    const userId = req.session.user._id;
+    const commentId = xss(req.params.commentId);
 
     await events.deleteComment(
       eventId,

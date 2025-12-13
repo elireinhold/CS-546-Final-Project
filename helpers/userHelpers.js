@@ -141,6 +141,31 @@ const exportedMethods = {
     }
     return email;
   },
+
+  async validEmailServer(email) {
+    if (!email) {
+      throw "Error: Must provide email.";
+    }
+    if (typeof email !== "string") {
+      throw "Error: email must be a string.";
+    }
+    email = email.trim();
+    if (email.length === 0) {
+      throw "Error: email cannot be an empty string or just spaces.";
+    }
+    const email_regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; //from https://www.mailercheck.com/articles/email-validation-javascript
+    if (!email_regex.test(email)) {
+      throw "Error: email must be a valid email format.";
+    }
+    const usersList = await getUsers();
+    for (let i = 0; i < usersList.length; i++) {
+      if (usersList[i].email.toLowerCase() === email) {
+        throw "Error: email already in use. Please choose a different email.";
+      }
+    }
+    return email;
+  },
+
   //Validates that event type is one of the categories from the NYC dataset. CASE-SENSITIVE. Returns trimmed event type.
   validEventType(eventType) {
     if (!eventType) {

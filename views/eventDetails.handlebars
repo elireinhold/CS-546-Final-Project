@@ -14,8 +14,8 @@
       {{/if}}
     </p>
     <p><strong>Source:</strong> {{event.eventSource}}</p>
-    <p><strong>Start:</strong> {{event.startDateTime}}</p>
-    <p><strong>End:</strong> {{event.endDateTime}}</p>
+    <p><strong>Start:</strong> {{event.startDateTimeLocal}}</p>
+    <p><strong>End:</strong> {{event.endDateTimeLocal}}</p>
 
     <!-- Inline saved count + save button -->
     <div class="save-row">
@@ -85,6 +85,7 @@
 
 <!-- Scripts -->
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/geolib@3.3.4/lib/index.min.js"></script>
 <script>
   const eventLocation = {{{json eventLocation}}};
 </script>

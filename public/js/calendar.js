@@ -17,6 +17,15 @@
       calendarDiv.removeChild(calendarDiv.firstChild);
     }
 
+    // Add weekday headers
+    const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thusday", "Friday", "Saturday"];
+    weekdays.forEach(day => {
+      const dayHeader = document.createElement("div");
+      dayHeader.textContent = day;
+      dayHeader.classList.add("weekday");
+      calendarDiv.appendChild(dayHeader);
+    })
+
     const firstDay = new Date(year, month, 1);
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 

@@ -58,6 +58,16 @@ const exportedMethods = {
     }
     return eventName;
   },
+  validKeyword(keyword) {
+    if (typeof keyword !== "string") {
+      throw "Error: Event name must be a string.";
+    }
+    keyword = keyword.trim();
+    if (keyword.length < 2) {
+      throw "Error: Event name must be at least 2 characters long.";
+    }
+    return keyword;
+  },
   // Validate borough format. borough. Return borough with capital first letter
   validBorough(borough) {
     if (typeof borough !== "string") {
@@ -177,61 +187,49 @@ const exportedMethods = {
     return trimmed;
   },
   // Validates that startDateTime or endDateTime format [2025-11-15T09:00:00.000]. Date must be real date, time must be real time. Return validiated time.
-  validDateTime(dateTime,when="") {
-    if(!dateTime) throw "Error: Must provide date/time"
-    if(when) {when=`${when.trim()} `}
+  validDateTime(dateTime) {
+    if (!dateTime) throw "Error: Must provide date/time";
 
-    if(typeof dateTime !== "string") throw `Error: ${when}Date/time must be a string.`;
-    dateTime = dateTime.trim();
-    if(!dateTime) throw `Error: ${when}date/time is required`;
-    
-    const dateTimePattern = /^[\d]{4}-[\d]{2}-[\d]{2}T[\d]{2}:[\d]{2}:[\d]{2}.[\d]{3}Z$/;
-    if(!dateTimePattern.test(dateTime)) throw "Error: Date/Time must in valid ISO string format";
     const d = new Date(dateTime);
-    try {
-        const ISO = d.toISOString()
-        return ISO;
-    } catch {
-        throw "Error: Date/time does not exist";
-    }
+    if (isNaN(d.getTime())) throw "Error: Date/Time must be valid";
+
+    // Return a proper Date object instead of string
+    return d;
   },
+
   // Validates that startDateTime occurs before endDateTime. Returns True if no error.
   validStartEndTimeDate(startDateTime, endDateTime) {
-    if(typeof startDateTime !== 'string') throw "Error: Start date/time must be a string.";
-      if(typeof endDateTime !== 'string') throw 'Error: End date/time must be a string.'; 
-
-      startDateTime = startDateTime.trim();
-      endDateTime = endDateTime.trim();
-
-      if(!startDateTime) throw "Error: Must provide start date/time";
-      if(!endDateTime) throw "Error: Must provide end date/time";
-      
-      const sd = new Date(this.validDateTime(startDateTime));
-      const ed = new Date(this.validDateTime(endDateTime));
-      if(sd >= ed) throw "Error: Start date/time must occur before end date/time"
-      return true;
+    if(!startDateTime) throw "Error: Must provide start date/time";
+    if(!endDateTime) throw "Error: Must provide end date/time";
+    const sd = new Date(exportedMethods.validDateTime(startDateTime));
+    const ed = new Date(exportedMethods.validDateTime(endDateTime));
+    if(sd >= ed) throw "Error: Start date/time must occur before end date/time"
+    return true;
   },
   async validUserId(id) {
-    id = exportedMethods.checkId(id);
+    // id = exportedMethods.checkId(id);
 
-    const usersCollection = await users();
-    const user = await usersCollection.findOne({ _id: new ObjectId(id) });
+    // const usersCollection = await users();
+    // const user = await usersCollection.findOne({ _id: new ObjectId(id) });
 
-    if (!user) {
-      throw "Error: No user with that id";
-    }
-    return id;
-  },
-  async validEventId(id) {
-    id = exportedMethods.checkId(id);
-
-    const eventCollection = await events();
-    const event = await eventCollection.findOne({ _id: new ObjectId(id) });
-
-    if (!event) {
-      throw "Error: No event with that id";
-    }
-    return id;
+    // if (!user) {
+    //   throw "Error: No user with that id";
+    // }
+    // return id;
+      if (!id || typeof id !== "string") throw "userId must be a string";
+      id = id.trim();
+      if (id.length === 0) throw "userId cannot be empty";
+    
+      // 2. must be objectId string
+      if (!ObjectId.isValid(id)) throw "userId is not a valid ObjectId";
+    
+      // 3. check existence in DB
+      const usersCollection = await users();
+      const user = await usersCollection.findOne({ _id: new ObjectId(id) });
+      if (!user) throw "User not found";
+    
+      // always return string form
+      return id;
   },
   async validId(id, varName) {
     if (!id) throw `${varName} is required`;
@@ -240,8 +238,35 @@ const exportedMethods = {
     if (id.length === 0) throw `${varName} cannot be empty`;
     if (!ObjectId.isValid(id)) throw `${varName} is not a valid ObjectId`;
     return id;
+  },
+  async formatDateTime(dt) {
+    if (!dt) return null;
+    const d = new Date(dt);
+    if (isNaN(d)) return null;
+    return d.toISOString().replace("T", " ").split(".")[0];
+  },
+ async validateDateMMDDYYYY(dateStr) {
+  if (!dateStr) return null;
+  if (!/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+    throw "Date must be in mm/dd/yyyy format";
   }
-};
+  const [mm, dd, yyyy] = dateStr.split("/").map(Number);
 
+  if (mm < 1 || mm > 12) throw "Invalid month in date";
+  const d = new Date(`${yyyy}-${mm}-${dd}T00:00:00`);
+
+  if (isNaN(d.getTime())) throw "Invalid date";
+
+  if (
+    d.getUTCFullYear() !== yyyy ||
+    d.getUTCMonth() + 1 !== mm ||
+    d.getUTCDate() !== dd
+  ) {
+    throw "Invalid calendar date";
+  }
+
+  return dateStr;
+}
+}
 
 export default exportedMethods;
