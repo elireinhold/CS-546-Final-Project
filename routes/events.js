@@ -96,6 +96,14 @@ router.post("/create", requireLogin, async (req, res) => {
     startDateTime = helpers.validDateTime(startDateTime);
     endDateTime = helpers.validDateTime(endDateTime);
     helpers.validStartEndTimeDate(startDateTime, endDateTime);
+
+    const start = new Date(startDateTime);
+    const end = new Date(endDateTime);
+
+    // Check if valid
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      throw new Error("Invalid date input");
+    }
     //isPublic = helpers.validPublicity(isPublic);
   } catch (e) {
     return res.status(400).render("createEvent", {
@@ -112,6 +120,7 @@ router.post("/create", requireLogin, async (req, res) => {
   }
 
   try {
+
     const event = await events.userCreateEvent(
       req.session.user._id,
       eventName,
@@ -295,13 +304,20 @@ router.get("/search", async (req, res) => {
       }
     }
 
+    const resultsWithLocalTime = results.map(evt => ({
+      ...evt,
+      startDateTimeLocal: new Date(evt.startDateTime).toLocaleString("en-US", { timeZone: "America/New_York" }),
+      endDateTimeLocal: new Date(evt.endDateTime).toLocaleString("en-US", { timeZone: "America/New_York" })
+    }));
+
+
     res.render("search", {
       keyword: keyword || "",
       borough,
       eventType,
       startDate,
       endDate,
-      results,
+      results: resultsWithLocalTime,
       eventTypes,
       boroughs,
       totalEvents,
@@ -373,8 +389,14 @@ router.get("/:id", async (req, res) => {
 
     const userCount = await usersd.countUsersWhoSaved(eventId);
 
+    const eventLocal = {
+      ...event,
+      startDateTimeLocal: new Date(event.startDateTime).toLocaleString("en-US", { timeZone: "America/New_York" }),
+      endDateTimeLocal: new Date(event.endDateTime).toLocaleString("en-US", { timeZone: "America/New_York" })
+    };
+
     res.render("eventDetails", {
-      event,
+      event: eventLocal,
       eventLocation,
       saved,
       userCount,
