@@ -387,7 +387,7 @@ export async function addComment(
     if (!parentComment) throw "Parent comment not found";
   }
 
-  const comment = {
+  const newComment = {
     _id: new ObjectId(),
     userId: new ObjectId(userId),
     username: username,
@@ -396,13 +396,16 @@ export async function addComment(
     parentId: parentId ? new ObjectId(parentId) : null,
   };
 
-  const result = await eventCollection.updateOne(
+  event.comments.push(newComment);
+
+  const updated = await eventCollection.replaceOne(
     { _id: new ObjectId(eventId) },
-    { $push: { comments: comment } }
+    event
   );
 
-  if (result.matchedCount === 0) throw "Event not found";
-  return comment;
+  if (!updated.matchedCount) throw "Could not update event";
+
+  return newComment;
 }
 
 export async function deleteComment(eventId, commentId, userId) {
@@ -418,32 +421,30 @@ export async function deleteComment(eventId, commentId, userId) {
   if (!comment) throw "Comment not found";
   if (comment.userId.toString() !== userId)
     throw "You can only delete your own comments";
+  const idsToRemove = new Set();
 
-  // Collect all IDs to delete (comment + all its descendants)
-  const idsToDelete = new Set();
+  function collect(id) {
+    idsToRemove.add(id);
+    event.comments.forEach(c => {
+      if (c.parentId && c.parentId.toString() === id) {
+        collect(c._id.toString());
+      }
+    });
+  }
 
-  const collectChildren = (parentId) => {
-    idsToDelete.add(parentId);
-    const children = event.comments.filter(
-      (c) => c.parentId && c.parentId.toString() === parentId
-    );
-    children.forEach((child) => collectChildren(child._id.toString()));
-  };
+  collect(commentId);
 
-  collectChildren(commentId);
-
-  const result = await eventCollection.updateOne(
-    { _id: new ObjectId(eventId) },
-    {
-      $pull: {
-        comments: {
-          _id: { $in: Array.from(idsToDelete).map((id) => new ObjectId(id)) },
-        },
-      },
-    }
+  event.comments = event.comments.filter(
+    c => !idsToRemove.has(c._id.toString())
   );
 
-  if (result.modifiedCount === 0) throw "Failed to delete comment";
+  const updated = await eventCollection.replaceOne(
+    { _id: new ObjectId(eventId) },
+    event
+  );
+
+  if (!updated.modifiedCount) throw "Failed to delete comment";
+
   return { deleted: true };
 }
 
