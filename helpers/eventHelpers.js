@@ -136,7 +136,9 @@ const exportedMethods = {
     return id;
   },
   // Validates that publicity is either private or public. Case Insensetive. Returns true if public, false if private
+  // SYNC WITH CLIENT
   validPublicity(publicity) {
+    if(typeof publicity === 'boolean') return publicity;
     if (!publicity) {
       throw "Error: Must specify if event is public or private.";
     }
@@ -152,16 +154,23 @@ const exportedMethods = {
       throw "Error: Publicity must be private or public.";
     }
   },
+  // Changes publicity from a bool to a string.
+  publicityString(isPublic) {
+    if(typeof isPublic !== 'boolean') throw "Error: isPublic must be a boolean.";
+    return isPublic ? 'public' : 'private';
+  },
   //Validates that street closure is valid format. Returns closure.trim()
   validStreetClosure(closure) {
-    if (typeof closure !== "string") {
-      throw "Error: Street closure must be a string.";
+    if(closure) { // optional
+      if (typeof closure !== "string") {
+        throw "Error: Street closure must be a string.";
+      }
+      closure = closure.trim();
+      if (closure.length < 4) {
+        throw "Error: Street closure infromation must be atleast 4 character long.";
+      }
+      return closure;
     }
-    closure = closure.trim();
-    if (closure.length < 4) {
-      throw "Error: Street closure infromation must be atleast 4 character long.";
-    }
-    return closure;
   },
   // Validates that communityBoard can be turned into a positve integer. Retuns communityBoard.trim()
   validCommunityBoard(communityBoard) {

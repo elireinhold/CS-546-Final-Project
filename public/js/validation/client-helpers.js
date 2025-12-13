@@ -298,11 +298,11 @@ const exportedMethods = {
         if(typeof dateTime !== "string") throw `Error: ${when}Date/time must be a string.`;
         dateTime = dateTime.trim();
         if(!dateTime) throw `Error: ${when}date/time is required`;
-        
+
         const d = new Date(dateTime);
         try {
             const ISO = d.toISOString()
-            return ISO.substring(0,ISO.length-1);
+            return ISO;
         } catch {
             throw "Error: Date/time does not exist";
         }

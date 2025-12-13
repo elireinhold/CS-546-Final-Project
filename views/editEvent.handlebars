@@ -1,0 +1,114 @@
+<div class="content-wrapper-center">
+    <div>
+        <div id="error-here">
+            {{#if error}}
+            <div id="server-error">
+                <p>{{error}}</p>
+            </div>
+            {{/if}}
+        </div>
+        <form action="/events/{{eventId}}/edit" method="POST" id="event-form">
+            <div class="form-group">
+                <label for="eventName">
+                    Event Name<span class="req">*</span>
+                </label>
+                <input value="{{eventName}}" type="text" name="eventName" id="eventName" class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="eventType">
+                    Event Type<span class="req">*</span>
+                </label>
+                <select value="Special Event" name="eventType" id="eventType" class="form-input">
+                    <option value="">...</option>
+                    <option value="Special Event">Special Event</option>
+                    <option value="Sport - Adult">Sport - Adult</option>
+                    <option value="Sport - Youth">Sport - Youth</option>
+                    <option value="Production Event">Production Event</option>
+                    <option value="Open Street Partner Event">Open Street Partner Event</option>
+                    <option value="Plaza Partner Event">Plaza Partner Event</option>
+                    <option value="Street Event">Street Event</option>
+                    <option value="Religious Event">Religious Event</option>
+                    <option value="Farmers Market">Farmers Market</option>
+                    <option value="Sidewalk Sale">Sidewalk Sale</option>
+                    <option value="Theater Load in and Load Outs">Theater Load in and Load Outs</option>
+                    <option value="Parade">Parade</option>
+                    <option value="Miscellaneous">Miscellaneous</option>
+                    <option value="Plaza Event">Plaza Event</option>
+                    <option value="Block Party">Block Party</option>
+                    <option value="Clean-Up">Clean-Up</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="eventLocation">
+                    Location<span class="req">*</span>
+                </label>
+                <input value="{{eventLocation}}" type="text" name="eventLocation" id="eventLocation" class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="eventBorough">
+                    Borough<span class="req">*</span>
+                </label>
+                <select name="eventBorough" id="eventBorough" class="form-input">
+                    <option value="">...</option>
+                    <option value="bronx">Bronx</option>
+                    <option value="brooklyn">Brooklyn</option>
+                    <option value="manhattan">Manhattan</option>
+                    <option value="queens">Queens</option>
+                    <option value="staten island">Staten Island</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="startDateTime">
+                    Start Date and Time<span class="req">*</span>
+                </label>
+                <input type="datetime-local" id="startDateTime" class="form-input">
+                <input type="hidden" name="startDateTime" id="startReturn">
+            </div>
+            <div class="form-group">
+                <label for="endDateTime">
+                    End Date and Time<span class="req">*</span>
+                </label>
+                <input type="datetime-local" id="endDateTime" class="form-input">
+                <input type="hidden" name="endDateTime" id="endReturn">
+            </div>
+            <div class="form-group">
+                <label for="streetClosureType">
+                    Street Closure
+                </label>
+                <input value="{{streetClosureType}}" type="text" name="streetClosureType" id="streetClosureType" class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="isPublic">
+                    Event Visibility<span class="req">*</span>
+                </label>
+                <select value="{{isPublic}}" name="isPublic" id="isPublic" class="form-input">
+                    <option value="public">Public</option>
+                    <option value="private">Private</option>
+                </select>
+            </div>
+            <div class="form-group form-submit">
+                <input type="submit" id="submit" class="form-input">
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.getElementById('eventType').value = "{{eventType}}";
+    document.getElementById('eventBorough').value = "{{eventBorough}}";
+    console.log(document.getElementById('eventBorough').value);
+    document.getElementById('isPublic').value = "{{isPublic}}";
+
+    const fixTime = (timeStr) => {
+        let d = new Date(timeStr);
+        const date = d.toISOString().split("T")[0];
+        const time = `${d.getHours()}:${d.getMinutes()}`;
+        return `${date}T${time}`;
+    }
+
+    document.getElementById('startDateTime').value = fixTime("{{startDateTime}}");
+    document.getElementById('endDateTime').value = fixTime("{{endDateTime}}");
+    console.log(fixTime("{{startDateTime}}"));
+</script>
+
+<script type="module" src="../../public/js/validation/createEvent.js"></script>
