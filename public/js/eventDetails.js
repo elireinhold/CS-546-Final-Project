@@ -64,6 +64,54 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Share functionality
+  const shareBtn = document.getElementById(`share-btn-${eventId}`);
+  const shareMessage = document.getElementById(`share-message-${eventId}`);
+  
+  if (shareBtn) {
+    shareBtn.addEventListener("click", async () => {
+      try {
+        // Get current page URL
+        const url = window.location.href;
+        
+        // Copy to clipboard
+        await navigator.clipboard.writeText(url);
+        
+        // Show message
+        if (shareMessage) {
+          shareMessage.style.display = "inline";
+          
+          // Hide message after 3 seconds
+          setTimeout(() => {
+            shareMessage.style.display = "none";
+          }, 3000);
+        }
+      } catch (err) {
+        console.error("Failed to copy link:", err);
+        // Fallback for browsers that don't support clipboard API
+        const url = window.location.href;
+        const textArea = document.createElement("textarea");
+        textArea.value = url;
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand("copy");
+          if (shareMessage) {
+            shareMessage.style.display = "inline";
+            setTimeout(() => {
+              shareMessage.style.display = "none";
+            }, 3000);
+          }
+        } catch (fallbackErr) {
+          alert("Failed to copy link. Please copy manually: " + url);
+        }
+        document.body.removeChild(textArea);
+      }
+    });
+  }
+
   // Comments functionality - Recursive rendering with parentId model
 
   // Format date for display
