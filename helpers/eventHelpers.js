@@ -231,6 +231,22 @@ const exportedMethods = {
       // always return string form
       return id;
   },
+  async validEventId(id) {
+      if (!id || typeof id !== "string") throw "eventId must be a string";
+      id = id.trim();
+      if (id.length === 0) throw "eventId cannot be empty";
+    
+      // 2. must be objectId string
+      if (!ObjectId.isValid(id)) throw "eventId is not a valid ObjectId";
+    
+      // 3. check existence in DB
+      const eventCollection = await events();
+      const event = await eventCollection.findOne({ _id: new ObjectId(id) });
+      if (!event) throw "Event not found";
+    
+      // always return string form
+      return id;
+  },
   async validId(id, varName) {
     if (!id) throw `${varName} is required`;
     if (typeof id !== "string") throw `${varName} must be a string`;
