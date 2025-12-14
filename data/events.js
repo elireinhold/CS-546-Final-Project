@@ -277,16 +277,13 @@ export async function userCreateEvent(
   if (!user) {
     throw "Error: User not found";
   }
-
-  const startDateTimeNY = new Date(new Date(startDateTimestr).getTime() - 5 * 60 * 60 * 1000);
-  const endDateTimeNY = new Date(new Date(endDateTimestr).getTime() - 5 * 60 * 60 * 1000);
-
+  
   const username = user.username;
   const newEvent = {
     eventId: null,
     eventName: eventName,
-    startDateTime: startDateTimeNY,
-    endDateTime: endDateTimeNY,
+    startDateTime: startDateTimestr,
+    endDateTime: endDateTimestr,
     eventSource: `User Created: ${username}`,
     eventType: eventType,
     eventBorough: eventBorough,
