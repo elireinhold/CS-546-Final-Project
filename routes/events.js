@@ -573,7 +573,7 @@ router.get("/:id", async (req, res) => {
       const userId = req.session.user._id
       const savedList = await usersd.getSavedEvents(userId);
       saved = savedList.map((x) => x.toString()).includes(eventId);
-      ownEvent = new Boolean(userId === event.userIdWhoCreatedEvent);
+      ownEvent = (userId === event.userIdWhoCreatedEvent);
     }
 
     const userCount = await usersd.countUsersWhoSaved(eventId);
