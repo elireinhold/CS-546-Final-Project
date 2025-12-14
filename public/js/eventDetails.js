@@ -76,8 +76,8 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         const data = await response.json();
 
-        if (data.error) {
-          alert(data.error);
+        if (!response.ok || data.error) {
+          alert(data.error || "Error updating save status");
           return;
         }
 
@@ -100,7 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       } catch (err) {
         console.error(err);
-        alert("Something went wrong");
+        alert("Error updating save status. Please try again.");
       }
     });
   }
@@ -108,10 +108,25 @@ document.addEventListener("DOMContentLoaded", () => {
   // Comments functionality - Recursive rendering with parentId model
 
   // Format date for display
+  // function formatDate(dateString) {
+  //   const date = new Date(dateString);
+  //   return date.toLocaleString();
+
+  // }
   function formatDate(dateString) {
     const date = new Date(dateString);
-    return date.toLocaleString();
+  
+    return date.toLocaleString("en-US", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true
+    });
   }
+  
 
   // Recursive function to render comment tree
   function renderComment(comment, depth = 0) {

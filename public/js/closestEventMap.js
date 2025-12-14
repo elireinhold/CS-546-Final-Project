@@ -25,10 +25,14 @@ document.addEventListener("DOMContentLoaded", () => {
           { latitude: Number(ev.lat) , longitude: Number(ev.lon) }
         )
       }));
+      // Sort by distance, take top 10 closest
+      const closestEvents = eventsWithDistance
+        .sort((a, b) => a.distance - b.distance)
+        .slice(0, 10);
 
       // Add markers for closest events
       const bounds = [];
-      eventsWithDistance.forEach(ev => {
+      closestEvents.forEach(ev => {
         if (ev.lat && ev.lon) {
           L.marker([ev.lat, ev.lon])
             .addTo(map)

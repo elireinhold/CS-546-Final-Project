@@ -8,11 +8,6 @@ import { getSavedEvents } from "../data/users.js";
 import { getEventById } from "../data/events.js";
 import { ObjectId } from "mongodb";
 import { getRecommendedEventsForUser } from "../data/events.js";
-// Placeholder routes — you can replace later
-
-router.get("/", (req, res) => {
-  res.send("Users route placeholder");
-});
 
 router.get("/login", (req, res) => {
   res.render("users/login");
@@ -200,7 +195,7 @@ router.post("/register", async (req, res) => {
         preferredEventType: preferredEventType || "",
       });
     }
-    email = userHelpers.validEmail(email);
+    email = await userHelpers.validEmailServer(email);
 
     birthday = userHelpers.validAge(birthday);
 

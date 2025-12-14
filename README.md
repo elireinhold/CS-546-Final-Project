@@ -1,6 +1,6 @@
 # NYSee Now — CS 546 Final Project
 
-**Group 17: Janet Koublanou, Richard Toothill, Eli Reinhold, Ru Jia**
+**Group 17: Ru Jia, Janet Koublanou, Richard Toothill, Eli Reinhold**
 
 **GitHub Repository:** https://github.com/elireinhold/CS-546-Final-Project
 
@@ -61,19 +61,16 @@ All event data is stored in MongoDB, and NYC data is synchronized through script
 
 ## Extra Features
 
-### 1. Event Rating System
-- Users can rate events from 1–5 stars or "like" them
-- Display the most popular events
-- Implementation: store ratings as numbers in each event document and compute the average
-
-### 2. User Profile Page
+### 1. User Profile Page
 - Display user information, saved events, and comments
 - Show personalized event recommendations
 - Implementation: simple profile route that fetches data from existing user collections
 
-### 3. Event Sharing
+### 2. Event Sharing
 - Users can share an event link with others via a generated URL
 - Implementation: generate a shareable route like `/event/:id` that anyone can open
+
+### 
 
 ---
 
@@ -85,23 +82,24 @@ CS-546-Final-Project/
 ├── package.json
 ├── middleware.js
 ├── README.md
+├── .gitignore
 ├── config/
-│   ├── mongoConnection.js     # MongoDB connection
 │   ├── mongoCollections.js
+│   ├── mongoConnection.js     # MongoDB connection
 │   └── settings.js            # Session and app settings
 ├── data/                      # Data access layer
 │   ├── events.js              # Events (search, comments, save counts)
 │   ├── map.js
-│   ├── users.js               # Users (auth, save/unsave helpers)
-│   └── savedEvents.js         # Saved events store
+│   └── users.js               # Users (auth, save/unsave helpers)
 ├── helpers/                   # Validation & utility helpers
 │   ├── userHelpers.js
+│   ├── handlebarsHelpers.js
 │   └── eventHelpers.js
 ├── routes/                    # Route handlers
-│   ├── index.js               # Route configuration
+│   ├── calendar.js            # Calendar view
 │   ├── events.js              # Event search/details/save/comments
 │   ├── home.js                # Home
-│   ├── calendar.js            # Calendar view
+│   ├── index.js               # Route configuration
 │   └── users.js               # Auth routes
 ├── scripts/                   # Data sync
 │   ├── seedNYCEvents.js       # Seed NYC data
@@ -119,18 +117,21 @@ CS-546-Final-Project/
 │   ├── eventDetails.handlebars
 │   ├── home.handlebars
 │   ├── logout.handlebars
-│   └── search.handlebars
-└── public/                    # Static assets
+│   ├── search.handlebars
+│   └── userProfile.handlebars
+└── public/                
     ├── css/main.css
     └── js/
         ├── validation/
             ├── client-helpers.js
-            └── login.js
+            ├── createEvent.js
+            ├── login.js
+            └── register.js
         ├── calander.js
         ├── client.js
         ├── eventDetails.js    # Save/unsave, comments/replies
-        ├── calendar.js
-        ├── map.js
+        ├── eventMap.js
+        ├── homeMap.js
         └── search.js
 ```
 
@@ -143,7 +144,7 @@ CS-546-Final-Project/
 - MongoDB (local or remote instance)
 - npm
 
-### Installation Steps
+### Installation Steps (Clone Repository)
 
 1. **Clone the repository**
    ```bash
@@ -171,22 +172,30 @@ CS-546-Final-Project/
 
 ### Updating NYC Event Data
 
-Run the update script periodically to sync the latest NYC event data:
+Run the update script in a seperate terminal whenever you want to sync the latest NYC event data:
 
 ```bash
 npm run updateNYC
 ```
 
+### Installation Steps (.zip)
+1. **Download zip file submission from Canvas**
+2. **Unzip file into decided terminal**
+2. **Follow steps 3-5 from "Installation Steps (Clone Repository)" Section** 
 ---
 
 ## Main Routes
 
 - GET `/` - Home page
 - GET `/search` - Event search page
+- GET `/users/login` - User login page
+- GET `/users/register` -User registration page
+- GET `/users/:id` - User profile page
+- GET `/users/logout` - Logout success page
 - GET `/calendar` - Personal calendar page
 - GET `/event/:id` - Event details page
-- GET `/map` - Map view page
-- GET `/profile` - User profile page
+- GET `/event/create` - Event creation form
+- GET `/event/create/success` - Event creation success indication
 
 (For specific route implementations, refer to files in the `routes/` directory)
 
@@ -194,7 +203,8 @@ npm run updateNYC
 
 ## Contributors
 
+- Ru Jia
 - Janet Koublanou
 - Richard Toothill
 - Eli Reinhold
-- Ru Jia
+
