@@ -2,7 +2,9 @@
     <div class="auth-form">
         <div id="error-here">
             {{#if error}}
-                <p class="error-message">{{error}}</p>
+            <div id="server-error">
+                <p>{{error}}</p>
+            </div>
             {{/if}}
         </div>
         <form action="/users/register" method="post" id="register-form">

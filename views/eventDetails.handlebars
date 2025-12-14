@@ -1,8 +1,15 @@
 <!-- Two-column container -->
-<div class="container">
+<div class="flex-container">
   <!-- Left column: event details + comments -->
   <div class="left-side">
     <h1>{{event.eventName}}</h1>
+    {{#if ownEvent}}
+    <div class="creator-controls">
+      <button id="edit">Edit</button>
+      <button id="delete">Delete</button>
+      
+    </div>
+    {{/if}}
     <p><strong>Type:</strong> {{event.eventType}}</p>
     <p><strong>Borough:</strong> {{event.eventBorough}}</p>
     <p><strong>Location:</strong> {{event.eventLocation}}</p>
@@ -98,6 +105,7 @@
 <script src="https://cdn.jsdelivr.net/npm/geolib@3.3.4/lib/index.min.js"></script>
 <script>
   const eventLocation = {{{json eventLocation}}};
+  const ownEvent = {{ownEvent}};
 </script>
 <script src="/public/js/eventMap.js"></script>
 <script type="module" src="/public/js/eventDetails.js"></script>
@@ -121,3 +129,5 @@
     window.location.href = target;
   });
 </script>
+
+<!-- input type="hidden" value="{{hasOwn}}" id="hasOwnPassthrough"-->

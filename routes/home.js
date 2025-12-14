@@ -22,7 +22,13 @@ router.get("/", async (req, res) => {
     });
 
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    let errMsg;
+    if(e.message) {
+      errMsg = e.message;
+    } else {
+      errMsg = e;
+    }
+    res.status(500).json({ error: errMsg });
   }
 });
 
