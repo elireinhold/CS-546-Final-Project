@@ -64,7 +64,8 @@ export async function searchEvents({
   const eventCollection = await events();
   let all = await eventCollection.find({}).toArray();
   if (keyword && keyword.trim()) {
-    keyword = helpers.validEventName(keyword);
+    keyword = helpers.validKeyword(keyword);
+
     const lower = keyword.toLowerCase();
     all = all.filter(
       (evt) => evt.eventName && evt.eventName.toLowerCase().includes(lower)
@@ -86,8 +87,28 @@ export async function searchEvents({
     all = all.filter((evt) => eventType.includes(evt.eventType));
   }
 
-  
+  // Validate dates if provided
   if (startDate || endDate) {
+    if (startDate) {
+      const start = new Date(startDate + "T00:00:00");
+      if (isNaN(start.getTime())) {
+        throw "Invalid start date format.";
+      }
+    }
+    if (endDate) {
+      const end = new Date(endDate + "T23:59:59");
+      if (isNaN(end.getTime())) {
+        throw "Invalid end date format.";
+      }
+    }
+    if (startDate && endDate) {
+      const start = new Date(startDate + "T00:00:00");
+      const end = new Date(endDate + "T23:59:59");
+      if (start > end) {
+        throw "Start date cannot be after end date.";
+      }
+    }
+    
     const start = startDate ? new Date(startDate + "T00:00:00") : null;
     const end = endDate ? new Date(endDate + "T23:59:59") : null;
 
@@ -367,7 +388,7 @@ export async function addComment(
 ) {
   if (!ObjectId.isValid(eventId)) throw "Invalid event ID";
   if (!ObjectId.isValid(userId)) throw "Invalid user ID";
-  if (!commentText || !commentText.trim()) throw "Comment text is required";
+  commentText = helpers.validCommentText(commentText);
   if (parentId && !ObjectId.isValid(parentId)) throw "Invalid parent ID";
 
   const eventCollection = await events();

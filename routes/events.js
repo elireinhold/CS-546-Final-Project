@@ -185,21 +185,41 @@ router.get("/search", async (req, res) => {
     const eventTypes = (await events.getDistinctEventTypes()).sort();
     const boroughs = (await events.getDistinctBoroughs()).sort();
 
-    if (keyword && keyword.trim().length === 1) {
-      return res.render("search", {
-        error: "Keyword must be at least 2 characters long.",
-        keyword,
-        borough,
-        eventType,
-        startDate,
-        endDate,
-        results: [],
-        eventTypes,
-        boroughs,
-        totalPages: 0,
-        currentPage: 1,
-        currentUrl: req.originalUrl
-      });
+    // Validate keyword (optional, but if provided must be at least 2 characters)
+    if (keyword && keyword.trim()) {
+      if (keyword.trim().length < 2) {
+        return res.render("search", {
+          error: "Keyword must be at least 2 characters long.",
+          keyword,
+          borough,
+          eventType,
+          startDate,
+          endDate,
+          results: [],
+          eventTypes,
+          boroughs,
+          totalPages: 0,
+          currentPage: 1,
+          currentUrl: req.originalUrl
+        });
+      }
+      // Validate keyword format
+      if (typeof keyword !== "string") {
+        return res.render("search", {
+          error: "Keyword must be a string.",
+          keyword,
+          borough,
+          eventType,
+          startDate,
+          endDate,
+          results: [],
+          eventTypes,
+          boroughs,
+          totalPages: 0,
+          currentPage: 1,
+          currentUrl: req.originalUrl
+        });
+      }
     }
 
     function isValidDate(d) {
@@ -576,9 +596,16 @@ router.post("/:id/comments", requireLoginAjax, async (req, res) => {
     if (commentText) commentText = xss(commentText);
     if (parentId) parentId = xss(parentId);
     
-
-    if (!commentText || !commentText.trim()) {
+    // Validate comment text
+    if (!commentText || typeof commentText !== "string") {
       return res.status(400).json({ error: "Comment text is required" });
+    }
+    commentText = commentText.trim();
+    if (commentText.length < 2) {
+      return res.status(400).json({ error: "Comment text must be at least 2 characters long." });
+    }
+    if (commentText.length > 500) {
+      return res.status(400).json({ error: "Comment text must be no more than 500 characters long." });
     }
 
     const eventId = req.params.id
@@ -595,7 +622,7 @@ router.post("/:id/comments", requireLoginAjax, async (req, res) => {
     res.json({ success: true, comment });
   } catch (e) {
     console.error("comment error:", e);
-    res.status(400).json({ error: e.message });
+    res.status(400).json({ error: e || e.message || "Error adding comment" });
   }
 });
 

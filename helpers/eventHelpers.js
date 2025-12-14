@@ -266,7 +266,24 @@ const exportedMethods = {
   }
 
   return dateStr;
-}
+},
+  // Validates comment text format. Requires commentText, must be string, trimmed length between 2 and 500 characters
+  validCommentText(commentText) {
+    if (!commentText) {
+      throw "Error: Comment text is required.";
+    }
+    if (typeof commentText !== "string") {
+      throw "Error: Comment text must be a string.";
+    }
+    commentText = commentText.trim();
+    if (commentText.length < 2) {
+      throw "Error: Comment text must be at least 2 characters long.";
+    }
+    if (commentText.length > 500) {
+      throw "Error: Comment text must be no more than 500 characters long.";
+    }
+    return commentText;
+  }
 }
 
 export default exportedMethods;

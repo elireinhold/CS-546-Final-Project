@@ -78,33 +78,33 @@ All event data is stored in MongoDB, and NYC data is synchronized through script
 
 ```
 CS-546-Final-Project/
-├── app.js                     # Main entry
+├── app.js                    
 ├── package.json
 ├── middleware.js
 ├── README.md
 ├── .gitignore
 ├── config/
 │   ├── mongoCollections.js
-│   ├── mongoConnection.js     # MongoDB connection
-│   └── settings.js            # Session and app settings
-├── data/                      # Data access layer
-│   ├── events.js              # Events (search, comments, save counts)
+│   ├── mongoConnection.js     
+│   └── settings.js           
+├── data/                    
+│   ├── events.js          
 │   ├── map.js
-│   └── users.js               # Users (auth, save/unsave helpers)
-├── helpers/                   # Validation & utility helpers
+│   └── users.js              
+├── helpers/                  
 │   ├── userHelpers.js
 │   ├── handlebarsHelpers.js
 │   └── eventHelpers.js
-├── routes/                    # Route handlers
-│   ├── calendar.js            # Calendar view
-│   ├── events.js              # Event search/details/save/comments
-│   ├── home.js                # Home
-│   ├── index.js               # Route configuration
-│   └── users.js               # Auth routes
-├── scripts/                   # Data sync
-│   ├── seedNYCEvents.js       # Seed NYC data
-│   └── updateNYCEvents.js     # Update NYC data
-├── views/                     # Handlebars templates
+├── routes/                   
+│   ├── calendar.js         
+│   ├── events.js             
+│   ├── home.js           
+│   ├── index.js             
+│   └── users.js               
+├── scripts/                  
+│   ├── seedNYCEvents.js      
+│   └── updateNYCEvents.js    
+├── views/                   
 │   ├── layouts/
 │       └── main.handlebars
 │   ├── users/
@@ -116,6 +116,7 @@ CS-546-Final-Project/
 │   ├── error.handlebars
 │   ├── eventDetails.handlebars
 │   ├── home.handlebars
+│   ├── editEvent.handlebars
 │   ├── logout.handlebars
 │   ├── search.handlebars
 │   └── userProfile.handlebars
@@ -129,8 +130,10 @@ CS-546-Final-Project/
             └── register.js
         ├── calander.js
         ├── client.js
-        ├── eventDetails.js    # Save/unsave, comments/replies
+        ├── eventDetails.js    
         ├── eventMap.js
+        ├── closestEventMap.js 
+        ├── searchValidation.js  
         ├── homeMap.js
         └── search.js
 ```
