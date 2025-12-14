@@ -49,6 +49,16 @@
       {{/if}}
     </div>
 
+    <!-- Share button -->
+    <div class="share-row">
+      <button id="share-btn-{{event._id}}" data-event-id="{{event._id}}">
+        Share
+      </button>
+      <span id="share-message-{{event._id}}" class="share-message" style="display: none;">
+        Link copied. Send it to your friend now
+      </span>
+    </div>
+
     <!-- Comments section directly under save button -->
     <div id="comments-section">
       <hr>
@@ -98,7 +108,7 @@
   const ownEvent = {{ownEvent}};
 </script>
 <script src="/public/js/eventMap.js"></script>
-<script src="/public/js/eventDetails.js"></script>
+<script type="module" src="/public/js/eventDetails.js"></script>
 
 <script>
   const returnTo = "{{returnTo}}";

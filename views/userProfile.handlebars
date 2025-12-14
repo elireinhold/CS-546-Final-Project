@@ -14,7 +14,10 @@
 {{#if savedEvents.length}}
   <ul>
     {{#each savedEvents}}
-      <li><a href="/events/{{this._id}}">{{this.eventName}}</a> — {{this.eventBorough}}</li>
+      <li>
+        <a href="/events/{{this._id}}">{{this.eventName}}</a>
+        — {{this.eventBorough}} — {{this.eventType}}
+      </li>
     {{/each}}
   </ul>
 {{else}}

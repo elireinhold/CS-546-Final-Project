@@ -1,3 +1,5 @@
+import helpers from './validation/client-helpers.js';
+
 document.addEventListener("DOMContentLoaded", () => {
   // Get eventId from button (always exists) or URL
   let eventId = null;
@@ -105,6 +107,54 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Share functionality
+  const shareBtn = document.getElementById(`share-btn-${eventId}`);
+  const shareMessage = document.getElementById(`share-message-${eventId}`);
+  
+  if (shareBtn) {
+    shareBtn.addEventListener("click", async () => {
+      try {
+        // Get current page URL
+        const url = window.location.href;
+        
+        // Copy to clipboard
+        await navigator.clipboard.writeText(url);
+        
+        // Show message
+        if (shareMessage) {
+          shareMessage.style.display = "inline";
+          
+          // Hide message after 3 seconds
+          setTimeout(() => {
+            shareMessage.style.display = "none";
+          }, 3000);
+        }
+      } catch (err) {
+        console.error("Failed to copy link:", err);
+        // Fallback for browsers that don't support clipboard API
+        const url = window.location.href;
+        const textArea = document.createElement("textarea");
+        textArea.value = url;
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand("copy");
+          if (shareMessage) {
+            shareMessage.style.display = "inline";
+            setTimeout(() => {
+              shareMessage.style.display = "none";
+            }, 3000);
+          }
+        } catch (fallbackErr) {
+          alert("Failed to copy link. Please copy manually: " + url);
+        }
+        document.body.removeChild(textArea);
+      }
+    });
+  }
+
   // Comments functionality - Recursive rendering with parentId model
 
   // Format date for display
@@ -115,17 +165,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // }
   function formatDate(dateString) {
     const date = new Date(dateString);
-  
     return date.toLocaleString("en-US", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: true
+      timeZone: "America/New_York",
     });
   }
+  
   
 
   // Recursive function to render comment tree
@@ -245,10 +289,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const parentId = e.target.getAttribute("data-comment-id");
         const replyForm = document.querySelector(`.reply-form-container[data-comment-id="${parentId}"]`);
         const replyText = replyForm.querySelector(".reply-text");
-        const text = replyText.value.trim();
-
-        if (!text) {
-          alert("Please enter a reply");
+        
+        // Client-side validation
+        let text = replyText.value;
+        try {
+          text = helpers.validCommentText(text);
+        } catch (e) {
+          alert(e);
           return;
         }
 
@@ -330,10 +377,12 @@ document.addEventListener("DOMContentLoaded", () => {
   
   if (submitCommentBtn && commentTextArea) {
     submitCommentBtn.addEventListener("click", async () => {
-      const text = commentTextArea.value.trim();
-      
-      if (!text) {
-        alert("Please enter a comment");
+      // Client-side validation
+      let text = commentTextArea.value;
+      try {
+        text = helpers.validCommentText(text);
+      } catch (e) {
+        alert(e);
         return;
       }
 

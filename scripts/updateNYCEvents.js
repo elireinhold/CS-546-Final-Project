@@ -15,9 +15,12 @@ async function updateNYCEvents() {
   let updatedCount = 0;
   let insertedCount = 0;
 
-  // For each NYC event, update or insert
   for (const evt of rawEvents) {
     const cleaned = normalizeNYCEvent(evt);
+    const existingEvent = await eventCollection.findOne({ eventId: cleaned.eventId });
+    if (existingEvent && existingEvent.comments && existingEvent.comments.length > 0) {
+      cleaned.comments = existingEvent.comments;
+    }
 
     const result = await eventCollection.updateOne(
       { eventId: cleaned.eventId },     // match by NYC eventId
