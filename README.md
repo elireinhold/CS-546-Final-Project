@@ -35,6 +35,7 @@ All event data is stored in MongoDB, and NYC data is synchronized through script
 - Click on an event from search results to view detailed information
 - Display event name, location, and road closure information
 - Ability to add the event to your personal calendar
+- Ability to view the profile of the event creator
 
 ### 4. Personal Event Management
 - Users can add personal events to their own calendar (not accessible to others)
@@ -45,9 +46,10 @@ All event data is stored in MongoDB, and NYC data is synchronized through script
 - Click on events on the map to view information (name, location, event details, and distance)
 - Use Geolib to find events near your location
 
-### 6. User-Created Public Events
-- Users can create, edit, or delete their own public events
+### 6. User-Created Events
+- Users can create, edit, or delete their own public and personal events
 - Other users can view these public events
+- Contents of personal events are restricted to creator
 
 ### 7. Event Comments
 - Users can comment or discuss events on event pages
@@ -65,6 +67,7 @@ All event data is stored in MongoDB, and NYC data is synchronized through script
 ### 1. User Profile Page
 - Display user information, saved events, and comments
 - Show personalized event recommendations
+- Display basic information of other users
 - Implementation: simple profile route that fetches data from existing user collections
 
 ### 2. Event Sharing
@@ -193,11 +196,12 @@ npm run updateNYC
 - GET `/` - Home page
 - GET `/search` - Event search page
 - GET `/users/login` - User login page
-- GET `/users/register` -User registration page
-- GET `/users/:id` - User profile page
+- GET `/users/register` - User registration page
+- GET `/users/:id/profile` - User profile page
 - GET `/users/logout` - Logout success page
 - GET `/calendar` - Personal calendar page
 - GET `/event/:id` - Event details page
+- GET `/event/:id/edit` - Event edit page
 - GET `/event/create` - Event creation form
 - GET `/event/create/success` - Event creation success indication
 
