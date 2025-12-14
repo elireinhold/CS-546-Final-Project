@@ -396,6 +396,8 @@ export async function deleteEvent(eventId,userId) {
   const removedEvent = await eventCollection.findOneAndDelete({_id: new ObjectId(eventId)});
   if(!removedEvent) throw "Could not delete event";
 
+  // REMOVE EVENTS FROM PUBLIC or PERSONAL EVENTS
+
   return {deleted:true};
 }
 

@@ -1,50 +1,67 @@
-<h1>{{user.username}}'s Profile</h1>
 
-<h2>User Information</h2>
-<p><strong>Full Name:</strong> {{user.firstName}} {{user.lastName}}</p>
-<p><strong>Email:</strong> {{user.email}}</p>
-<p><strong>Home Borough:</strong> {{user.homeBorough}}</p>
-<p><strong>Favorite Event Types:</strong> 
-  {{#each user.favoriteEventTypes}}
-    {{this}}{{#unless @last}}, {{/unless}}
-  {{/each}}
-</p>
+<div class="content-wrapper-center" style="justify-content: left">
+  <h1>{{user.username}}'s Profile</h1>
+</div>
 
-<h2>Saved Events</h2>
-{{#if savedEvents.length}}
-  <ul>
-    {{#each savedEvents}}
-      <li>
-        <a href="/events/{{this._id}}">{{this.eventName}}</a>
-        — {{this.eventBorough}} — {{this.eventType}}
-      </li>
-    {{/each}}
-  </ul>
-{{else}}
-  <p>No saved events yet.</p>
-{{/if}}
-
-<h2>Comments Posted:</h2>
-{{#if comments.length}}
-  <ul>
-    {{#each comments}}
-      <li>"{{this.text}}" — on <a href="/events/{{this.eventId}}">{{this.eventName}}</a></li>
-    {{/each}}
-  </ul>
-{{else}}
-  <p>No comments yet.</p>
-{{/if}}
-
-<h2>Recommended Events:</h2>
-{{#if recommendedEvents.length}}
-    <ul>
-    {{#each recommendedEvents}}
-        <li>
-        <a href="/events/{{this._id}}">{{this.eventName}}</a>
-        — {{this.eventBorough}} — {{this.eventType}}
-        </li>
-    {{/each}}
+<div class="flex-container">
+  <div class="left-side">
+    <div>
+      <h2>User Information</h2>
+      <p><strong>Full Name:</strong> {{user.firstName}} {{user.lastName}}</p>
+      <p><strong>Email:</strong> {{user.email}}</p>
+      <p><strong>Home Borough:</strong> {{user.homeBorough}}</p>
+      <p><strong>Favorite Event Types:</strong>
+        {{#each user.favoriteEventTypes}}
+          {{this}}{{#unless @last}}, {{/unless}}
+        {{/each}}
+      </p>
+    </div>
+  
+    <div>
+      <h2>Comments Posted:</h2>
+      {{#if comments.length}}
+        <ul>
+          {{#each comments}}
+            <li>"{{this.text}}" — on <a href="/events/{{this.eventId}}">{{this.eventName}}</a></li>
+          {{/each}}
         </ul>
-    {{else}}
-        <p>No recommendations yet. Save more events!</p>
-{{/if}}
+      {{else}}
+        <p>No comments yet.</p>
+      {{/if}}
+    </div>
+  </div>
+  
+  <div class="right-side">
+    <div>
+      <h2>Saved Events</h2>
+      {{#if savedEvents.length}}
+        <ul>
+          {{#each savedEvents}}
+            <li>
+              <a href="/events/{{this._id}}">{{this.eventName}}</a>
+              — {{this.eventBorough}} — {{this.eventType}}
+            </li>
+          {{/each}}
+        </ul>
+      {{else}}
+        <p>No saved events yet.</p>
+      {{/if}}
+    </div>
+  
+    <div>
+      <h2>Recommended Events:</h2>
+      {{#if recommendedEvents.length}}
+          <ul>
+          {{#each recommendedEvents}}
+              <li>
+              <a href="/events/{{this._id}}">{{this.eventName}}</a>
+              — {{this.eventBorough}} — {{this.eventType}}
+              </li>
+          {{/each}}
+              </ul>
+          {{else}}
+              <p>No recommendations yet. Save more events!</p>
+      {{/if}}
+    </div>
+  </div>
+</div>
