@@ -2,8 +2,10 @@
     <div class="auth-form">
         <div id="error-here">
             {{#if error}}
-            <div id="server-error">
-                <p>{{error}}</p>
+            <div id="server-error" class="form-error">
+                <ul class="form-error">
+                    <li>{{error}}</li>
+                </ul>
             </div>
             {{/if}}
         </div>
