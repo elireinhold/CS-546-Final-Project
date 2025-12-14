@@ -185,21 +185,41 @@ router.get("/search", async (req, res) => {
     const eventTypes = (await events.getDistinctEventTypes()).sort();
     const boroughs = (await events.getDistinctBoroughs()).sort();
 
-    if (keyword && keyword.trim().length === 1) {
-      return res.render("search", {
-        error: "Keyword must be at least 2 characters long.",
-        keyword,
-        borough,
-        eventType,
-        startDate,
-        endDate,
-        results: [],
-        eventTypes,
-        boroughs,
-        totalPages: 0,
-        currentPage: 1,
-        currentUrl: req.originalUrl
-      });
+    // Validate keyword (optional, but if provided must be at least 2 characters)
+    if (keyword && keyword.trim()) {
+      if (keyword.trim().length < 2) {
+        return res.render("search", {
+          error: "Keyword must be at least 2 characters long.",
+          keyword,
+          borough,
+          eventType,
+          startDate,
+          endDate,
+          results: [],
+          eventTypes,
+          boroughs,
+          totalPages: 0,
+          currentPage: 1,
+          currentUrl: req.originalUrl
+        });
+      }
+      // Validate keyword format
+      if (typeof keyword !== "string") {
+        return res.render("search", {
+          error: "Keyword must be a string.",
+          keyword,
+          borough,
+          eventType,
+          startDate,
+          endDate,
+          results: [],
+          eventTypes,
+          boroughs,
+          totalPages: 0,
+          currentPage: 1,
+          currentUrl: req.originalUrl
+        });
+      }
     }
 
     function isValidDate(d) {
