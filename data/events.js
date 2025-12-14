@@ -203,7 +203,7 @@ export async function getRecommendedEventsForUser(userId, limit = 5) {
   const scored = futureEvents.map((evt) => {
     let score = 0;
 
-    if (user.favoriteEventType && evt.eventType === user.favoriteEventType) {
+    if (user.favoriteEventTypes && Array.isArray(user.favoriteEventTypes) && user.favoriteEventTypes.includes(evt.eventType)) {
       score += 2;
     }
 
@@ -222,7 +222,14 @@ export async function getRecommendedEventsForUser(userId, limit = 5) {
     return { evt, score };
   });
 
-  scored.sort((a, b) => b.score - a.score);
+  scored.sort((a, b) => {
+    if (b.score !== a.score) {
+      return b.score - a.score;
+    }
+    const dateA = new Date(a.evt.startDateTime);
+    const dateB = new Date(b.evt.startDateTime);
+    return dateA - dateB;
+  });
 
   let recommendations = scored.slice(0, limit).map((s) => s.evt);
 
