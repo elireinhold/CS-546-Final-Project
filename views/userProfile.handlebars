@@ -1,6 +1,6 @@
 
 <div class="content-wrapper-center" style="justify-content: left">
-  <h1>{{user.username}}'s Profile</h1>
+  <h1 id="profile-head">{{user.username}}'s Profile</h1>
 </div>
 
 <div class="flex-container">
@@ -29,9 +29,45 @@
         <p>No comments yet.</p>
       {{/if}}
     </div>
+    <div>
+      <h2>Created Events</h2>
+      <p><strong>Public</strong></p>
+      {{#if publicEvents.length}}
+        <ul>
+          {{#each publicEvents}}
+            <li>
+              <a href="/events/{{this._id}}">{{this.eventName}}</a>
+              - {{this.eventBorough}} - {{this.eventType}}
+            </li>
+          {{/each}}
+        </ul>
+      {{else}}
+        <p>No events yet.
+          {{#if isUser}}
+            <a href="/events/create"> Create one!</a>
+          {{/if}}
+        </p>
+      {{/if }}
+      {{#if isUser}}
+        <p><strong>Personal</strong></p>
+        {{#if personalEvents.length}} 
+          <ul>
+            {{#each personalEvents}}
+              <li>
+                <a href="/events/{{this._id}}">{{this.eventName}}</a>
+                - {{this.eventBorough}} - {{this.eventType}}
+              </li>
+            {{/each}}
+          </ul>
+        {{else}}
+          <p>No events yet. <a href="/events/create">Create one!</a></p>
+        {{/if}}
+      {{/if}}
+    </div>
   </div>
   
   <div class="right-side">
+    {{#if isUser}}
     <div>
       <h2>Saved Events</h2>
       {{#if savedEvents.length}}
@@ -63,5 +99,6 @@
               <p>No recommendations yet. Save more events!</p>
       {{/if}}
     </div>
+    {{/if}}
   </div>
 </div>

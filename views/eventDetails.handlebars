@@ -19,7 +19,12 @@
         N/A
       {{/if}}
     </p>
-    <p><strong>Source:</strong> {{event.eventSource}}</p>
+    <p><strong>Source:</strong> 
+    {{event.eventSource}}
+    {{#if creatorId}}
+      <a id="profile-button" href="/users/{{creatorId}}/profile">(profile)</a>
+    {{/if}}
+    </p>
     <p><strong>Start:</strong> {{event.startDateTimeLocal}}</p>
     <p><strong>End:</strong> {{event.endDateTimeLocal}}</p>
 

@@ -379,6 +379,10 @@ export async function deleteEvent(eventId,userId) {
   eventId = await helpers.validEventId(eventId);
   userId = await helpers.validUserId(userId);
 
+  const userCollection = await users();
+  const user = await userCollection.findOne({_id: new ObjectId(userId)})
+  if(!user) throw "Could not find user to delete event.";
+
   const eventCollection = await events();
   const event = await eventCollection.findOne({ _id: new ObjectId(eventId) });
   if (!event) throw "Could not find event to delete";
@@ -394,6 +398,21 @@ export async function deleteEvent(eventId,userId) {
   if(!removedEvent) throw "Could not delete event";
 
   // REMOVE EVENTS FROM PUBLIC or PERSONAL EVENTS
+  if(removedEvent.isPublic) {
+    let {publicEvents} = user;
+    publicEvents = publicEvents.filter((id) => id.toString() !== eventId);
+    const updUser = await userCollection.updateOne(
+      {_id: new ObjectId(userId)},
+      {$set: {publicEvents}}
+    );
+  } else {
+    let {personalEvents} = user;
+    personalEvents = personalEvents.filter((id) => id.toString() !== eventId);
+    const updUser = await userCollection.updateOne(
+      {_id: new ObjectId(userId)},
+      {$set: {personalEvents}}
+    );
+  }
 
   return {deleted:true};
 }

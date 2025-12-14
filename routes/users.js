@@ -285,7 +285,7 @@ router.route("/logout").get(async (req, res) => {
 
 router.get("/:userId/profile", async (req, res) => {
   try {
-    const userId = req.params.userId;
+    const userId = xss(req.params.userId);
     if (!userId) {
       throw "Error: You need to login before seeing this page";
     }
@@ -328,12 +328,36 @@ router.get("/:userId/profile", async (req, res) => {
     let recommendedEvents = [];
     recommendedEvents = await getRecommendedEventsForUser(userId, 5);
 
+    let isUser = false
+    if(req.session.user) isUser = req.session.user._id === userId;
+
+    let {publicEvents, personalEvents} = user;
+
+    publicEvents = await Promise.all(
+      publicEvents.map(async (id) => {
+        const event = getEventById(id.toString());
+        return event;
+      })
+    )
+
+    if(isUser) {
+      personalEvents = await Promise.all(
+        personalEvents.map(async (id) => {
+          const event = getEventById(id.toString());
+          return event;
+        })
+      )   
+    }
+
     // Render profile page
     res.render("userProfile", {
       user,
       savedEvents,
       comments: userComments,
       recommendedEvents,
+      publicEvents,
+      personalEvents,
+      isUser,
     });
   } catch (e) {
     res.status(500).render("error", {
