@@ -233,4 +233,17 @@ span.req {
   text-align: center;
 }
 
+#profile-head {
+  margin: 10px 0px 0px 4px;
+  border-bottom: solid;
+}
+
+#profile-button {
+  font-size: 10px
+}
+
+#back-link {
+  padding: 10px 0px; 
+}
+
 

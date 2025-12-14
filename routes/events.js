@@ -598,6 +598,8 @@ router.get("/:id", async (req, res) => {
       endDateTimeLocal: new Date(event.endDateTime).toLocaleString("en-US", { timeZone: "America/New_York" })
     };
 
+    const creatorId = event.userIdWhoCreatedEvent;
+
     res.render("eventDetails", {
       event: eventLocal,
       eventLocation,
@@ -605,6 +607,7 @@ router.get("/:id", async (req, res) => {
       userCount,
       returnTo: req.query.returnTo || "/events/search",
       ownEvent,
+      creatorId,
     });
   } catch (e) {
     res.status(404).send("Event not found");
