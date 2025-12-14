@@ -413,6 +413,16 @@ router.get("/:id/edit", requireLogin, async (req, res) => {
 
     eventBorough = eventBorough.toLowerCase();
 
+    const fixTime = (timeStr) => {
+        let d = new Date(timeStr);
+        const date = d.toISOString().split("T")[0];
+        const time = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes()}`;
+        return `${date}T${time}`;
+    }
+
+    startDateTime = fixTime(startDateTime);
+    endDateTime = fixTime(endDateTime);
+
     res.render('editEvent',{
       eventId,
       userId,
@@ -574,6 +584,10 @@ router.get("/:id", async (req, res) => {
       const savedList = await usersd.getSavedEvents(userId);
       saved = savedList.map((x) => x.toString()).includes(eventId);
       ownEvent = (userId === event.userIdWhoCreatedEvent);
+    }
+
+    if(!event.isPublic && !ownEvent) {
+      return res.status(403).render('error',{title: "403 forbidden", error:"You do not have access to this page"});
     }
 
     const userCount = await usersd.countUsersWhoSaved(eventId);

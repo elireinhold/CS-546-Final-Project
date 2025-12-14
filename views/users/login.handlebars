@@ -2,20 +2,12 @@
     <div class="auth-form">
 
         <div id="error-here">
-            {{!-- need to verify how errors are returned
-            {{#if hasErrors}}
-            <div id="server-error" class="form-error">
-                <p>The following errors were returned:</p>
-                {{#each errors}}
-                <ul class="error-list">
-                    <li>{{this}}</li>
-                </ul>
-                {{/each}}
-            </div>
-            {{/if}}
-            --}}
             {{#if error}}
-            <p>{{error}}</p>
+            <div id="server-error" class="form-error">
+                <ul class="form-error">
+                    <li>{{error}}</li>
+                </ul>
+            </div>
             {{/if}}
         </div>
         <form action="/users/login" method="post" id="login-form">

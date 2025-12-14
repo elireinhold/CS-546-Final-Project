@@ -5,11 +5,11 @@
 <div class="content-wrapper-center">
     <div>
         <div id="error-here">
-            {{#if error}}
-            <div id="server-error">
-                <p>{{error}}</p>
+            <div id="server-error" class="form-error">
+                <ul class="form-error">
+                    <li>{{error}}</li>
+                </ul>
             </div>
-            {{/if}}
         </div>
         <form action="/events/create" method="POST" id="event-form">
             <div class="form-group">

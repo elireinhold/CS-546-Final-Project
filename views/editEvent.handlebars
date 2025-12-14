@@ -2,8 +2,10 @@
     <div>
         <div id="error-here">
             {{#if error}}
-            <div id="server-error">
-                <p>{{error}}</p>
+            <div id="server-error" class="form-error">
+                <ul class="form-error">
+                    <li>{{error}}</li>
+                </ul>
             </div>
             {{/if}}
         </div>
@@ -61,14 +63,14 @@
                 <label for="startDateTime">
                     Start Date and Time<span class="req">*</span>
                 </label>
-                <input type="datetime-local" id="startDateTime" class="form-input">
+                <input value="{{startDateTime}}" type="datetime-local" id="startDateTime" class="form-input">
                 <input type="hidden" name="startDateTime" id="startReturn">
             </div>
             <div class="form-group">
                 <label for="endDateTime">
                     End Date and Time<span class="req">*</span>
                 </label>
-                <input type="datetime-local" id="endDateTime" class="form-input">
+                <input value="{{endDateTime}}" type="datetime-local" id="endDateTime" class="form-input">
                 <input type="hidden" name="endDateTime" id="endReturn">
             </div>
             <div class="form-group">
@@ -98,17 +100,6 @@
     document.getElementById('eventBorough').value = "{{eventBorough}}";
     console.log(document.getElementById('eventBorough').value);
     document.getElementById('isPublic').value = "{{isPublic}}";
-
-    const fixTime = (timeStr) => {
-        let d = new Date(timeStr);
-        const date = d.toISOString().split("T")[0];
-        const time = `${d.getHours()}:${d.getMinutes()}`;
-        return `${date}T${time}`;
-    }
-
-    document.getElementById('startDateTime').value = fixTime("{{startDateTime}}");
-    document.getElementById('endDateTime').value = fixTime("{{endDateTime}}");
-    console.log(fixTime("{{startDateTime}}"));
 </script>
 
 <script type="module" src="../../public/js/validation/createEvent.js"></script>
