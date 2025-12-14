@@ -254,6 +254,10 @@ router.post("/:id/unsave", requireLogin, async (req, res) => {
     const userId = req.session.user._id
     await users.unsaveEvent(userId, eventId);
 
+    if(req.body.ownEvent) {
+      return res.json({error:'Cannot unsave your own event.'});
+    }
+
     const userCount = await users.countUsersWhoSaved(eventId);
     res.json({ saved: false, userCount });
   } catch (e) {
@@ -432,10 +436,12 @@ router.get("/:id", async (req, res) => {
     const eventLocation = await getEventWithCoordinates(eventId);
 
     let saved = false;
+    let ownEvent = false;
     if (req.session.user) {
       const userId = req.session.user._id
       const savedList = await users.getSavedEvents(userId);
       saved = savedList.map((x) => x.toString()).includes(eventId);
+      ownEvent = new Boolean(userId === event.userIdWhoCreatedEvent);
     }
 
     const userCount = await users.countUsersWhoSaved(eventId);
@@ -446,9 +452,25 @@ router.get("/:id", async (req, res) => {
       saved,
       userCount,
       returnTo: req.query.returnTo || "/events/search",
+      ownEvent,
     });
   } catch (e) {
     res.status(404).send("Event not found");
+  }
+});
+
+router.delete("/:id", requireLogin, async(req, res) => {
+  try {
+    const eventId = req.params.id;
+    const userId = req.session.user._id;
+
+    const event = await events.deleteEvent(
+      eventId,
+      userId
+    )
+    res.json({deleted:true});
+  } catch(e) {
+    res.status(500).json({deleted:false, error:e});
   }
 });
 

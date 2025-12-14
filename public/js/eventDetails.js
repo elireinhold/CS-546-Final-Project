@@ -21,6 +21,43 @@ document.addEventListener("DOMContentLoaded", () => {
     console.error("Could not determine eventId");
     return;
   }
+  
+  // Edit/Delete button function
+  if(ownEvent) {
+    btn.disabled = true;
+    const editBtn = document.getElementById('edit');
+    const deleteBtn = document.getElementById('delete');
+
+    editBtn.addEventListener("click", (event) => {
+      const url = `/events/${eventId}/edit`;
+
+      window.location.href = url;
+    }) 
+
+    deleteBtn.addEventListener("click", async (event) => {
+      const url = `/events/${eventId}`;
+      let confirm = window.confirm("Are you sure you want to delete this event?");
+      if(confirm) {
+        try {
+          const response = await fetch(url, {method: "DELETE"});
+          const data = await response.json();
+
+          if(!data.deleted && data.error) {
+            alert(data.error);
+            return;
+          }
+
+          window.alert("Event deleted sucessfully!");
+          window.location.href = '/';
+
+        } catch(e) {
+          console.log(e);
+          alert("Something went wrong");
+        }
+      }
+    })
+
+  }
 
   // Save/Unsave functionality (btn already declared above)
   if (btn) {
@@ -32,7 +69,11 @@ document.addEventListener("DOMContentLoaded", () => {
         : `/events/${eventId}/save`;
 
       try {
-        const response = await fetch(url, { method: "POST" });
+        const response = await fetch(url, { 
+          method: "POST", 
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ownEvent}) 
+        });
         const data = await response.json();
 
         if (data.error) {

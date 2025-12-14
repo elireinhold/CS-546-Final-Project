@@ -302,7 +302,7 @@ export async function userCreateEvent(
     )
   } else {
     usersCollection.updateOne(
-      {"_id": new Object(id)},
+      {"_id": new ObjectId(id)},
       {$push: {"personalEvents":insertInfo.insertedId}}
     )
   }
@@ -361,6 +361,27 @@ export async function editEvent(
 
   return {edited:true};
 
+}
+
+export async function deleteEvent(eventId,userId) {
+  eventId = await helpers.validEventId(eventId);
+  userId = await helpers.validUserId(userId);
+
+  const eventCollection = await events();
+  const event = await eventCollection.findOne({ _id: new ObjectId(eventId) });
+  if (!event) throw "Could not find event to delete";
+
+  if(event.userIdWhoCreatedEvent) {
+    if(event.userIdWhoCreatedEvent !== userId) throw 'You can only delete your own events.'
+  }
+  else {
+    throw 'Cannot delete non-user created events.';
+  }
+  
+  const removedEvent = await eventCollection.findOneAndDelete({_id: new ObjectId(eventId)});
+  if(!removedEvent) throw "Could not delete event";
+
+  return {deleted:true};
 }
 
 // eventsComments
@@ -456,6 +477,7 @@ const exportedMethods = {
   getDistinctEventTypes,
   getDistinctBoroughs,
   userCreateEvent,
+  deleteEvent,
   editEvent,
   addComment,
   deleteComment,

@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { users } from "../config/mongoCollections.js";
+import { events } from "../config/mongoCollections.js";
 import helpers from "../helpers/userHelpers.js";
 import bcrypt from "bcrypt";
 
@@ -119,9 +120,44 @@ export async function unsaveEvent(userId, eventId) {
 // Get saved events for user
 export async function getSavedEvents(userId) {
   const userCollection = await users();
+  let hasDeleted = false;
 
   const user = await userCollection.findOne({ _id: toObjectId(userId) });
   if (!user) throw new Error("User not found");
+
+  let {savedEvents} = user;
+
+  // check for deleted events, remove from savedEvents if deleted
+  const eventCollection = await events();
+  savedEvents = savedEvents = await Promise.all(
+    savedEvents.map(async (id) => {
+      let event = await eventCollection.findOne({_id: id});
+      if(event) {
+        return event._id;
+      } else {
+        return null;
+      }
+    })
+  );
+
+  user.savedEvents = savedEvents.filter((event) => {
+    if(!event) {
+      hasDeleted = true;
+      return false;
+    } else {
+      return true;
+    }
+  })
+
+  if(hasDeleted) {
+    const updatedUser = await userCollection.replaceOne(
+      {_id: toObjectId(userId)},
+      user
+    )
+    if(!updatedUser) {
+      if (!user) throw new Error("User not found");
+    }
+  }
 
   return user.savedEvents || [];
 }
