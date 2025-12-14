@@ -21,6 +21,7 @@ All event data is stored in MongoDB, and NYC data is synchronized through script
 
 ### 1. Your Event Calendar
 - Displays events you have saved and their dates
+- Click on event to view event details
 - Click on a day in the calendar to view all events happening on that day
 
 ### 2. Event Search and Filtering
@@ -41,8 +42,8 @@ All event data is stored in MongoDB, and NYC data is synchronized through script
 
 ### 5. Map Integration
 - Display a map view of events you have saved
-- Click on events on the map to view information (name, location, road closures)
-- Use MongoDB geospatial queries to find events near your location
+- Click on events on the map to view information (name, location, event details, and distance)
+- Use Geolib to find events near your location
 
 ### 6. User-Created Public Events
 - Users can create, edit, or delete their own public events
@@ -52,7 +53,7 @@ All event data is stored in MongoDB, and NYC data is synchronized through script
 - Users can comment or discuss events on event pages
 
 ### 8. View Past and Upcoming Events
-- Users can view both past and upcoming events they've saved
+- Users can view both past and upcoming events they've saved in their calendar
 
 ### 9. Event Recommendations
 - Suggest events based on the user's previous saved events
