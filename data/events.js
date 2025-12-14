@@ -367,7 +367,7 @@ export async function addComment(
 ) {
   if (!ObjectId.isValid(eventId)) throw "Invalid event ID";
   if (!ObjectId.isValid(userId)) throw "Invalid user ID";
-  if (!commentText || !commentText.trim()) throw "Comment text is required";
+  commentText = helpers.validCommentText(commentText);
   if (parentId && !ObjectId.isValid(parentId)) throw "Invalid parent ID";
 
   const eventCollection = await events();

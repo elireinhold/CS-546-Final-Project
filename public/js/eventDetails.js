@@ -1,3 +1,5 @@
+import helpers from './validation/client-helpers.js';
+
 document.addEventListener("DOMContentLoaded", () => {
   // Get eventId from button (always exists) or URL
   let eventId = null;
@@ -246,10 +248,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const parentId = e.target.getAttribute("data-comment-id");
         const replyForm = document.querySelector(`.reply-form-container[data-comment-id="${parentId}"]`);
         const replyText = replyForm.querySelector(".reply-text");
-        const text = replyText.value.trim();
-
-        if (!text) {
-          alert("Please enter a reply");
+        
+        // Client-side validation
+        let text = replyText.value;
+        try {
+          text = helpers.validCommentText(text);
+        } catch (e) {
+          alert(e);
           return;
         }
 
@@ -331,10 +336,12 @@ document.addEventListener("DOMContentLoaded", () => {
   
   if (submitCommentBtn && commentTextArea) {
     submitCommentBtn.addEventListener("click", async () => {
-      const text = commentTextArea.value.trim();
-      
-      if (!text) {
-        alert("Please enter a comment");
+      // Client-side validation
+      let text = commentTextArea.value;
+      try {
+        text = helpers.validCommentText(text);
+      } catch (e) {
+        alert(e);
         return;
       }
 

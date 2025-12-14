@@ -576,9 +576,16 @@ router.post("/:id/comments", requireLoginAjax, async (req, res) => {
     if (commentText) commentText = xss(commentText);
     if (parentId) parentId = xss(parentId);
     
-
-    if (!commentText || !commentText.trim()) {
+    // Validate comment text
+    if (!commentText || typeof commentText !== "string") {
       return res.status(400).json({ error: "Comment text is required" });
+    }
+    commentText = commentText.trim();
+    if (commentText.length < 2) {
+      return res.status(400).json({ error: "Comment text must be at least 2 characters long." });
+    }
+    if (commentText.length > 500) {
+      return res.status(400).json({ error: "Comment text must be no more than 500 characters long." });
     }
 
     const eventId = req.params.id
@@ -595,7 +602,7 @@ router.post("/:id/comments", requireLoginAjax, async (req, res) => {
     res.json({ success: true, comment });
   } catch (e) {
     console.error("comment error:", e);
-    res.status(400).json({ error: e.message });
+    res.status(400).json({ error: e || e.message || "Error adding comment" });
   }
 });
 

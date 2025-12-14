@@ -322,6 +322,22 @@ const exportedMethods = {
         if(sd >= ed) throw "Error: Start date/time must occur before end date/time"
         return true;
     },
+    validCommentText(commentText) {
+        if (!commentText) {
+            throw "Error: Comment text is required.";
+        }
+        if (typeof commentText !== "string") {
+            throw "Error: Comment text must be a string.";
+        }
+        commentText = commentText.trim();
+        if (commentText.length < 2) {
+            throw "Error: Comment text must be at least 2 characters long.";
+        }
+        if (commentText.length > 500) {
+            throw "Error: Comment text must be no more than 500 characters long.";
+        }
+        return commentText;
+    },
 }
 
 export default exportedMethods;
