@@ -573,7 +573,7 @@ router.get("/:id", async (req, res) => {
       const userId = req.session.user._id
       const savedList = await usersd.getSavedEvents(userId);
       saved = savedList.map((x) => x.toString()).includes(eventId);
-      ownEvent = new Boolean(userId === event.userIdWhoCreatedEvent);
+      ownEvent = (userId === event.userIdWhoCreatedEvent);
     }
 
     const userCount = await usersd.countUsersWhoSaved(eventId);
@@ -597,7 +597,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.delete("/:id", requireLogin, async(req, res) => {
+router.delete("/:id", requireLoginAjax, async(req, res) => {
   try {
     const eventId = req.params.id;
     const userId = req.session.user._id;
