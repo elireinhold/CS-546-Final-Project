@@ -597,7 +597,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.delete("/:id", requireLogin, async(req, res) => {
+router.delete("/:id", requireLoginAjax, async(req, res) => {
   try {
     const eventId = req.params.id;
     const userId = req.session.user._id;
