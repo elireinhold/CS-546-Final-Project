@@ -326,7 +326,7 @@ router.get("/:userId/profile", async (req, res) => {
     }
 
     let recommendedEvents = [];
-    recommendedEvents = await getRecommendedEventsForUser(userId, 5);
+     recommendedEvents = await getRecommendedEventsForUser(userId, 5);
 
     let isUser = false
     if(req.session.user) isUser = req.session.user._id === userId;

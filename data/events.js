@@ -358,13 +358,25 @@ export async function editEvent(
   streetClosureType = helpers.validStreetClosure(streetClosureType);
   isPublic = helpers.validPublicity(isPublic);
 
-  const eventInfo = {eventName,eventType,eventLocation,eventBorough,startDateTime,endDateTime,streetClosureType,isPublic};
+  const eventInfo = {
+    eventName,
+    eventType,
+    eventLocation,
+    eventBorough,
+    startDateTime,
+    endDateTime,
+    streetClosureType,
+    isPublic,
+    updatedAt: new Date(),
+  };
 
   const eventCollection = await events();
   const event = await eventCollection.findOne(
     {_id: new ObjectId(eventId)},
-    {projection: {userIdWhoCreatedEvent:1}}
+    {projection: {userIdWhoCreatedEvent:1,isPublic:1}}
   )
+
+  let prevPublic = event.isPublic;
 
   if(!event) throw "Error: Could not edit event";
 
@@ -376,8 +388,48 @@ export async function editEvent(
     {returnDocument: 'after'}
   );
 
+  if(prevPublic !== updatedEvent.isPublic) {
+    let oldArrName = prevPublic ? "publicEvents" : "personalEvents";
+    let newArrName = !prevPublic ? "publicEvents" : "personalEvents";
+
+    const userCollection = await users();
+
+    const user = await userCollection.findOne(
+      {_id: new ObjectId(userId)},
+      {projection: {publicEvents:1,personalEvents:1}},
+      {returnDocument: 'after'}
+    );
+
+    let oldArr = user[oldArrName].filter((id) => id.toString() !== eventId);
+    let newArr = user[newArrName];
+    newArr.push(new ObjectId(eventId));
+
+    const updatedArrs = {};
+    updatedArrs[oldArrName] = oldArr;
+    updatedArrs[newArrName] = newArr;
+    
+    const updUser = await userCollection.updateOne( 
+      {_id: new ObjectId(userId)},
+      {$set: updatedArrs}
+    ) 
+  }
+
   if(!updatedEvent) throw "Error: Could not edit event";
 
+  
+  // insert into user made events
+  /*   if(isPublic) {
+      usersCollection.updateOne(
+        {"_id": new ObjectId(id)},
+        {$push: {"publicEvents":insertInfo.insertedId}}
+      )
+    } else {
+      usersCollection.updateOne(
+        {"_id": new ObjectId(id)},
+        {$push: {"personalEvents":insertInfo.insertedId}}
+      )
+    } */
+  
   return {edited:true};
 
 }

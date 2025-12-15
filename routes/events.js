@@ -416,7 +416,7 @@ router.get("/:id/edit", requireLogin, async (req, res) => {
     const fixTime = (timeStr) => {
         let d = new Date(timeStr);
         const date = d.toISOString().split("T")[0];
-        const time = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes()}`;
+        const time = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
         return `${date}T${time}`;
     }
 
@@ -557,7 +557,7 @@ router.get("/:id/edit", requireLogin, async (req, res) => {
     }
 
   } catch(e) {
-    res.status(400).render({
+    res.status(400).render('editEvent', {
       error: e,
       eventName,
       eventType,
