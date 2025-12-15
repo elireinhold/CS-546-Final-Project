@@ -15,6 +15,13 @@ https://data.cityofnewyork.us/City-Government/NYC-Permitted-Event-Information/tv
 
 All event data is stored in MongoDB, and NYC data is synchronized through scripts in the `/scripts` directory.
 
+**External Libraries & APIs Used:**  
+We use Nominatim to search location names by search term and calculate coordinates for each event since our event database does not have coordinates provided.
+
+And to speed up this process we limited the search area to NYC area and we cache coordinates for quick lookup if they are needed later on. 
+
+We also use the coordinates to plot events on the various maps using the Open Street Map API and the geolib library to calculate the distance between the user’s location and an event.
+
 ---
 
 ## Core Features
